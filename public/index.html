@@ -20,7 +20,8 @@
   --accent:#3fb950;
   font-size:14px;
 }
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
+html{background:var(--bg)}
 
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -273,10 +274,17 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .order-card{animation:fadeIn .2s ease both}
 
 /* HAMBURGER */
-.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-direction:column;gap:4px;align-items:center;justify-content:center}
+.hamburger{display:flex;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-direction:column;gap:4px;align-items:center;justify-content:center}
 .hamburger span{display:block;width:20px;height:2px;background:currentColor;border-radius:2px;transition:all .2s}
 .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
 .sidebar-overlay.open{display:block}
+
+/* DESKTOP - hide hamburger, show sidebar normally */
+@media(min-width:901px){
+  .hamburger{display:none}
+  .sidebar{position:fixed;left:0;width:220px;min-width:220px}
+  .main{margin-left:220px}
+}
 
 /* RESPONSIVE */
 @media(max-width:900px) and (min-width:769px){
@@ -287,14 +295,13 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
   .panel-3{grid-template-columns:1fr 1fr}
   .panel-2c{grid-template-columns:1fr}
 }
-@media(max-width:768px){
+@media(max-width:900px){
   .sidebar{
     position:fixed;left:-220px;top:0;height:100vh;z-index:100;
     transition:left .25s ease;width:220px;min-width:220px;
   }
   .sidebar.open{left:0}
   .main{margin-left:0}
-  .hamburger{display:flex}
   .topbar{padding:0 14px;gap:10px}
   .topbar-title{font-size:14px}
   .topbar-actions{gap:6px}
