@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SolarCRM - AI Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-4 md:p-10">
+    <div class="max-w-3xl mx-auto bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden">
+        <div class="bg-slate-700 p-4 border-b border-slate-600 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-orange-400">SolarCRM <span class="text-slate-400 text-sm font-normal">v1.0 AI</span></h1>
+            <div class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
+        </div>
+
+        <div id="chat-box" class="h-[400px] overflow-y-auto p-6 space-y-4 flex flex-col">
+            <div class="bg-slate-700 self-start p-3 rounded-lg max-w-[80%] text-sm">
+                Witaj w SolarCRM. Jak mogę pomóc w zarządzaniu Twoimi klientami?
+            </div>
+        </div>
+
+        <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-2">
+            <input id="user-input" type="text" 
+                class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 focus:outline-none focus:border-orange-500 transition-colors"
+                placeholder="Np. Podsumuj dzisiejsze zlecenia..."
+                onkeypress="if(event.key === 'Enter') askAI()">
+            <button onclick="askAI()" 
+                class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-6 py-3 rounded-lg transition-all active:scale-95">
+                Wyślij
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function askAI() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Dodaj wiadomość użytkownika
+            chatBox.innerHTML += `<div class="bg-orange-600 self-end p-3 rounded-lg max-w-[80%] text-sm shadow-lg">${message}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                const aiMessage = data.content[0].text;
+                
+                // Dodaj odpowiedź AI
+                chatBox.innerHTML += `<div class="bg-slate-700 self-start p-3 rounded-lg max-w-[80%] text-sm border border-slate-600 shadow-md"><strong>AI:</strong> ${aiMessage}</div>`;
+            } catch (err) {
+                chatBox.innerHTML += `<div class="text-red-400 text-xs text-center">Błąd: Upewnij się, że dodałeś ANTHROPIC_API_KEY na Vercelu.</div>`;
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
