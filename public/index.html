@@ -279,7 +279,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 .sidebar-overlay.open{display:block}
 
 /* RESPONSIVE */
-@media(max-width:900px){
+@media(max-width:900px) and (min-width:769px){
   .sidebar{width:200px;min-width:200px}
   .main{margin-left:200px}
   .stats-grid{grid-template-columns:repeat(3,1fr)}
@@ -287,7 +287,7 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
   .panel-3{grid-template-columns:1fr 1fr}
   .panel-2c{grid-template-columns:1fr}
 }
-@media(max-width:640px){
+@media(max-width:768px){
   .sidebar{
     position:fixed;left:-220px;top:0;height:100vh;z-index:100;
     transition:left .25s ease;width:220px;min-width:220px;
