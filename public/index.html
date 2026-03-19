@@ -272,24 +272,58 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .order-card{animation:fadeIn .2s ease both}
 
+/* HAMBURGER */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-direction:column;gap:4px;align-items:center;justify-content:center}
+.hamburger span{display:block;width:20px;height:2px;background:currentColor;border-radius:2px;transition:all .2s}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+.sidebar-overlay.open{display:block}
+
 /* RESPONSIVE */
 @media(max-width:900px){
-  .sidebar{width:180px;min-width:180px}
-  .main{margin-left:180px}
+  .sidebar{width:200px;min-width:200px}
+  .main{margin-left:200px}
   .stats-grid{grid-template-columns:repeat(3,1fr)}
   .panel-2{grid-template-columns:1fr}
   .panel-3{grid-template-columns:1fr 1fr}
+  .panel-2c{grid-template-columns:1fr}
 }
 @media(max-width:640px){
-  .sidebar{display:none}
+  .sidebar{
+    position:fixed;left:-220px;top:0;height:100vh;z-index:100;
+    transition:left .25s ease;width:220px;min-width:220px;
+  }
+  .sidebar.open{left:0}
   .main{margin-left:0}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .hamburger{display:flex}
+  .topbar{padding:0 14px;gap:10px}
+  .topbar-title{font-size:14px}
+  .topbar-actions{gap:6px}
+  .topbar-actions #topbarDate{display:none}
+  .btn-secondary{padding:6px 10px;font-size:11px}
+  .content{padding:14px}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-val{font-size:18px}
+  .panel-2{grid-template-columns:1fr;gap:12px}
   .panel-3{grid-template-columns:1fr}
+  .panel-2c{grid-template-columns:1fr}
+  .page-title{font-size:17px}
+  .form-modal{width:100%;max-width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:90vh}
+  .form-overlay{align-items:flex-end}
+  .form-grid-2{grid-template-columns:1fr}
+  .form-grid-3{grid-template-columns:1fr 1fr}
+  .chat-window{height:350px}
+  .order-list{max-height:none}
+  .ai-header{flex-direction:column;align-items:flex-start}
+  .ai-controls{width:100%}
+  .ai-select{flex:1}
+  .btn-ai{width:100%;justify-content:center}
+  .map-toolbar{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
 <body>
 <div class="shell">
+<div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
@@ -361,6 +395,9 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 <!-- MAIN -->
 <div class="main">
   <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-actions">
       <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)" id="topbarDate"></div>
@@ -1106,6 +1143,20 @@ function getApiHeaders(){
   return{"Content-Type":"application/json"};
 }
 function requireKey(featureName){return true;}
+
+// ── MOBILE SIDEBAR ────────────────────────────────────────
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.querySelector('.sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.querySelector('.sidebar-overlay').classList.remove('open');
+}
+// Close sidebar when nav item clicked on mobile
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.addEventListener('click',()=>{if(window.innerWidth<=640)closeSidebar();});
+});
 
 // ── INIT ──────────────────────────────────────────────────
 function renderAll(){renderStats();renderClients();renderOrders();}
