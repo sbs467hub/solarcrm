@@ -248,6 +248,25 @@ body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-he
 
 /* NOTIFY */
 .notify{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--green-dim);color:var(--green);padding:10px 16px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;z-index:999;display:none;animation:fadeUp .3s ease}
+
+/* API KEY MODAL */
+.apikey-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center}
+.apikey-overlay.open{display:flex}
+.apikey-modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;width:460px;max-width:95vw}
+.apikey-modal h2{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.apikey-modal p{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:18px;line-height:1.7}
+.apikey-input-wrap{position:relative;margin-bottom:14px}
+.apikey-input-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 40px 10px 12px;font-size:13px;font-family:'DM Mono',monospace;color:var(--text)}
+.apikey-input-wrap input:focus{outline:none;border-color:var(--green)}
+.apikey-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace}
+.apikey-status{font-size:11px;font-family:'DM Mono',monospace;margin-bottom:14px;min-height:16px}
+.apikey-status.ok{color:var(--green)}.apikey-status.err{color:var(--red)}
+.apikey-hint{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:12px;line-height:1.6}
+.apikey-hint a{color:var(--blue)}
+.key-indicator{display:flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);transition:all .15s}
+.key-indicator:hover{border-color:var(--border2);color:var(--text)}
+.key-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.key-dot.active{background:var(--green);box-shadow:0 0 5px var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -971,12 +990,13 @@ function addChatMsg(text,role){
 async function sendChat(){
   const input=document.getElementById('chatInput');
   const text=input.value.trim();if(!text) return;
+  if(!requireKey('chatbota')) return;
   input.value='';addChatMsg(text,'user');
   const c=chatClient?clients.find(x=>x.id===chatClient):null;
   const ords=chatClient?orders.filter(o=>o.clientId===chatClient):orders;
   const ctx=ords.map(o=>`- ${o.title} | status: ${o.status} | termin: ${o.date} | nota: ${o.note}`).join('\n');
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:`Jesteś asystentem CRM firmy OZE. Rozmawiasz z ${c?`klientem ${c.name}`:"pracownikiem"}. Dane:\n${ctx}\nOdpowiadaj krótko, po polsku, max 3 zdania.`,messages:[{role:"user",content:text}]})});
+    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:`Jesteś asystentem CRM firmy OZE. Rozmawiasz z ${c?`klientem ${c.name}`:"pracownikiem"}. Dane:\n${ctx}\nOdpowiadaj krótko, po polsku, max 3 zdania.`,messages:[{role:"user",content:text}]})});
     const data=await res.json();
     addChatMsg(data.content?.find(b=>b.type==="text")?.text||"Przepraszam, spróbuj ponownie.",'bot');
   }catch(e){addChatMsg("Błąd połączenia z AI.",'bot');}
@@ -984,6 +1004,7 @@ async function sendChat(){
 
 // ── OFFER AI ──────────────────────────────────────────────────
 async function genOffer(){
+  if(!requireKey('generatora ofert')) return;
   const btn=document.getElementById('offerBtn');const spin=document.getElementById('ofSpin');const label=document.getElementById('ofLabel');
   const client=document.getElementById('of-client').value;const addr=document.getElementById('of-addr').value;
   const type=document.getElementById('of-type').value;const kw=document.getElementById('of-kw').value;
@@ -996,7 +1017,7 @@ async function genOffer(){
     protokol:`Napisz protokół odbioru instalacji OZE. Inwestor: ${client||'[Klient]'}. Adres: ${addr}. Instalacja: ${type} ${kw} kWp. Uwagi: ${notes}. Zawrzyj: datę odbioru, komisję, opis instalacji, wyniki pomiarów, uwagi, podpisy. Po polsku.`
   };
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[doctype]}]})});
+    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[doctype]}]})});
     const data=await res.json();
     document.getElementById('offerPreview').textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd generowania.";
   }catch(e){document.getElementById('offerPreview').textContent="Błąd połączenia z AI.";}
@@ -1006,6 +1027,7 @@ function copyOffer(){const t=document.getElementById('offerPreview').textContent
 
 // ── AI REPORT ──────────────────────────────────────────────────
 async function generateReport(){
+  if(!requireKey('raportu AI')) return;
   const btn=document.getElementById('aiBtn');const spin=document.getElementById('spin');const label=document.getElementById('aiLabel');const result=document.getElementById('aiResult');
   spin.classList.add('show');label.textContent='Analizuję…';btn.disabled=true;result.classList.remove('show');
   const scope=document.getElementById('aiScope').value;
@@ -1017,17 +1039,99 @@ async function generateReport(){
     osd_ai:`Specjalista OSD/URE. Status zgłoszeń do operatorów. Co czeka, zagrożenia opóźnieniem, potrzebne dokumenty. Po polsku.\n\n${sum}`
   };
   try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompts[scope]}]})});
+    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompts[scope]}]})});
     const data=await res.json();
     result.textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd.";result.classList.add('show');
   }catch(e){result.textContent="Błąd połączenia z AI.";result.classList.add('show');}
   spin.classList.remove('show');label.textContent='Analizuj ↗';btn.disabled=false;
 }
 
+// ── API KEY MANAGEMENT ────────────────────────────────────
+let ANTHROPIC_API_KEY = '';
+
+function openApiKeyModal(){
+  document.getElementById('apikeyInput').value = ANTHROPIC_API_KEY || '';
+  document.getElementById('apikeyStatus').textContent = '';
+  document.getElementById('apikeyOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('apikeyInput').focus(),100);
+}
+function closeApiKeyModal(){document.getElementById('apikeyOverlay').classList.remove('open');}
+function clearKeyStatus(){document.getElementById('apikeyStatus').textContent='';}
+function toggleKeyVisibility(){
+  const inp=document.getElementById('apikeyInput');
+  const btn=inp.nextElementSibling;
+  if(inp.type==='password'){inp.type='text';btn.textContent='ukryj';}
+  else{inp.type='password';btn.textContent='pokaż';}
+}
+function updateKeyIndicator(){
+  const dot=document.getElementById('keyDot');
+  const lbl=document.getElementById('keyLabel');
+  if(ANTHROPIC_API_KEY){
+    dot.classList.add('active');
+    lbl.textContent='API: sk-...'+ANTHROPIC_API_KEY.slice(-4);
+  } else {
+    dot.classList.remove('active');
+    lbl.textContent='Brak klucza API';
+  }
+}
+async function saveApiKey(){
+  const key=document.getElementById('apikeyInput').value.trim();
+  const status=document.getElementById('apikeyStatus');
+  if(!key){status.className='apikey-status err';status.textContent='⚠ Wklej klucz API.';return;}
+  if(!key.startsWith('sk-ant')){status.className='apikey-status err';status.textContent='⚠ Klucz powinien zaczynać się od sk-ant...';return;}
+  status.className='apikey-status';status.textContent='⏳ Testuję połączenie...';
+  try{
+    const res=await fetch("/api/chat",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:10,messages:[{role:"user",content:"ping"}]})
+    });
+    if(res.ok||res.status===200){
+      ANTHROPIC_API_KEY=key;
+      status.className='apikey-status ok';status.textContent='✓ Klucz poprawny! Połączono z API.';
+      updateKeyIndicator();
+      setTimeout(closeApiKeyModal,1200);
+    } else {
+      const err=await res.json().catch(()=>({}));
+      status.className='apikey-status err';
+      status.textContent='✗ Błąd: '+(err?.error?.message||'Nieprawidłowy klucz ('+res.status+')');
+    }
+  }catch(e){
+    status.className='apikey-status err';
+    status.textContent='✗ Błąd sieci. Sprawdź połączenie.';
+  }
+}
+
+function getApiHeaders(){
+  return{"Content-Type":"application/json"};
+}
+function requireKey(featureName){return true;}
+
 // ── INIT ──────────────────────────────────────────────────
 function renderAll(){renderStats();renderClients();renderOrders();}
 document.getElementById('topbarDate').textContent=new Date().toLocaleDateString('pl-PL',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 renderAll();
+
+// Add API key modal HTML
+(function(){
+  const overlay=document.createElement('div');
+  overlay.className='apikey-overlay';overlay.id='apikeyOverlay';
+  overlay.innerHTML=`<div class="apikey-modal">
+    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Klucz API Anthropic</h2>
+    <p>Wymagany do funkcji AI: chatbot, oferty, raporty.<br>Klucz przechowywany tylko w pamięci — znika po zamknięciu karty.</p>
+    <div class="apikey-input-wrap">
+      <input type="password" id="apikeyInput" placeholder="sk-ant-api03-..." oninput="clearKeyStatus()"/>
+      <button class="apikey-toggle" onclick="toggleKeyVisibility()">pokaż</button>
+    </div>
+    <div class="apikey-status" id="apikeyStatus"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-primary" onclick="saveApiKey()" style="flex:1">Zapisz i przetestuj</button>
+      <button class="btn-secondary" onclick="closeApiKeyModal()">Anuluj</button>
+    </div>
+    <div class="apikey-hint">Klucz API: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue)">console.anthropic.com</a><br>⚠️ Nie udostępniaj klucza nikomu.</div>
+  </div>`;
+  document.body.appendChild(overlay);
+})();
 </script>
 </body>
 </html>
