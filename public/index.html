@@ -1,1195 +1,463 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SolarCRM PRO — CRM dla firm OZE</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#21262d;
-  --border:#30363d;--border2:#444c56;
-  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
-  --green:#3fb950;--green-dim:#1a3a1f;--green-bg:#0d2818;
-  --amber:#d29922;--amber-dim:#3a2a0a;
-  --blue:#58a6ff;--blue-dim:#0d2149;
-  --red:#f85149;--red-dim:#3a0d0d;
-  --teal:#39d353;--coral:#ff7b72;
-  --accent:#3fb950;
-  font-size:14px;
-}
-body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-text-size-adjust:100%}
-html{background:var(--bg)}
-
-/* SCROLLBAR */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-
-/* LAYOUT */
-.shell{display:flex;min-height:100vh}
-.sidebar{width:220px;min-width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
-.main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
-.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50}
-.content{padding:24px;flex:1}
-
-/* SIDEBAR */
-.sidebar-logo{padding:18px 20px 14px;border-bottom:1px solid var(--border)}
-.sidebar-logo-mark{display:flex;align-items:center;gap:10px}
-.logo-sun{width:30px;height:30px;background:var(--green-bg);border:1px solid var(--green-dim);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.logo-name{font-size:16px;font-weight:700;letter-spacing:-.3px}
-.logo-name span{color:var(--green)}
-.logo-tag{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px}
-.nav{padding:12px 10px;flex:1;display:flex;flex-direction:column;gap:2px}
-.nav-section{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);padding:10px 10px 6px;text-transform:uppercase;letter-spacing:.8px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'Syne',sans-serif}
-.nav-item:hover{background:var(--bg3);color:var(--text)}
-.nav-item.active{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim)}
-.nav-item.active .nav-icon{color:var(--green)}
-.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
-.nav-item.active .nav-icon{opacity:1}
-.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border)}
-.sidebar-user{display:flex;align-items:center;gap:10px}
-.user-av{width:30px;height:30px;border-radius:50%;background:var(--green-dim);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--green)}
-.user-name{font-size:12px;font-weight:500}
-.user-role{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
-
-/* TOPBAR */
-.topbar-title{font-size:15px;font-weight:600;flex:1}
-.topbar-actions{display:flex;gap:8px;align-items:center}
-.btn-primary{background:var(--green);color:#0d1117;border:none;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
-.btn-primary:hover{background:#4dc160;transform:translateY(-1px)}
-.btn-primary:active{transform:none}
-.btn-secondary{background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:6px;padding:6px 13px;font-size:12px;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
-.btn-secondary:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
-.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:5px 11px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
-.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;position:relative;overflow:hidden;transition:border-color .15s}
-.stat-card:hover{border-color:var(--border2)}
-.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.stat-card.c-green::before{background:var(--green)}
-.stat-card.c-amber::before{background:var(--amber)}
-.stat-card.c-blue::before{background:var(--blue)}
-.stat-card.c-red::before{background:var(--red)}
-.stat-card.c-teal::before{background:var(--teal)}
-.stat-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
-.stat-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;line-height:1}
-.stat-val.green{color:var(--green)}.stat-val.amber{color:var(--amber)}.stat-val.blue{color:var(--blue)}.stat-val.red{color:var(--red)}
-.stat-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:6px}
-
-/* PANEL */
-.panel-2{display:grid;grid-template-columns:240px 1fr;gap:16px;margin-bottom:20px}
-.panel-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px}
-.panel-2c{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-
-/* CARD */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.card-title{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
-
-/* CLIENT LIST */
-.client-list{display:flex;flex-direction:column;gap:4px}
-.client-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:all .12s;border:1px solid transparent}
-.client-row:hover{background:var(--bg3);border-color:var(--border)}
-.client-row.active{background:var(--green-bg);border-color:var(--green-dim)}
-.av{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0}
-.av-g{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim)}
-.av-a{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(210,153,34,.3)}
-.av-b{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
-.av-r{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,81,73,.3)}
-.av-t{background:#0d2a1a;color:#39d353;border:1px solid #1a4a2a}
-.c-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.c-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
-.c-kw{font-size:11px;font-family:'DM Mono',monospace;color:var(--green);white-space:nowrap}
-
-/* ORDER CARDS */
-.order-list{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding-right:4px}
-.order-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px;cursor:pointer;transition:border-color .15s}
-.order-card:hover{border-color:var(--border2)}
-.order-card.risk{border-left:3px solid var(--red);border-radius:0 8px 8px 0}
-.order-top{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
-.order-title{font-size:13px;font-weight:500;line-height:1.4}
-.order-price{font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);white-space:nowrap}
-.order-meta{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:8px;line-height:1.5}
-.order-footer{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.order-note{font-size:11px;color:var(--text2);margin-top:7px;line-height:1.5;font-family:'DM Mono',monospace}
-
-/* TAGS / BADGES */
-.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;white-space:nowrap}
-.t-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-dim)}
-.t-amber{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(210,153,34,.3)}
-.t-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(88,166,255,.3)}
-.t-red{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,81,73,.3)}
-.t-gray{background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
-.t-teal{background:#0d2a1a;color:#39d353;border:1px solid #1a4a2a}
-.t-coral{background:#2a130d;color:#ff7b72;border:1px solid rgba(255,123,114,.3)}
-
-/* FORM */
-.form-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}
-.form-overlay.open{display:flex}
-.form-modal{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:24px;width:560px;max-height:90vh;overflow-y:auto;max-width:95vw}
-.form-title{font-size:15px;font-weight:600;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between}
-.form-close{background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;line-height:1}
-.form-grid{display:grid;gap:12px}
-.form-grid-2{grid-template-columns:1fr 1fr}
-.form-grid-3{grid-template-columns:1fr 1fr 1fr}
-.form-field{display:flex;flex-direction:column;gap:5px}
-.form-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
-.form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 11px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);width:100%;transition:border-color .15s}
-.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--green)}
-.form-select option{background:var(--bg3)}
-.form-textarea{resize:vertical;min-height:60px}
-.form-actions{display:flex;gap:8px;margin-top:4px}
-
-/* AI PANEL */
-.ai-panel{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:20px}
-.ai-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px}
-.ai-title{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
-.ai-badge{background:var(--green-bg);color:var(--green);font-size:9px;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;border:1px solid var(--green-dim)}
-.ai-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.ai-select{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);cursor:pointer}
-.btn-ai{background:var(--green);color:#0d1117;border:none;border-radius:6px;padding:7px 16px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;display:flex;align-items:center;gap:6px;transition:background .15s}
-.btn-ai:hover{background:#4dc160}
-.btn-ai:disabled{opacity:.5;cursor:not-allowed}
-.ai-result{margin-top:12px;padding:14px;background:var(--green-bg);border:1px solid var(--green-dim);border-radius:8px;font-size:12px;color:#b3f0b8;line-height:1.8;display:none;white-space:pre-wrap;font-family:'DM Mono',monospace}
-.ai-result.show{display:block}
-.spinner{width:11px;height:11px;border:2px solid var(--green-dim);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite;display:none}
-.spinner.show{display:inline-block}
-
-/* MAP */
-.map-container{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
-.map-toolbar{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.map-svg-wrap{position:relative}
-.map-tooltip{position:absolute;background:var(--bg2);border:1px solid var(--border2);border-radius:7px;padding:10px 13px;font-size:11px;font-family:'DM Mono',monospace;pointer-events:none;display:none;z-index:10;min-width:180px;line-height:1.7;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.map-legend{display:flex;gap:16px;padding:10px 16px;background:var(--bg3);border-top:1px solid var(--border);flex-wrap:wrap}
-.map-legend-item{display:flex;align-items:center;gap:6px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
-.map-dot{width:9px;height:9px;border-radius:50%}
-.map-detail{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px}
-
-/* DOCS */
-.dropzone{border:1px dashed var(--border2);border-radius:8px;padding:28px;text-align:center;cursor:pointer;transition:all .15s;margin-bottom:14px}
-.dropzone:hover{border-color:var(--green);background:var(--green-bg)}
-.doc-list{display:flex;flex-direction:column;gap:7px}
-.doc-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border)}
-.doc-icon{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.doc-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.doc-meta{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
-
-/* INVOICES */
-.fv-row{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px;transition:border-color .12s}
-.fv-row:hover{border-color:var(--border2)}
-.fv-num{font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);min-width:130px}
-.fv-client{font-size:13px;font-weight:500;flex:1}
-.fv-amount{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text)}
-
-/* GRANTS */
-.grant-program{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
-.grant-program-name{font-size:13px;font-weight:600;margin-bottom:4px}
-.grant-program-val{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)}
-.grant-row{display:flex;align-items:center;gap:12px;padding:10px 13px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px}
-
-/* OSD */
-.osd-row{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px}
-.osd-steps{display:flex;gap:3px;margin-top:10px;margin-bottom:6px}
-.osd-step{flex:1;height:4px;border-radius:2px;transition:background .3s}
-.osd-step.done{background:var(--green)}
-.osd-step.curr{background:var(--amber)}
-.osd-step.todo{background:var(--bg4)}
-.osd-step-labels{display:flex;gap:3px}
-.osd-step-label{flex:1;font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);text-align:center}
-.osd-step-label.curr{color:var(--amber)}
-.osd-step-label.done{color:var(--green)}
-
-/* REMINDERS */
-.remind-row{display:flex;align-items:center;gap:12px;padding:10px 13px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px;transition:border-color .12s}
-.remind-row.urgent{border-left:3px solid var(--red);border-radius:0 7px 7px 0}
-.remind-row.soon{border-left:3px solid var(--amber);border-radius:0 7px 7px 0}
-.remind-day{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;min-width:28px;text-align:center}
-.remind-month{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-align:center}
-
-/* CHATBOT */
-.chat-window{background:var(--bg2);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;height:420px;overflow:hidden}
-.chat-header{padding:12px 16px;background:var(--bg3);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
-.chat-av{width:28px;height:28px;border-radius:50%;background:var(--green-bg);border:1px solid var(--green-dim);display:flex;align-items:center;justify-content:center}
-.chat-title{font-size:13px;font-weight:600}
-.chat-sub{font-size:10px;color:var(--green);font-family:'DM Mono',monospace}
-.chat-online{width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:auto;box-shadow:0 0 6px var(--green)}
-.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.msg{max-width:80%;padding:10px 13px;border-radius:10px;font-size:12px;line-height:1.6}
-.msg.bot{background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:3px 10px 10px 10px;align-self:flex-start}
-.msg.user{background:var(--green);color:#0d1117;border-radius:10px 3px 10px 10px;align-self:flex-end;font-family:'DM Mono',monospace;font-weight:500}
-.chat-input-row{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--bg3)}
-.chat-input{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--text)}
-.chat-input:focus{outline:none;border-color:var(--green)}
-.chat-client-list{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
-
-/* PAGE */
-.page{display:none}.page.active{display:block}
-.page-header{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.page-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
-.page-sub{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:3px}
-
-/* INLINE FILTER ROW */
-.filter-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.filter-chip{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);cursor:pointer;transition:all .12s}
-.filter-chip.active,.filter-chip:hover{background:var(--green-bg);color:var(--green);border-color:var(--green-dim)}
-
-/* DIVIDER */
-.divider{height:1px;background:var(--border);margin:16px 0}
-
-/* EMPTY */
-.empty{padding:24px;text-align:center;font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)}
-
-/* SECTION TITLE */
-.section-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;font-family:'DM Mono',monospace}
-
-/* NOTIFY */
-.notify{position:fixed;bottom:20px;right:20px;background:var(--bg2);border:1px solid var(--green-dim);color:var(--green);padding:10px 16px;border-radius:8px;font-size:12px;font-family:'DM Mono',monospace;z-index:999;display:none;animation:fadeUp .3s ease}
-
-/* API KEY MODAL */
-.apikey-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;align-items:center;justify-content:center}
-.apikey-overlay.open{display:flex}
-.apikey-modal{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:28px;width:460px;max-width:95vw}
-.apikey-modal h2{font-size:16px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.apikey-modal p{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:18px;line-height:1.7}
-.apikey-input-wrap{position:relative;margin-bottom:14px}
-.apikey-input-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 40px 10px 12px;font-size:13px;font-family:'DM Mono',monospace;color:var(--text)}
-.apikey-input-wrap input:focus{outline:none;border-color:var(--green)}
-.apikey-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace}
-.apikey-status{font-size:11px;font-family:'DM Mono',monospace;margin-bottom:14px;min-height:16px}
-.apikey-status.ok{color:var(--green)}.apikey-status.err{color:var(--red)}
-.apikey-hint{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:12px;line-height:1.6}
-.apikey-hint a{color:var(--blue)}
-.key-indicator{display:flex;align-items:center;gap:6px;cursor:pointer;padding:5px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);transition:all .15s}
-.key-indicator:hover{border-color:var(--border2);color:var(--text)}
-.key-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
-.key-dot.active{background:var(--green);box-shadow:0 0 5px var(--green)}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
-.order-card{animation:fadeIn .2s ease both}
-
-/* HAMBURGER */
-.hamburger{display:flex;background:none;border:none;cursor:pointer;padding:6px;color:var(--text);flex-direction:column;gap:4px;align-items:center;justify-content:center}
-.hamburger span{display:block;width:20px;height:2px;background:currentColor;border-radius:2px;transition:all .2s}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
-.sidebar-overlay.open{display:block}
-
-/* DESKTOP - hide hamburger, show sidebar normally */
-@media(min-width:901px){
-  .hamburger{display:none}
-  .sidebar{position:fixed;left:0;width:220px;min-width:220px}
-  .main{margin-left:220px}
-}
-
-/* RESPONSIVE */
-@media(max-width:900px) and (min-width:769px){
-  .sidebar{width:200px;min-width:200px}
-  .main{margin-left:200px}
-  .stats-grid{grid-template-columns:repeat(3,1fr)}
-  .panel-2{grid-template-columns:1fr}
-  .panel-3{grid-template-columns:1fr 1fr}
-  .panel-2c{grid-template-columns:1fr}
-}
-@media(max-width:900px){
-  .sidebar{
-    position:fixed;left:-220px;top:0;height:100vh;z-index:100;
-    transition:left .25s ease;width:220px;min-width:220px;
-  }
-  .sidebar.open{left:0}
-  .main{margin-left:0}
-  .topbar{padding:0 14px;gap:10px}
-  .topbar-title{font-size:14px}
-  .topbar-actions{gap:6px}
-  .topbar-actions #topbarDate{display:none}
-  .btn-secondary{padding:6px 10px;font-size:11px}
-  .content{padding:14px}
-  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}
-  .stat-val{font-size:18px}
-  .panel-2{grid-template-columns:1fr;gap:12px}
-  .panel-3{grid-template-columns:1fr}
-  .panel-2c{grid-template-columns:1fr}
-  .page-title{font-size:17px}
-  .form-modal{width:100%;max-width:100%;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;max-height:90vh}
-  .form-overlay{align-items:flex-end}
-  .form-grid-2{grid-template-columns:1fr}
-  .form-grid-3{grid-template-columns:1fr 1fr}
-  .chat-window{height:350px}
-  .order-list{max-height:none}
-  .ai-header{flex-direction:column;align-items:flex-start}
-  .ai-controls{width:100%}
-  .ai-select{flex:1}
-  .btn-ai{width:100%;justify-content:center}
-  .map-toolbar{flex-direction:column;align-items:flex-start}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SolarCRM - AI Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            background-color: #0f172a;
+            min-height: 100%;
+            min-height: 100dvh;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-item.active .nav-icon { color: #f97316; }
+        .nav-item.active .nav-label { color: #f97316; }
+        .nav-item .nav-icon { color: #94a3b8; }
+        .nav-item .nav-label { color: #94a3b8; }
+        .sidebar-item.active { background-color: #1e293b; border-left: 3px solid #f97316; }
+        .sidebar-item.active span { color: #f97316; }
+        #chat-box { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        #chat-box::-webkit-scrollbar { width: 4px; }
+        #chat-box::-webkit-scrollbar-track { background: transparent; }
+        #chat-box::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 4px; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
 </head>
-<body>
-<div class="shell">
-<div class="sidebar-overlay" onclick="closeSidebar()"></div>
+<body class="bg-slate-900 text-slate-100 font-sans" style="background-color:#0f172a;">
 
-<!-- SIDEBAR -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="sidebar-logo-mark">
-      <div class="logo-sun">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
-      </div>
-      <div>
-        <div class="logo-name">Solar<span>CRM</span></div>
-        <div class="logo-tag">PRO · OZE Platform</div>
-      </div>
-    </div>
-  </div>
-  <nav class="nav">
-    <div class="nav-section">Główne</div>
-    <button class="nav-item active" onclick="goPage('dashboard',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
-    </button>
-    <button class="nav-item" onclick="goPage('zlecenia',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Zlecenia
-    </button>
-    <button class="nav-item" onclick="goPage('mapa',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-      Mapa instalacji
-    </button>
-    <div class="nav-section">Finanse</div>
-    <button class="nav-item" onclick="goPage('faktury',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      Faktury
-    </button>
-    <button class="nav-item" onclick="goPage('dofinansowania',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      Dofinansowania
-    </button>
-    <div class="nav-section">Instalacje</div>
-    <button class="nav-item" onclick="goPage('dokumenty',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      Dokumenty & Zdjęcia
-    </button>
-    <button class="nav-item" onclick="goPage('osd',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      OSD Tracker
-    </button>
-    <div class="nav-section">AI & Smart</div>
-    <button class="nav-item" onclick="goPage('oferty',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Oferty & Umowy AI
-    </button>
-    <button class="nav-item" onclick="goPage('chatbot',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Chatbot klienta
-    </button>
-    <button class="nav-item" onclick="goPage('przypomnienia',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Przypomnienia
-    </button>
-  </nav>
-  <div class="sidebar-footer">
-    <div class="sidebar-user">
-      <div class="user-av">AK</div>
-      <div><div class="user-name">Adam Kowalczyk</div><div class="user-role">Manager OZE</div></div>
-    </div>
-  </div>
-</aside>
+    <!-- Desktop Layout -->
+    <div class="hidden md:flex h-screen overflow-hidden">
 
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-    <div class="topbar-title" id="topbarTitle">Dashboard</div>
-    <div class="topbar-actions">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)" id="topbarDate"></div>
-      <button class="btn-secondary" onclick="openForm()">+ Nowe zlecenie</button>
-    </div>
-  </div>
-  <div class="content">
-
-    <!-- DASHBOARD -->
-    <div class="page active" id="page-dashboard">
-      <div class="page-header">
-        <div><div class="page-title">Przegląd tygodnia</div><div class="page-sub">Małopolska · Tydzień 11/2025</div></div>
-      </div>
-      <div class="stats-grid" id="statsGrid"></div>
-      <div class="panel-2">
-        <div class="card">
-          <div class="card-header"><div class="card-title">Klienci</div><span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)" id="clientCount"></span></div>
-          <div class="client-list" id="clientList"></div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title" id="ordersLabel">Wszystkie zlecenia</div>
-            <select class="ai-select" id="filterStatus" onchange="renderOrders()">
-              <option value="">Wszystkie statusy</option>
-              <option>Wycena</option><option>Umowa podpisana</option><option>W realizacji</option><option>Odbiór końcowy</option><option>Zgłoszenie do OSD</option><option>Zakończone</option>
-            </select>
-          </div>
-          <div class="order-list" id="orderList"></div>
-        </div>
-      </div>
-      <div class="ai-panel">
-        <div class="ai-header">
-          <div class="ai-title">Asystent AI <span class="ai-badge">GPT-4 powered</span></div>
-          <div class="ai-controls">
-            <select class="ai-select" id="aiScope">
-              <option value="ryzyko">Analiza ryzyka opóźnień</option>
-              <option value="tydzien">Podsumowanie tygodnia</option>
-              <option value="priorytet">Priorytety na jutro</option>
-              <option value="osd_ai">Status zgłoszeń OSD</option>
-            </select>
-            <button class="btn-ai" id="aiBtn" onclick="generateReport()">
-              <div class="spinner" id="spin"></div><span id="aiLabel">Analizuj ↗</span>
-            </button>
-          </div>
-        </div>
-        <div class="ai-result" id="aiResult"></div>
-      </div>
-    </div>
-
-    <!-- ZLECENIA -->
-    <div class="page" id="page-zlecenia">
-      <div class="page-header">
-        <div><div class="page-title">Zlecenia</div><div class="page-sub">Zarządzaj projektami instalacyjnymi</div></div>
-        <button class="btn-primary" onclick="openForm()">+ Nowe zlecenie</button>
-      </div>
-      <div class="filter-row" style="margin-bottom:16px" id="statusFilters"></div>
-      <div style="display:flex;flex-direction:column;gap:8px" id="orderListFull"></div>
-    </div>
-
-    <!-- MAPA -->
-    <div class="page" id="page-mapa">
-      <div class="page-header">
-        <div><div class="page-title">Mapa instalacji</div><div class="page-sub">Małopolska i okolice</div></div>
-        <div class="filter-row">
-          <button class="filter-chip active" onclick="filterMap('all',this)">Wszystkie</button>
-          <button class="filter-chip" onclick="filterMap('W realizacji',this)">W realizacji</button>
-          <button class="filter-chip" onclick="filterMap('Zakończone',this)">Zakończone</button>
-          <button class="filter-chip" onclick="filterMap('Zgłoszenie do OSD',this)">OSD</button>
-        </div>
-      </div>
-      <div class="map-container">
-        <div class="map-svg-wrap">
-          <div id="mapTooltip" class="map-tooltip"></div>
-          <svg id="mapSvg" viewBox="0 0 760 340" style="width:100%;display:block"></svg>
-        </div>
-        <div class="map-legend">
-          <div class="map-legend-item"><div class="map-dot" style="background:#3fb950"></div>Zakończone</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#d29922"></div>W realizacji</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#58a6ff"></div>Zgłoszenie OSD</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#6e7681"></div>Wycena/Umowa</div>
-        </div>
-      </div>
-      <div class="map-detail" id="mapDetail">
-        <div class="empty">Kliknij pin na mapie, aby zobaczyć szczegóły instalacji.</div>
-      </div>
-    </div>
-
-    <!-- FAKTURY -->
-    <div class="page" id="page-faktury">
-      <div class="page-header">
-        <div><div class="page-title">Faktury</div><div class="page-sub">Zarządzanie rozliczeniami</div></div>
-        <button class="btn-primary" onclick="addInvoice()">+ Wystaw fakturę</button>
-      </div>
-      <div class="panel-3" style="margin-bottom:20px">
-        <div class="stat-card c-green"><div class="stat-label">Zapłacone (mies.)</div><div class="stat-val green" id="fv-paid">0 zł</div></div>
-        <div class="stat-card c-amber"><div class="stat-label">Do zapłaty</div><div class="stat-val amber" id="fv-pending">0 zł</div></div>
-        <div class="stat-card c-red"><div class="stat-label">Przeterminowane</div><div class="stat-val red" id="fv-overdue">0 zł</div></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">Lista faktur</div></div><div id="fvList"></div></div>
-    </div>
-
-    <!-- DOFINANSOWANIA -->
-    <div class="page" id="page-dofinansowania">
-      <div class="page-header">
-        <div><div class="page-title">Dofinansowania</div><div class="page-sub">Czyste Powietrze, Mój Prąd, ulgi</div></div>
-        <button class="btn-primary" onclick="addGrant()">+ Dodaj wniosek</button>
-      </div>
-      <div class="panel-3">
-        <div class="grant-program"><div class="grant-program-name">Czyste Powietrze</div><div class="grant-program-val">66 000 zł</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Aktywny program</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">PV + Pompa ciepła + termomodernizacja</div></div>
-        <div class="grant-program"><div class="grant-program-name">Mój Prąd 6.0</div><div class="grant-program-val">7 000 zł</div><div style="font-size:10px;color:var(--amber);font-family:'DM Mono',monospace;margin-top:4px">⚡ Sprawdź dostępność</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">PV + magazyn energii</div></div>
-        <div class="grant-program"><div class="grant-program-name">Ulga termomodernizacyjna</div><div class="grant-program-val">53 000 zł</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Odliczenie PIT/CIT</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Pompa ciepła, PV, ocieplenie</div></div>
-      </div>
-      <div class="card"><div class="card-header"><div class="card-title">Wnioski klientów</div></div><div id="grantList"></div></div>
-    </div>
-
-    <!-- DOKUMENTY -->
-    <div class="page" id="page-dokumenty">
-      <div class="page-header"><div><div class="page-title">Dokumenty & Zdjęcia</div><div class="page-sub">Protokoły, zdjęcia z montażu, certyfikaty</div></div></div>
-      <div class="panel-2">
-        <div class="card"><div class="card-header"><div class="card-title">Wybierz zlecenie</div></div><div class="client-list" id="docOrderList"></div></div>
-        <div class="card">
-          <div class="card-header"><div class="card-title" id="docTitle">Dokumenty</div><button class="btn-secondary" style="font-size:11px" onclick="document.getElementById('fileInput').click()">+ Dodaj</button></div>
-          <input type="file" id="fileInput" style="display:none" multiple accept="image/*,.pdf,.doc,.docx" onchange="handleUpload(event)"/>
-          <div class="dropzone" onclick="document.getElementById('fileInput').click()">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)">Przeciągnij lub kliknij aby dodać pliki</div>
-            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px">Zdjęcia z montażu, protokoły PDF, umowy</div>
-          </div>
-          <div class="doc-list" id="docList"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- OSD -->
-    <div class="page" id="page-osd">
-      <div class="page-header"><div><div class="page-title">OSD Tracker</div><div class="page-sub">Status zgłoszeń do operatorów sieci (Tauron, PGE, Energa)</div></div></div>
-      <div id="osdList"></div>
-    </div>
-
-    <!-- OFERTY AI -->
-    <div class="page" id="page-oferty">
-      <div class="page-header"><div><div class="page-title">Oferty & Umowy AI</div><div class="page-sub">Generator dokumentów oparty na AI</div></div></div>
-      <div class="panel-2c">
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Parametry dokumentu</div>
-          <div class="form-grid" style="gap:12px">
-            <div class="form-field"><div class="form-label">Klient</div><input class="form-input" id="of-client" placeholder="Jan Kowalski / Firma XYZ"/></div>
-            <div class="form-field"><div class="form-label">Adres instalacji</div><input class="form-input" id="of-addr" placeholder="ul. Słoneczna 12, Kraków"/></div>
-            <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Typ instalacji</div><select class="form-select" id="of-type"><option>Fotowoltaika</option><option>Pompa ciepła</option><option>Hybryda PV + PC</option><option>Magazyn energii</option></select></div>
-              <div class="form-field"><div class="form-label">Moc (kWp)</div><input class="form-input" id="of-kw" type="number" value="9.9" step="0.5"/></div>
+        <!-- Sidebar -->
+        <aside class="w-56 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
+            <div class="p-5 border-b border-slate-700">
+                <h1 class="text-lg font-bold text-orange-400">SolarCRM</h1>
+                <p class="text-xs text-slate-500 mt-0.5">v1.0 AI</p>
             </div>
-            <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Wartość netto (zł)</div><input class="form-input" id="of-price" type="number" value="28000"/></div>
-              <div class="form-field"><div class="form-label">Typ dokumentu</div><select class="form-select" id="of-doctype"><option value="oferta">Oferta handlowa</option><option value="umowa">Umowa instalacyjna</option><option value="protokol">Protokół odbioru</option></select></div>
+            <nav class="flex-1 py-4 space-y-1 px-2">
+                <button onclick="switchTab('dashboard')" class="sidebar-item active w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" id="sidebar-dashboard">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </button>
+                <button onclick="switchTab('chat')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-chat">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="text-sm font-medium">AI Asystent</span>
+                </button>
+                <button onclick="switchTab('clients')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-clients">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-sm font-medium">Klienci</span>
+                </button>
+                <button onclick="switchTab('orders')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-orders">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span class="text-sm font-medium">Zlecenia</span>
+                </button>
+                <button onclick="switchTab('settings')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-settings">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-sm font-medium">Ustawienia</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-700">
+                <div class="flex items-center gap-2">
+                    <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs text-slate-500">System aktywny</span>
+                </div>
             </div>
-            <div class="form-field"><div class="form-label">Uwagi dodatkowe</div><textarea class="form-textarea" id="of-notes" placeholder="Dofinansowanie Czyste Powietrze, dach skośny 35°, licznik dwukierunkowy..."></textarea></div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-ai" id="offerBtn" onclick="genOffer()"><div class="spinner" id="ofSpin"></div><span id="ofLabel">Generuj AI ↗</span></button>
-              <button class="btn-secondary" onclick="copyOffer()">Kopiuj</button>
+        </aside>
+
+        <!-- Main content desktop -->
+        <main class="flex-1 overflow-y-auto bg-slate-900" id="desktop-main">
+            <div id="tab-dashboard" class="tab-content active p-8">
+                <div id="dashboard-content"></div>
             </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Podgląd dokumentu</div>
-          <div id="offerPreview" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.8;white-space:pre-wrap;min-height:300px">Wypełnij formularz po lewej i kliknij "Generuj AI" aby stworzyć profesjonalny dokument.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CHATBOT -->
-    <div class="page" id="page-chatbot">
-      <div class="page-header"><div><div class="page-title">Chatbot klienta</div><div class="page-sub">AI asystent statusu instalacji dla klienta</div></div></div>
-      <div class="panel-2c">
-        <div class="chat-client-list">
-          <div class="card-title" style="margin-bottom:12px">Wybierz klienta</div>
-          <div id="chatClientList"></div>
-        </div>
-        <div class="chat-window">
-          <div class="chat-header">
-            <div class="chat-av"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg></div>
-            <div><div class="chat-title" id="chatClientName">SolarBot</div><div class="chat-sub">Asystent instalacji OZE</div></div>
-            <div class="chat-online"></div>
-          </div>
-          <div class="chat-msgs" id="chatMsgs">
-            <div class="msg bot">Cześć! Jestem asystentem SolarCRM. Wybierz klienta z listy lub zadaj mi pytanie o zlecenia.</div>
-          </div>
-          <div class="chat-input-row">
-            <input class="chat-input" id="chatInput" placeholder="Napisz wiadomość..." onkeydown="if(event.key==='Enter')sendChat()"/>
-            <button class="btn-primary" style="padding:7px 14px" onclick="sendChat()">Wyślij</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRZYPOMNIENIA -->
-    <div class="page" id="page-przypomnienia">
-      <div class="page-header"><div><div class="page-title">Przypomnienia SMS & Email</div><div class="page-sub">Automatyczne powiadomienia dla klientów</div></div></div>
-      <div class="panel-2c">
-        <div><div class="section-title">Nadchodzące terminy</div><div id="remindList"></div></div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Dodaj przypomnienie</div>
-          <div class="form-grid" style="gap:11px">
-            <div class="form-field"><div class="form-label">Klient</div><select class="form-select" id="r-client"></select></div>
-            <div class="form-field"><div class="form-label">Typ zdarzenia</div><select class="form-select" id="r-type"><option>Termin montażu</option><option>Przegląd serwisowy</option><option>Płatność faktury</option><option>Dokumenty do OSD</option><option>Odbiór instalacji</option></select></div>
-            <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Data</div><input class="form-input" type="date" id="r-date"/></div>
-              <div class="form-field"><div class="form-label">Kanał</div><select class="form-select" id="r-channel"><option>SMS</option><option>Email</option><option>SMS + Email</option></select></div>
+            <div id="tab-chat" class="tab-content p-6 h-full flex flex-col">
+                <div id="chat-content-desktop"></div>
             </div>
-            <button class="btn-primary" onclick="addReminder()" style="align-self:flex-start">Dodaj przypomnienie</button>
-          </div>
+            <div id="tab-clients" class="tab-content p-8">
+                <div id="clients-content"></div>
+            </div>
+            <div id="tab-orders" class="tab-content p-8">
+                <div id="orders-content"></div>
+            </div>
+            <div id="tab-settings" class="tab-content p-8">
+                <div id="settings-content"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="md:hidden flex flex-col" style="min-height:100dvh; min-height:100vh; background-color:#0f172a;">
+
+        <!-- Mobile Header -->
+        <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <h1 class="text-base font-bold text-orange-400">SolarCRM <span class="text-slate-500 text-xs font-normal">v1.0</span></h1>
+            <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-xs text-slate-500">Online</span>
+            </div>
+        </header>
+
+        <!-- Mobile Content Area -->
+        <div class="flex-1 overflow-y-auto" style="background-color:#0f172a;">
+            <div id="mobile-tab-dashboard" class="tab-content active">
+                <div id="mobile-dashboard-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-chat" class="tab-content h-full flex flex-col" style="background-color:#0f172a;">
+                <div id="mobile-chat-content" class="flex flex-col h-full"></div>
+            </div>
+            <div id="mobile-tab-clients" class="tab-content">
+                <div id="mobile-clients-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-orders" class="tab-content">
+                <div id="mobile-orders-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-settings" class="tab-content">
+                <div id="mobile-settings-content" class="p-4"></div>
+            </div>
         </div>
-      </div>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="bg-slate-800 border-t border-slate-700 flex-shrink-0 safe-bottom" style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);">
+            <div class="flex items-center justify-around px-2 pt-2 pb-1">
+                <button onclick="switchTab('dashboard')" class="nav-item active flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-dashboard">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span class="nav-label text-xs font-medium">Dashboard</span>
+                </button>
+                <button onclick="switchTab('chat')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-chat">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="nav-label text-xs font-medium">AI Chat</span>
+                </button>
+                <button onclick="switchTab('clients')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-clients">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="nav-label text-xs font-medium">Klienci</span>
+                </button>
+                <button onclick="switchTab('orders')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-orders">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span class="nav-label text-xs font-medium">Zlecenia</span>
+                </button>
+                <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-settings">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="nav-label text-xs font-medium">Ustawienia</span>
+                </button>
+            </div>
+        </nav>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /main -->
-</div><!-- /shell -->
+    <script>
+        // ─── Tab switching ───────────────────────────────────────────────
+        const TABS = ['dashboard', 'chat', 'clients', 'orders', 'settings'];
+        let currentTab = 'dashboard';
 
-<!-- ADD ORDER FORM MODAL -->
-<div class="form-overlay" id="formOverlay">
-  <div class="form-modal">
-    <div class="form-title">
-      Nowe zlecenie OZE
-      <button class="form-close" onclick="closeForm()">✕</button>
-    </div>
-    <div class="form-grid">
-      <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Klient</div><input class="form-input" id="f-client" placeholder="Nazwa firmy lub osoby"/></div>
-        <div class="form-field"><div class="form-label">Adres instalacji</div><input class="form-input" id="f-addr" placeholder="ul. Słoneczna 5, Kraków"/></div>
-      </div>
-      <div class="form-grid form-grid-3" style="gap:10px">
-        <div class="form-field"><div class="form-label">Typ instalacji</div><select class="form-select" id="f-type"><option>Fotowoltaika</option><option>Pompa ciepła</option><option>Kolektory słoneczne</option><option>Magazyn energii</option><option>Hybryda PV+PC</option></select></div>
-        <div class="form-field"><div class="form-label">Moc (kWp)</div><input class="form-input" id="f-kw" type="number" step="0.1" placeholder="9.9"/></div>
-        <div class="form-field"><div class="form-label">Wartość (zł)</div><input class="form-input" id="f-price" type="number" placeholder="28000"/></div>
-      </div>
-      <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Status</div><select class="form-select" id="f-status"><option>Wycena</option><option>Umowa podpisana</option><option>W realizacji</option><option>Odbiór końcowy</option><option>Zgłoszenie do OSD</option><option>Zakończone</option></select></div>
-        <div class="form-field"><div class="form-label">Termin realizacji</div><input class="form-input" id="f-date" type="date"/></div>
-      </div>
-      <div class="form-field"><div class="form-label">Notatka</div><textarea class="form-textarea" id="f-note" placeholder="Typ dachu, falownik, uwagi montażowe..."></textarea></div>
-    </div>
-    <div class="divider"></div>
-    <div class="form-actions">
-      <button class="btn-primary" onclick="saveOrder()">Zapisz zlecenie</button>
-      <button class="btn-secondary" onclick="closeForm()">Anuluj</button>
-    </div>
-  </div>
-</div>
+        function switchTab(tab) {
+            currentTab = tab;
+            const isMobile = window.innerWidth < 768;
 
-<div class="notify" id="notify"></div>
+            TABS.forEach(t => {
+                // Desktop
+                const dtab = document.getElementById('tab-' + t);
+                if (dtab) dtab.classList.toggle('active', t === tab);
+                const sitem = document.getElementById('sidebar-' + t);
+                if (sitem) {
+                    sitem.classList.toggle('active', t === tab);
+                    if (t !== tab) {
+                        sitem.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
+                        sitem.classList.remove('bg-slate-700');
+                    } else {
+                        sitem.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
+                    }
+                }
+                // Mobile
+                const mtab = document.getElementById('mobile-tab-' + t);
+                if (mtab) mtab.classList.toggle('active', t === tab);
+                const nitem = document.getElementById('nav-' + t);
+                if (nitem) nitem.classList.toggle('active', t === tab);
+            });
 
-<script>
-// ── DATA ──────────────────────────────────────────────────
-const clients=[
-  {id:1,name:"Farma Wiatrakowa Sp. z o.o.",type:"Agro",av:"FW",col:"av-g",tel:"501 234 567",email:"biuro@farmawiatrakowa.pl"},
-  {id:2,name:"Jan Kowalski",type:"Dom jednorodzinny",av:"JK",col:"av-a",tel:"602 111 222",email:"jan.kowalski@gmail.com"},
-  {id:3,name:"Hurtownia BudMax",type:"Przemysł / magazyn",av:"BM",col:"av-b",tel:"12 345 67 89",email:"kontakt@budmax.pl"},
-  {id:4,name:"Anna Wiśniewska",type:"Dom + pompa ciepła",av:"AW",col:"av-t",tel:"793 456 789",email:"anna.wisniewska@wp.pl"},
-  {id:5,name:"Gmina Zielona Dolina",type:"Samorząd",av:"GZ",col:"av-r",tel:"12 987 65 43",email:"urzad@zielona-dolina.pl"},
-];
-let orders=[
-  {id:1,clientId:1,title:"Instalacja PV 49.5 kWp – stodoła",type:"Fotowoltaika",kw:49.5,status:"W realizacji",price:148000,note:"Montaż dach dwuspadowy. Falownik Huawei SUN2000. Czekamy na moduły Longi.",date:"2025-03-15",addr:"Wiejska 22, Kraków",lat:170,lng:170},
-  {id:2,clientId:2,title:"Fotowoltaika 9.9 kWp + magazyn 10kWh",type:"Hybryda PV+PC",kw:9.9,status:"Zgłoszenie do OSD",price:47000,note:"Zgłoszono do Tauron 10.03. Magazyn BYD HVM. Czekamy na warunki przyłączenia.",date:"2025-03-20",addr:"Słoneczna 5, Tarnów",lat:195,lng:440},
-  {id:3,clientId:3,title:"Pompa ciepła 16 kW – hala produkcyjna",type:"Pompa ciepła",kw:16,status:"Umowa podpisana",price:38000,note:"Kontrakt podpisany. Czekamy na dostawę jednostki zewnętrznej Mitsubishi Zubadan.",date:"2025-04-01",addr:"Przemysłowa 88, Wieliczka",lat:155,lng:258},
-  {id:4,clientId:4,title:"Kolektory słoneczne 6-tubowe + CWU",type:"Kolektory słoneczne",kw:4.2,status:"Zakończone",price:14500,note:"Odebrane, protokół podpisany. Gwarancja 5 lat do 03.2030.",date:"2025-03-01",addr:"Różana 3, Myślenice",lat:228,lng:298},
-  {id:5,clientId:5,title:"PV 99 kWp – dach hali sportowej",type:"Fotowoltaika",kw:99,status:"Wycena",price:280000,note:"Przetarg publiczny, wycena do 25.03. Potrzebna ekspertyza statyczna dachu.",date:"2025-03-25",addr:"Sportowa 1, Zakopane",lat:278,lng:318},
-  {id:6,clientId:2,title:"Przegląd serwisowy PV – rok 1",type:"Fotowoltaika",kw:9.9,status:"Wycena",price:450,note:"Umówiony 18.03. Sprawdzić wydajność i logi falownika.",date:"2025-03-18",addr:"Słoneczna 5, Tarnów",lat:200,lng:445},
-];
-let invoices=[
-  {id:1,num:"FV/2025/03/001",clientId:1,amount:148000,status:"paid",date:"2025-03-01"},
-  {id:2,num:"FV/2025/03/002",clientId:2,amount:47000,status:"pending",date:"2025-03-10"},
-  {id:3,num:"FV/2025/02/015",clientId:3,amount:38000,status:"overdue",date:"2025-02-15"},
-  {id:4,num:"FV/2025/03/003",clientId:4,amount:14500,status:"paid",date:"2025-03-05"},
-];
-let grants=[
-  {id:1,clientId:2,program:"Czyste Powietrze",amount:20000,status:"W trakcie",submitted:"2025-02-01",expected:"2025-05-01"},
-  {id:2,clientId:4,program:"Mój Prąd 6.0",amount:7000,status:"Zatwierdzone",submitted:"2025-01-15",expected:"2025-03-15"},
-  {id:3,clientId:1,program:"Czyste Powietrze",amount:35000,status:"Złożony",submitted:"2025-03-01",expected:"2025-06-01"},
-];
-let osdItems=[
-  {id:1,orderId:2,operator:"Tauron Dystrybucja",submitted:"2025-03-10",step:2,steps:["Złożono wniosek","Warunki przyłączenia","Umowa przyłączeniowa","Montaż licznika","Aktywacja — odczyt"]},
-  {id:2,orderId:5,operator:"Tauron Dystrybucja",submitted:"2025-03-01",step:0,steps:["Złożono wniosek","Warunki przyłączenia","Umowa przyłączeniowa","Montaż licznika","Aktywacja — odczyt"]},
-];
-let reminders=[
-  {clientId:2,type:"Termin montażu",date:"2025-03-18",channel:"SMS"},
-  {clientId:1,type:"Odbiór instalacji",date:"2025-03-15",channel:"Email"},
-  {clientId:3,type:"Płatność faktury",date:"2025-03-20",channel:"SMS + Email"},
-  {clientId:4,type:"Przegląd serwisowy",date:"2025-04-10",channel:"SMS"},
-];
-let docs={};
-let activeClient=null,selectedDocOrder=null,chatClient=null;
+            renderTabContent(tab);
+        }
 
-// ── UTILS ──────────────────────────────────────────────────
-const TODAY=new Date("2025-03-14");
-function daysLeft(d){return Math.ceil((new Date(d)-TODAY)/(864e5));}
-function notify(msg){const n=document.getElementById('notify');n.textContent=msg;n.style.display='block';setTimeout(()=>n.style.display='none',2500);}
+        // ─── Content renderers ──────────────────────────────────────────
+        function renderTabContent(tab) {
+            if (tab === 'dashboard') renderDashboard();
+            else if (tab === 'chat') renderChat();
+            else if (tab === 'clients') renderClients();
+            else if (tab === 'orders') renderOrders();
+            else if (tab === 'settings') renderSettings();
+        }
 
-function statusTag(s){
-  const m={"Zakończone":"t-green","W realizacji":"t-amber","Umowa podpisana":"t-teal","Zgłoszenie do OSD":"t-blue","Wycena":"t-gray","Odbiór końcowy":"t-coral"};
-  return`<span class="tag ${m[s]||'t-gray'}">${s}</span>`;
-}
-function typeTag(t){
-  const m={"Fotowoltaika":"t-amber","Pompa ciepła":"t-blue","Kolektory słoneczne":"t-teal","Magazyn energii":"t-green","Hybryda PV+PC":"t-coral"};
-  return`<span class="tag ${m[t]||'t-gray'}">${t}</span>`;
-}
+        function dashboardHTML() {
+            return `
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100 mb-1">Dashboard</h2>
+                <p class="text-slate-500 text-sm mb-6">Witaj z powrotem! Oto przegląd dnia.</p>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Klienci</p>
+                        <p class="text-2xl font-bold text-orange-400">24</p>
+                        <p class="text-slate-500 text-xs mt-1">+3 w tym miesiącu</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Zlecenia</p>
+                        <p class="text-2xl font-bold text-orange-400">8</p>
+                        <p class="text-slate-500 text-xs mt-1">2 do realizacji</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Przychód</p>
+                        <p class="text-2xl font-bold text-green-400">42k</p>
+                        <p class="text-slate-500 text-xs mt-1">PLN w tym miesiącu</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Instalacje</p>
+                        <p class="text-2xl font-bold text-blue-400">5</p>
+                        <p class="text-slate-500 text-xs mt-1">zaplanowane</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-3">Ostatnie zlecenia</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Jan Kowalski</p>
+                                <p class="text-xs text-slate-500">Instalacja 8kW · Warszawa</p>
+                            </div>
+                            <span class="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full">Gotowe</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Anna Nowak</p>
+                                <p class="text-xs text-slate-500">Oferta 12kW · Kraków</p>
+                            </div>
+                            <span class="text-xs bg-orange-900 text-orange-400 px-2 py-0.5 rounded-full">W trakcie</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Piotr Wiśniewski</p>
+                                <p class="text-xs text-slate-500">Wycena 6kW · Gdańsk</p>
+                            </div>
+                            <span class="text-xs bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full">Nowe</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-2">Szybki AI Chat</h3>
+                    <p class="text-xs text-slate-500 mb-3">Zapytaj asystenta o dane klientów, zlecenia lub raporty.</p>
+                    <button onclick="switchTab('chat')" class="w-full bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-95">
+                        Otwórz AI Asystenta
+                    </button>
+                </div>
+            </div>`;
+        }
 
-// ── NAVIGATION ──────────────────────────────────────────────
-const pageTitles={dashboard:"Dashboard",zlecenia:"Zlecenia",mapa:"Mapa instalacji",faktury:"Faktury",dofinansowania:"Dofinansowania",dokumenty:"Dokumenty & Zdjęcia",osd:"OSD Tracker",oferty:"Oferty & Umowy AI",chatbot:"Chatbot klienta",przypomnienia:"Przypomnienia"};
-function goPage(name,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  if(el) el.classList.add('active');
-  document.getElementById('topbarTitle').textContent=pageTitles[name]||name;
-  if(name==='mapa') renderMap();
-  if(name==='faktury') renderInvoices();
-  if(name==='dofinansowania') renderGrants();
-  if(name==='dokumenty'){renderDocOrders();renderDocList();}
-  if(name==='osd') renderOSD();
-  if(name==='przypomnienia') renderReminders();
-  if(name==='chatbot') renderChatClients();
-  if(name==='zlecenia') renderOrdersFull();
-}
+        function renderDashboard() {
+            const html = dashboardHTML();
+            const d = document.getElementById('dashboard-content');
+            const md = document.getElementById('mobile-dashboard-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
 
-// ── STATS ──────────────────────────────────────────────────
-function renderStats(){
-  const active=orders.filter(o=>o.status!=="Zakończone").length;
-  const inWork=orders.filter(o=>o.status==="W realizacji").length;
-  const pipeline=orders.filter(o=>["Wycena","Umowa podpisana"].includes(o.status)).reduce((a,b)=>a+b.price,0);
-  const kw=orders.filter(o=>o.status==="Zakończone").reduce((a,b)=>a+(b.kw||0),0);
-  const osd=orders.filter(o=>o.status==="Zgłoszenie do OSD").length;
-  document.getElementById('statsGrid').innerHTML=`
-    <div class="stat-card c-green"><div class="stat-label">Aktywne zlecenia</div><div class="stat-val">${active}</div><div class="stat-sub">${orders.length} łącznie</div></div>
-    <div class="stat-card c-amber"><div class="stat-label">W realizacji</div><div class="stat-val amber">${inWork}</div><div class="stat-sub">na budowie</div></div>
-    <div class="stat-card c-blue"><div class="stat-label">Pipeline (zł)</div><div class="stat-val blue">${pipeline.toLocaleString('pl-PL')}</div><div class="stat-sub">wyceny + umowy</div></div>
-    <div class="stat-card c-teal"><div class="stat-label">Zainstalowane kWp</div><div class="stat-val green">${kw.toFixed(1)}</div><div class="stat-sub">zakończone projekty</div></div>
-    <div class="stat-card c-red"><div class="stat-label">Oczekuje OSD</div><div class="stat-val">${osd}</div><div class="stat-sub">zgłoszenia aktywne</div></div>`;
-}
+        function chatHTML(isMobile) {
+            return `
+            <div class="flex flex-col ${isMobile ? 'h-full' : 'h-[calc(100vh-2rem)]'}" style="${isMobile ? 'min-height:calc(100dvh - 112px)' : ''}">
+                <div id="${isMobile ? 'mobile-chat-box' : 'desktop-chat-box'}" class="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col" style="scrollbar-width:thin; scrollbar-color:#334155 transparent;">
+                    <div class="bg-slate-700 self-start p-3 rounded-xl max-w-[85%] text-sm border border-slate-600">
+                        Witaj w SolarCRM. Jak mogę pomóc w zarządzaniu Twoimi klientami?
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-800 border-t border-slate-700 flex gap-2 flex-shrink-0">
+                    <input id="${isMobile ? 'mobile-user-input' : 'desktop-user-input'}" type="text"
+                        class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                        placeholder="Zapytaj o klienta, zlecenie..."
+                        onkeypress="if(event.key==='Enter') askAI('${isMobile ? 'mobile' : 'desktop'}')">
+                    <button onclick="askAI('${isMobile ? 'mobile' : 'desktop'}')"
+                        class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-5 py-2.5 rounded-xl transition-all active:scale-95 flex-shrink-0 text-sm">
+                        Wyślij
+                    </button>
+                </div>
+            </div>`;
+        }
 
-// ── CLIENTS ──────────────────────────────────────────────────
-function renderClients(){
-  const list=document.getElementById('clientList');
-  list.innerHTML=clients.map(c=>{
-    const cnt=orders.filter(o=>o.clientId===c.id).length;
-    const kw=orders.filter(o=>o.clientId===c.id).reduce((a,b)=>a+(b.kw||0),0);
-    return`<div class="client-row${activeClient===c.id?' active':''}" onclick="selectClient(${c.id})">
-      <div class="av ${c.col}">${c.av}</div>
-      <div style="flex:1;min-width:0"><div class="c-name">${c.name}</div><div class="c-sub">${c.type} · ${cnt} zlec.</div></div>
-      <div class="c-kw">${kw.toFixed(1)} kWp</div>
-    </div>`;
-  }).join('');
-  document.getElementById('clientCount').textContent=clients.length+' firm';
-}
-function selectClient(id){activeClient=activeClient===id?null:id;renderClients();renderOrders();}
+        function renderChat() {
+            const dc = document.getElementById('chat-content-desktop');
+            const mc = document.getElementById('mobile-chat-content');
+            if (dc && !dc.innerHTML.trim()) dc.innerHTML = chatHTML(false);
+            if (mc && !mc.innerHTML.trim()) mc.innerHTML = chatHTML(true);
+        }
 
-// ── ORDERS ──────────────────────────────────────────────────
-function renderOrders(){
-  const list=document.getElementById('orderList');
-  const fv=document.getElementById('filterStatus').value;
-  let filtered=activeClient?orders.filter(o=>o.clientId===activeClient):orders;
-  if(fv) filtered=filtered.filter(o=>o.status===fv);
-  document.getElementById('ordersLabel').textContent=activeClient?clients.find(c=>c.id===activeClient)?.name:"Wszystkie zlecenia";
-  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">Brak zleceń.</div>`;
-}
-function orderCardHTML(o){
-  const c=clients.find(cl=>cl.id===o.clientId);
-  const dl=daysLeft(o.date);
-  const risk=dl<5&&o.status!=="Zakończone";
-  return`<div class="order-card${risk?' risk':''}">
-    <div class="order-top"><div class="order-title">${o.title}</div><div class="order-price">${o.price.toLocaleString('pl-PL')} zł</div></div>
-    <div class="order-meta">${c?.name||''} · ${o.addr} · Termin: ${o.date}${risk?` · <span style="color:var(--red)">⚠ ${dl}d</span>`:''}</div>
-    <div class="order-footer">${typeTag(o.type)}${statusTag(o.status)}<span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--green);margin-left:auto">${o.kw} kWp</span></div>
-    <div class="order-note">${o.note}</div>
-  </div>`;
-}
-function renderOrdersFull(){
-  const list=document.getElementById('orderListFull');
-  // status filter chips
-  const statuses=["Wszystkie","Wycena","Umowa podpisana","W realizacji","Odbiór końcowy","Zgłoszenie do OSD","Zakończone"];
-  const sf=document.getElementById('statusFilters');
-  if(!sf.hasChildNodes()){
-    sf.innerHTML=statuses.map((s,i)=>`<button class="filter-chip${i===0?' active':''}" onclick="filterOrdersFull('${s}',this)">${s}</button>`).join('');
-  }
-  list.innerHTML=orders.map(o=>orderCardHTML(o)).join('');
-}
-function filterOrdersFull(status,el){
-  document.querySelectorAll('#statusFilters .filter-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  const list=document.getElementById('orderListFull');
-  const filtered=status==='Wszystkie'?orders:orders.filter(o=>o.status===status);
-  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">Brak zleceń w tym statusie.</div>`;
-}
+        function clientsHTML() {
+            return `
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-100">Klienci</h2>
+                    <button class="bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all active:scale-95">+ Dodaj</button>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl mb-4">
+                    <div class="p-3 border-b border-slate-700">
+                        <input type="text" placeholder="Szukaj klienta..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                    </div>
+                    <div class="divide-y divide-slate-700">
+                        ${[
+                            {name:'Jan Kowalski', city:'Warszawa', kw:'8 kW', status:'Aktywny', color:'green'},
+                            {name:'Anna Nowak', city:'Kraków', kw:'12 kW', status:'Oferta', color:'orange'},
+                            {name:'Piotr Wiśniewski', city:'Gdańsk', kw:'6 kW', status:'Nowy', color:'blue'},
+                            {name:'Maria Zielińska', city:'Wrocław', kw:'10 kW', status:'Aktywny', color:'green'},
+                            {name:'Tomasz Lewandowski', city:'Poznań', kw:'15 kW', status:'Instalacja', color:'purple'},
+                        ].map(c => `
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-orange-400 flex-shrink-0">${c.name.charAt(0)}</div>
+                                <div>
+                                    <p class="text-sm font-medium text-slate-200">${c.name}</p>
+                                    <p class="text-xs text-slate-500">${c.city} · ${c.kw}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-${c.color}-900 text-${c.color}-400 px-2 py-0.5 rounded-full flex-shrink-0">${c.status}</span>
+                        </div>`).join('')}
+                    </div>
+                </div>
+            </div>`;
+        }
 
-// ── FORM ──────────────────────────────────────────────────
-function openForm(){document.getElementById('formOverlay').classList.add('open');}
-function closeForm(){document.getElementById('formOverlay').classList.remove('open');}
-function saveOrder(){
-  const name=document.getElementById('f-client').value.trim();if(!name){notify('Podaj nazwę klienta.');return;}
-  const addr=document.getElementById('f-addr').value.trim();
-  const type=document.getElementById('f-type').value;
-  const kw=parseFloat(document.getElementById('f-kw').value)||0;
-  const price=parseFloat(document.getElementById('f-price').value)||0;
-  const status=document.getElementById('f-status').value;
-  const date=document.getElementById('f-date').value||"2025-04-01";
-  const note=document.getElementById('f-note').value.trim()||"Nowe zlecenie.";
-  let c=clients.find(x=>x.name.toLowerCase()===name.toLowerCase());
-  if(!c){const cols=["av-g","av-a","av-b","av-t","av-r"];c={id:clients.length+1,name,type:"Nowy klient",av:name.slice(0,2).toUpperCase(),col:cols[clients.length%cols.length],tel:"",email:""};clients.push(c);}
-  orders.push({id:orders.length+1,clientId:c.id,title:`${type} ${kw} kWp – ${addr||'brak adresu'}`,type,kw,status,price,note,date,addr,lat:140+Math.random()*120,lng:150+Math.random()*300});
-  closeForm();renderAll();notify('Zlecenie zostało zapisane.');
-  ['f-client','f-addr','f-kw','f-price','f-note'].forEach(id=>document.getElementById(id).value='');
-}
+        function renderClients() {
+            const html = clientsHTML();
+            const d = document.getElementById('clients-content');
+            const md = document.getElementById('mobile-clients-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
 
-// ── MAP ──────────────────────────────────────────────────
-let mapFilter='all';
-function renderMap(filter){
-  if(filter) mapFilter=filter;
-  const svg=document.getElementById('mapSvg');
-  const filtered=mapFilter==='all'?orders:orders.filter(o=>o.status===mapFilter);
-  const colMap={"Zakończone":"#3fb950","W realizacji":"#d29922","Zgłoszenie do OSD":"#58a6ff"};
-  const cities=[{x:190,y:70,n:"Kraków"},{x:445,y:100,n:"Tarnów"},{x:260,y:68,n:"Wieliczka"},{x:300,y:130,n:"Myślenice"},{x:325,y:170,n:"Zakopane"},{x:140,y:90,n:"Chrzanów"},{x:380,y:60,n:"Bochnia"},{x:520,y:80,n:"Dębica"}];
-  svg.innerHTML=`
-    <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs>
-    <rect width="760" height="340" fill="var(--bg3)"/>
-    <rect width="760" height="340" fill="url(#grid)"/>
-    ${cities.map(t=>`<text x="${t.x}" y="${t.y}" font-size="10" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.2)">${t.n}</text>`).join('')}
-    ${filtered.map(o=>{
-      const col=colMap[o.status]||"#6e7681";
-      return`<g class="map-pin" style="cursor:pointer" onclick="showMapDetail(${o.id})" onmouseover="showMapTip(event,${o.id})" onmouseout="hideMapTip()">
-        <circle cx="${o.lng}" cy="${o.lat}" r="14" fill="${col}" fill-opacity=".12"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}" fill-opacity=".3"><animate attributeName="r" from="7" to="18" dur="2s" repeatCount="indefinite"/><animate attributeName="fill-opacity" from=".3" to="0" dur="2s" repeatCount="indefinite"/></circle>
-        <text x="${o.lng}" y="${o.lat+18}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.4)">${o.kw}k</text>
-      </g>`;
-    }).join('')}`;
-}
-function showMapTip(e,id){
-  const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  const tip=document.getElementById('mapTooltip');
-  tip.innerHTML=`<strong>${c?.name}</strong><br>${o.title}<br><span style="color:var(--green)">${o.kw} kWp · ${o.status}</span>`;
-  tip.style.display="block";tip.style.left=(e.offsetX+14)+"px";tip.style.top=(e.offsetY-10)+"px";
-}
-function hideMapTip(){document.getElementById('mapTooltip').style.display='none';}
-function showMapDetail(id){
-  const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  document.getElementById('mapDetail').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div><div class="stat-label">Klient</div><div style="font-size:13px;font-weight:600;margin-top:5px">${c?.name}</div></div>
-    <div><div class="stat-label">Status</div><div style="margin-top:5px">${statusTag(o.status)}</div></div>
-    <div><div class="stat-label">Moc</div><div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.kw} kWp</div></div>
-    <div><div class="stat-label">Adres</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${o.addr}</div></div>
-    <div><div class="stat-label">Wartość</div><div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.price.toLocaleString('pl-PL')} zł</div></div>
-    <div><div class="stat-label">Termin</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${o.date}</div></div>
-    <div style="grid-column:1/-1"><div class="stat-label">Notatka</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px;line-height:1.6">${o.note}</div></div>
-  </div>`;
-}
-function filterMap(f,el){
-  document.querySelectorAll('#page-mapa .filter-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');renderMap(f);
-}
+        function ordersHTML() {
+            return `
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-100">Zlecenia</h2>
+                    <button class="bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all active:scale-95">+ Nowe</button>
+                </div>
+                <div class="space-y-3">
+                    ${[
+                        {id:'#001', name:'Jan Kowalski', desc:'Instalacja paneli 8kW', date:'15.03.2026', status:'Gotowe', color:'green'},
+                        {id:'#002', name:'Anna Nowak', desc:'Wycena systemu 12kW', date:'18.03.2026', status:'W trakcie', color:'orange'},
+                        {id:'#003', name:'Piotr Wiśniewski', desc:'Wizja lokalna 6kW', date:'20.03.2026', status:'Zaplanowane', color:'blue'},
+                        {id:'#004', name:'Tomasz Lewandowski', desc:'Montaż falownika 15kW', date:'22.03.2026', status:'Nowe', color:'slate'},
+                    ].map(o => `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <p class="text-xs text-slate-500 mb-0.5">${o.id}</p>
+                                <p class="text-sm font-semibold text-slate-200">${o.name}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${o.desc}</p>
+                            </div>
+                            <span class="text-xs bg-${o.color}-900 text-${o.color}-400 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">${o.status}</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Termin: ${o.date}</p>
+                    </div>`).join('')}
+                </div>
+            </div>`;
+        }
 
-// ── DOCS ──────────────────────────────────────────────────
-function renderDocOrders(){
-  const list=document.getElementById('docOrderList');
-  list.innerHTML=orders.map(o=>{
-    const c=clients.find(cl=>cl.id===o.clientId);
-    const cnt=(docs[o.id]||[]).length;
-    return`<div class="client-row${selectedDocOrder===o.id?' active':''}" onclick="selectDocOrder(${o.id},this)">
-      <div class="av av-g" style="font-size:9px">${o.kw}k</div>
-      <div style="flex:1;min-width:0"><div class="c-name" style="font-size:12px">${o.title.substring(0,32)}…</div><div class="c-sub">${c?.name} · ${cnt} plików</div></div>
-    </div>`;
-  }).join('');
-}
-function selectDocOrder(id,el){
-  selectedDocOrder=id;
-  document.querySelectorAll('#docOrderList .client-row').forEach(r=>r.classList.remove('active'));
-  el.classList.add('active');
-  const o=orders.find(x=>x.id===id);
-  document.getElementById('docTitle').textContent=o?.title.substring(0,40)+'…';
-  renderDocList();
-}
-function handleUpload(e){
-  if(!selectedDocOrder){notify('Wybierz zlecenie z listy.');return;}
-  if(!docs[selectedDocOrder]) docs[selectedDocOrder]=[];
-  Array.from(e.target.files).forEach(f=>{docs[selectedDocOrder].push({name:f.name,size:(f.size/1024).toFixed(0)+"KB",type:f.type,date:"2025-03-14"});});
-  renderDocList();renderDocOrders();notify('Pliki dodane.');
-}
-function renderDocList(){
-  const list=document.getElementById('docList');
-  if(!selectedDocOrder){list.innerHTML='';return;}
-  const d=docs[selectedDocOrder]||[];
-  list.innerHTML=d.length?d.map((f,i)=>{
-    const isImg=f.type.startsWith('image');
-    return`<div class="doc-row">
-      <div class="doc-icon" style="background:${isImg?'var(--green-bg)':'var(--blue-dim)'}">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${isImg?'#3fb950':'#58a6ff'}" stroke-width="2">${isImg?'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'}</svg>
-      </div>
-      <div style="flex:1;min-width:0"><div class="doc-name">${f.name}</div><div class="doc-meta">${f.size} · ${f.date}</div></div>
-      <button class="btn-danger" onclick="docs[${selectedDocOrder}].splice(${i},1);renderDocList();renderDocOrders()">Usuń</button>
-    </div>`;
-  }).join(''):`<div class="empty">Brak plików. Dodaj zdjęcia z montażu lub dokumenty.</div>`;
-}
+        function renderOrders() {
+            const html = ordersHTML();
+            const d = document.getElementById('orders-content');
+            const md = document.getElementById('mobile-orders-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
 
-// ── INVOICES ──────────────────────────────────────────────────
-function renderInvoices(){
-  const list=document.getElementById('fvList');
-  const sc={"paid":"t-green","pending":"t-amber","overdue":"t-red"};
-  const sl={"paid":"Zapłacona","pending":"Do zapłaty","overdue":"Przeterminowana"};
-  list.innerHTML=invoices.map(fv=>{
-    const c=clients.find(cl=>cl.id===fv.clientId);
-    return`<div class="fv-row">
-      <div class="fv-num">${fv.num}</div>
-      <div class="fv-client">${c?.name}</div>
-      <div class="fv-amount">${fv.amount.toLocaleString('pl-PL')} zł</div>
-      <span class="tag ${sc[fv.status]}">${sl[fv.status]}</span>
-      <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-left:auto">${fv.date}</div>
-      ${fv.status!=='paid'?`<button class="btn-primary" style="padding:4px 10px;font-size:10px" onclick="markPaid(${fv.id})">Opłać</button>`:''}
-    </div>`;
-  }).join('');
-  document.getElementById('fv-paid').textContent=invoices.filter(f=>f.status==="paid").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
-  document.getElementById('fv-pending').textContent=invoices.filter(f=>f.status==="pending").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
-  document.getElementById('fv-overdue').textContent=invoices.filter(f=>f.status==="overdue").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
-}
-function markPaid(id){const f=invoices.find(x=>x.id===id);if(f){f.status='paid';renderInvoices();notify('Faktura oznaczona jako opłacona.');}}
-function addInvoice(){
-  const c=clients[invoices.length%clients.length];
-  const o=orders.find(x=>x.clientId===c.id);if(!o) return;
-  invoices.push({id:invoices.length+1,num:`FV/2025/03/${String(invoices.length+1).padStart(3,'0')}`,clientId:c.id,amount:o.price,status:"pending",date:"2025-03-14"});
-  renderInvoices();notify('Faktura wystawiona.');
-}
+        function settingsHTML() {
+            return `
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100 mb-6">Ustawienia</h2>
+                <div class="space-y-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-3">Profil firmy</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs text-slate-500 block mb-1">Nazwa firmy</label>
+                                <input type="text" value="SolarPro Sp. z o.o." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 block mb-1">Email</label>
+                                <input type="email" value="kontakt@solarpro.pl" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-3">AI Asystent</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-300">Model AI</p>
+                                    <p class="text-xs text-slate-500">Claude 3.5 Sonnet</p>
+                                </div>
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-300">Status API</p>
+                                    <p class="text-xs text-slate-500">Połączono z Anthropic</p>
+                                </div>
+                                <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all active:scale-95">
+                        Zapisz zmiany
+                    </button>
+                </div>
+            </div>`;
+        }
 
-// ── GRANTS ──────────────────────────────────────────────────
-function renderGrants(){
-  const list=document.getElementById('grantList');
-  const sc={"Zatwierdzone":"t-green","W trakcie":"t-amber","Złożony":"t-blue","Odrzucony":"t-red"};
-  list.innerHTML=grants.map(g=>{
-    const c=clients.find(cl=>cl.id===g.clientId);
-    return`<div class="grant-row">
-      <div class="av av-g" style="font-size:9px;font-weight:700">${g.program.slice(0,2).toUpperCase()}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500">${c?.name}</div>
-        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${g.program} · złożono: ${g.submitted} · oczekiwany: ${g.expected}</div>
-      </div>
-      <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${g.amount.toLocaleString('pl-PL')} zł</div>
-      <span class="tag ${sc[g.status]||'t-gray'}">${g.status}</span>
-    </div>`;
-  }).join('');
-}
-function addGrant(){
-  const c=clients[grants.length%clients.length];
-  grants.push({id:grants.length+1,clientId:c.id,program:"Czyste Powietrze",amount:15000,status:"Złożony",submitted:"2025-03-14",expected:"2025-07-01"});
-  renderGrants();notify('Wniosek dodany.');
-}
+        function renderSettings() {
+            const html = settingsHTML();
+            const d = document.getElementById('settings-content');
+            const md = document.getElementById('mobile-settings-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
 
-// ── OSD ──────────────────────────────────────────────────
-function renderOSD(){
-  const list=document.getElementById('osdList');
-  list.innerHTML=osdItems.map(osd=>{
-    const o=orders.find(x=>x.id===osd.orderId);const c=clients.find(x=>x.id===o?.clientId);
-    return`<div class="osd-row">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:4px">${c?.name}</div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px">${o?.title} · Operator: <span style="color:var(--blue)">${osd.operator}</span> · Złożono: ${osd.submitted}</div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:8px">Etap ${osd.step+1}/${osd.steps.length}: <strong style="color:var(--amber)">${osd.steps[osd.step]}</strong></div>
-        </div>
-        <button class="btn-secondary" style="font-size:11px" onclick="advanceOSD(${osd.id})">Następny etap →</button>
-      </div>
-      <div class="osd-steps">${osd.steps.map((_,i)=>`<div class="osd-step ${i<osd.step?'done':i===osd.step?'curr':'todo'}"></div>`).join('')}</div>
-      <div class="osd-step-labels">${osd.steps.map((s,i)=>`<div class="osd-step-label ${i<osd.step?'done':i===osd.step?'curr':''}">${s}</div>`).join('')}</div>
-    </div>`;
-  }).join('');
-}
-function advanceOSD(id){const osd=osdItems.find(x=>x.id===id);if(osd&&osd.step<osd.steps.length-1){osd.step++;renderOSD();notify('Etap zaktualizowany.');}}
+        // ─── AI Chat logic ───────────────────────────────────────────────
+        async function askAI(context) {
+            const inputId = context === 'mobile' ? 'mobile-user-input' : 'desktop-user-input';
+            const boxId   = context === 'mobile' ? 'mobile-chat-box'   : 'desktop-chat-box';
+            const input   = document.getElementById(inputId);
+            const chatBox = document.getElementById(boxId);
+            if (!input || !chatBox) return;
+            const message = input.value.trim();
+            if (!message) return;
 
-// ── REMINDERS ──────────────────────────────────────────────────
-function renderReminders(){
-  const sel=document.getElementById('r-client');
-  sel.innerHTML=clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  const list=document.getElementById('remindList');
-  const months=["Sty","Lut","Mar","Kwi","Maj","Cze","Lip","Sie","Wrz","Paź","Lis","Gru"];
-  list.innerHTML=reminders.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(r=>{
-    const c=clients.find(cl=>cl.id===r.clientId);
-    const d=new Date(r.date);const dl=Math.ceil((d-TODAY)/864e5);
-    const cls=dl<=1?'urgent':dl<=7?'soon':'';
-    return`<div class="remind-row ${cls}">
-      <div style="text-align:center;min-width:34px"><div class="remind-day">${d.getDate()}</div><div class="remind-month">${months[d.getMonth()]}</div></div>
-      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c?.name}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${r.type}</div></div>
-      <span class="tag ${dl<=1?'t-red':dl<=7?'t-amber':'t-blue'}">${r.channel}</span>
-      ${dl<=3?`<span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--red)">${dl===0?'Dziś':dl===1?'Jutro':dl+'d'}</span>`:''}
-    </div>`;
-  }).join('');
-}
-function addReminder(){
-  const clientId=parseInt(document.getElementById('r-client').value);
-  const type=document.getElementById('r-type').value;
-  const date=document.getElementById('r-date').value;
-  const channel=document.getElementById('r-channel').value;
-  if(!date){notify('Wybierz datę.');return;}
-  reminders.push({clientId,type,date,channel});
-  renderReminders();notify('Przypomnienie dodane.');
-}
+            chatBox.innerHTML += `<div class="bg-orange-600 self-end p-3 rounded-xl max-w-[85%] text-sm shadow-lg">${escapeHTML(message)}</div>`;
+            input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-// ── CHATBOT ──────────────────────────────────────────────────
-function renderChatClients(){
-  const list=document.getElementById('chatClientList');
-  list.innerHTML=clients.map(c=>`
-    <div class="client-row${chatClient===c.id?' active':''}" onclick="selectChatClient(${c.id})">
-      <div class="av ${c.col}">${c.av}</div>
-      <div style="flex:1;min-width:0"><div class="c-name">${c.name}</div><div class="c-sub">${c.type}</div></div>
-    </div>`).join('');
-}
-function selectChatClient(id){
-  chatClient=id;
-  const c=clients.find(x=>x.id===id);
-  document.getElementById('chatClientName').textContent=c?.name||'SolarBot';
-  renderChatClients();
-  const ords=orders.filter(o=>o.clientId===id);
-  const summary=ords.map(o=>`${o.title} — ${o.status}`).join('; ');
-  addChatMsg(`Cześć! Załadowałem dane klienta **${c?.name}**.\n\nAktywne zlecenia: ${ords.length}\n${summary}\n\nZadaj mi pytanie o status, terminy lub kolejne kroki.`,'bot');
-}
-function addChatMsg(text,role){
-  const msgs=document.getElementById('chatMsgs');
-  const div=document.createElement('div');
-  div.className=`msg ${role}`;div.textContent=text;
-  msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;
-}
-async function sendChat(){
-  const input=document.getElementById('chatInput');
-  const text=input.value.trim();if(!text) return;
-  if(!requireKey('chatbota')) return;
-  input.value='';addChatMsg(text,'user');
-  const c=chatClient?clients.find(x=>x.id===chatClient):null;
-  const ords=chatClient?orders.filter(o=>o.clientId===chatClient):orders;
-  const ctx=ords.map(o=>`- ${o.title} | status: ${o.status} | termin: ${o.date} | nota: ${o.note}`).join('\n');
-  try{
-    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:`Jesteś asystentem CRM firmy OZE. Rozmawiasz z ${c?`klientem ${c.name}`:"pracownikiem"}. Dane:\n${ctx}\nOdpowiadaj krótko, po polsku, max 3 zdania.`,messages:[{role:"user",content:text}]})});
-    const data=await res.json();
-    addChatMsg(data.content?.find(b=>b.type==="text")?.text||"Przepraszam, spróbuj ponownie.",'bot');
-  }catch(e){addChatMsg("Błąd połączenia z AI.",'bot');}
-}
+            const thinking = document.createElement('div');
+            thinking.className = 'bg-slate-700 self-start p-3 rounded-xl max-w-[85%] text-sm border border-slate-600';
+            thinking.innerHTML = '<span class="animate-pulse text-slate-400">Myślę...</span>';
+            chatBox.appendChild(thinking);
+            chatBox.scrollTop = chatBox.scrollHeight;
 
-// ── OFFER AI ──────────────────────────────────────────────────
-async function genOffer(){
-  if(!requireKey('generatora ofert')) return;
-  const btn=document.getElementById('offerBtn');const spin=document.getElementById('ofSpin');const label=document.getElementById('ofLabel');
-  const client=document.getElementById('of-client').value;const addr=document.getElementById('of-addr').value;
-  const type=document.getElementById('of-type').value;const kw=document.getElementById('of-kw').value;
-  const price=document.getElementById('of-price').value;const doctype=document.getElementById('of-doctype').value;
-  const notes=document.getElementById('of-notes').value;
-  spin.classList.add('show');label.textContent='Generuję…';btn.disabled=true;
-  const prompts={
-    oferta:`Napisz profesjonalną ofertę handlową dla firmy OZE w Polsce. Klient: ${client||'[Klient]'}. Adres: ${addr}. Instalacja: ${type} ${kw} kWp. Cena netto: ${price} zł. Uwagi: ${notes}. Zawrzyj: wstęp, zakres prac, spec techniczną, cenę z VAT, gwarancję, terminy. Max 280 słów, po polsku.`,
-    umowa:`Napisz szkic umowy instalacyjnej OZE. Zleceniodawca: ${client||'[Klient]'}. Adres: ${addr}. Przedmiot: ${type} ${kw} kWp. Wartość: ${price} zł netto. Uwagi: ${notes}. Sekcje: §1 Przedmiot, §2 Terminy, §3 Wynagrodzenie, §4 Gwarancja, §5 Postanowienia końcowe. Po polsku.`,
-    protokol:`Napisz protokół odbioru instalacji OZE. Inwestor: ${client||'[Klient]'}. Adres: ${addr}. Instalacja: ${type} ${kw} kWp. Uwagi: ${notes}. Zawrzyj: datę odbioru, komisję, opis instalacji, wyniki pomiarów, uwagi, podpisy. Po polsku.`
-  };
-  try{
-    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[doctype]}]})});
-    const data=await res.json();
-    document.getElementById('offerPreview').textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd generowania.";
-  }catch(e){document.getElementById('offerPreview').textContent="Błąd połączenia z AI.";}
-  spin.classList.remove('show');label.textContent='Generuj AI ↗';btn.disabled=false;
-}
-function copyOffer(){const t=document.getElementById('offerPreview').textContent;navigator.clipboard?.writeText(t).then(()=>notify('Skopiowano do schowka.'));}
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                const aiMessage = data.content[0].text;
+                thinking.innerHTML = '<strong class="text-orange-400">AI:</strong> ' + escapeHTML(aiMessage);
+            } catch (err) {
+                thinking.innerHTML = '<span class="text-red-400">Błąd: Upewnij się, że dodałeś ANTHROPIC_API_KEY na Vercelu.</span>';
+            }
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-// ── AI REPORT ──────────────────────────────────────────────────
-async function generateReport(){
-  if(!requireKey('raportu AI')) return;
-  const btn=document.getElementById('aiBtn');const spin=document.getElementById('spin');const label=document.getElementById('aiLabel');const result=document.getElementById('aiResult');
-  spin.classList.add('show');label.textContent='Analizuję…';btn.disabled=true;result.classList.remove('show');
-  const scope=document.getElementById('aiScope').value;
-  const sum=orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);const dl=daysLeft(o.date);return`- ${c?.name}: "${o.title}" | ${o.type} | ${o.kw}kWp | ${o.status} | ${o.price}zł | termin: ${o.date}(${dl}d) | ${o.note}`;}).join('\n');
-  const prompts={
-    ryzyko:`Analityk ryzyka firmy OZE. Wskaż zlecenia zagrożone opóźnieniem (termin <5 dni, problemy w notatkach). Dla każdego: powód ryzyka + rekomendacja. Max 200 słów, po polsku.\n\n${sum}`,
-    tydzien:`Asystent managera firmy OZE. Podsumowanie tygodnia: co zrealizowano, w toku, pipeline, kluczowe sprawy. Max 7 zdań, po polsku.\n\n${sum}`,
-    priorytet:`Asystent managera OZE. 5 najważniejszych zadań na jutro (OSD, odbiory, pilne terminy, płatności). Format: lista numerowana. Po polsku.\n\n${sum}`,
-    osd_ai:`Specjalista OSD/URE. Status zgłoszeń do operatorów. Co czeka, zagrożenia opóźnieniem, potrzebne dokumenty. Po polsku.\n\n${sum}`
-  };
-  try{
-    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompts[scope]}]})});
-    const data=await res.json();
-    result.textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd.";result.classList.add('show');
-  }catch(e){result.textContent="Błąd połączenia z AI.";result.classList.add('show');}
-  spin.classList.remove('show');label.textContent='Analizuj ↗';btn.disabled=false;
-}
+        function escapeHTML(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
 
-// ── API KEY MANAGEMENT ────────────────────────────────────
-let ANTHROPIC_API_KEY = '';
-
-function openApiKeyModal(){
-  document.getElementById('apikeyInput').value = ANTHROPIC_API_KEY || '';
-  document.getElementById('apikeyStatus').textContent = '';
-  document.getElementById('apikeyOverlay').classList.add('open');
-  setTimeout(()=>document.getElementById('apikeyInput').focus(),100);
-}
-function closeApiKeyModal(){document.getElementById('apikeyOverlay').classList.remove('open');}
-function clearKeyStatus(){document.getElementById('apikeyStatus').textContent='';}
-function toggleKeyVisibility(){
-  const inp=document.getElementById('apikeyInput');
-  const btn=inp.nextElementSibling;
-  if(inp.type==='password'){inp.type='text';btn.textContent='ukryj';}
-  else{inp.type='password';btn.textContent='pokaż';}
-}
-function updateKeyIndicator(){
-  const dot=document.getElementById('keyDot');
-  const lbl=document.getElementById('keyLabel');
-  if(ANTHROPIC_API_KEY){
-    dot.classList.add('active');
-    lbl.textContent='API: sk-...'+ANTHROPIC_API_KEY.slice(-4);
-  } else {
-    dot.classList.remove('active');
-    lbl.textContent='Brak klucza API';
-  }
-}
-async function saveApiKey(){
-  const key=document.getElementById('apikeyInput').value.trim();
-  const status=document.getElementById('apikeyStatus');
-  if(!key){status.className='apikey-status err';status.textContent='⚠ Wklej klucz API.';return;}
-  if(!key.startsWith('sk-ant')){status.className='apikey-status err';status.textContent='⚠ Klucz powinien zaczynać się od sk-ant...';return;}
-  status.className='apikey-status';status.textContent='⏳ Testuję połączenie...';
-  try{
-    const res=await fetch("/api/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:10,messages:[{role:"user",content:"ping"}]})
-    });
-    if(res.ok||res.status===200){
-      ANTHROPIC_API_KEY=key;
-      status.className='apikey-status ok';status.textContent='✓ Klucz poprawny! Połączono z API.';
-      updateKeyIndicator();
-      setTimeout(closeApiKeyModal,1200);
-    } else {
-      const err=await res.json().catch(()=>({}));
-      status.className='apikey-status err';
-      status.textContent='✗ Błąd: '+(err?.error?.message||'Nieprawidłowy klucz ('+res.status+')');
-    }
-  }catch(e){
-    status.className='apikey-status err';
-    status.textContent='✗ Błąd sieci. Sprawdź połączenie.';
-  }
-}
-
-function getApiHeaders(){
-  return{"Content-Type":"application/json"};
-}
-function requireKey(featureName){return true;}
-
-// ── MOBILE SIDEBAR ────────────────────────────────────────
-function toggleSidebar(){
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.querySelector('.sidebar-overlay').classList.toggle('open');
-}
-function closeSidebar(){
-  document.querySelector('.sidebar').classList.remove('open');
-  document.querySelector('.sidebar-overlay').classList.remove('open');
-}
-// Close sidebar when nav item clicked on mobile
-document.querySelectorAll('.nav-item').forEach(btn=>{
-  btn.addEventListener('click',()=>{if(window.innerWidth<=640)closeSidebar();});
-});
-
-// ── INIT ──────────────────────────────────────────────────
-function renderAll(){renderStats();renderClients();renderOrders();}
-document.getElementById('topbarDate').textContent=new Date().toLocaleDateString('pl-PL',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
-renderAll();
-
-// Add API key modal HTML
-(function(){
-  const overlay=document.createElement('div');
-  overlay.className='apikey-overlay';overlay.id='apikeyOverlay';
-  overlay.innerHTML=`<div class="apikey-modal">
-    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Klucz API Anthropic</h2>
-    <p>Wymagany do funkcji AI: chatbot, oferty, raporty.<br>Klucz przechowywany tylko w pamięci — znika po zamknięciu karty.</p>
-    <div class="apikey-input-wrap">
-      <input type="password" id="apikeyInput" placeholder="sk-ant-api03-..." oninput="clearKeyStatus()"/>
-      <button class="apikey-toggle" onclick="toggleKeyVisibility()">pokaż</button>
-    </div>
-    <div class="apikey-status" id="apikeyStatus"></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-primary" onclick="saveApiKey()" style="flex:1">Zapisz i przetestuj</button>
-      <button class="btn-secondary" onclick="closeApiKeyModal()">Anuluj</button>
-    </div>
-    <div class="apikey-hint">Klucz API: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue)">console.anthropic.com</a><br>⚠️ Nie udostępniaj klucza nikomu.</div>
-  </div>`;
-  document.body.appendChild(overlay);
-})();
-</script>
+        // ─── Init ────────────────────────────────────────────────────────
+        renderDashboard();
+    </script>
 </body>
 </html>
