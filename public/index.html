@@ -2,65 +2,462 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>SolarCRM - AI Agent</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body {
+            background-color: #0f172a;
+            min-height: 100%;
+            min-height: 100dvh;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .nav-item.active .nav-icon { color: #f97316; }
+        .nav-item.active .nav-label { color: #f97316; }
+        .nav-item .nav-icon { color: #94a3b8; }
+        .nav-item .nav-label { color: #94a3b8; }
+        .sidebar-item.active { background-color: #1e293b; border-left: 3px solid #f97316; }
+        .sidebar-item.active span { color: #f97316; }
+        #chat-box { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        #chat-box::-webkit-scrollbar { width: 4px; }
+        #chat-box::-webkit-scrollbar-track { background: transparent; }
+        #chat-box::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 4px; }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
+    </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen p-4 md:p-10">
-    <div class="max-w-3xl mx-auto bg-slate-800 rounded-xl shadow-2xl border border-slate-700 overflow-hidden">
-        <div class="bg-slate-700 p-4 border-b border-slate-600 flex justify-between items-center">
-            <h1 class="text-xl font-bold text-orange-400">SolarCRM <span class="text-slate-400 text-sm font-normal">v1.0 AI</span></h1>
-            <div class="h-3 w-3 rounded-full bg-green-500 animate-pulse"></div>
-        </div>
+<body class="bg-slate-900 text-slate-100 font-sans" style="background-color:#0f172a;">
 
-        <div id="chat-box" class="h-[400px] overflow-y-auto p-6 space-y-4 flex flex-col">
-            <div class="bg-slate-700 self-start p-3 rounded-lg max-w-[80%] text-sm">
-                Witaj w SolarCRM. Jak mogę pomóc w zarządzaniu Twoimi klientami?
+    <!-- Desktop Layout -->
+    <div class="hidden md:flex h-screen overflow-hidden">
+
+        <!-- Sidebar -->
+        <aside class="w-56 bg-slate-800 border-r border-slate-700 flex flex-col flex-shrink-0">
+            <div class="p-5 border-b border-slate-700">
+                <h1 class="text-lg font-bold text-orange-400">SolarCRM</h1>
+                <p class="text-xs text-slate-500 mt-0.5">v1.0 AI</p>
+            </div>
+            <nav class="flex-1 py-4 space-y-1 px-2">
+                <button onclick="switchTab('dashboard')" class="sidebar-item active w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all" id="sidebar-dashboard">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </button>
+                <button onclick="switchTab('chat')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-chat">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="text-sm font-medium">AI Asystent</span>
+                </button>
+                <button onclick="switchTab('clients')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-clients">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-sm font-medium">Klienci</span>
+                </button>
+                <button onclick="switchTab('orders')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-orders">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span class="text-sm font-medium">Zlecenia</span>
+                </button>
+                <button onclick="switchTab('settings')" class="sidebar-item w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-700" id="sidebar-settings">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-sm font-medium">Ustawienia</span>
+                </button>
+            </nav>
+            <div class="p-4 border-t border-slate-700">
+                <div class="flex items-center gap-2">
+                    <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs text-slate-500">System aktywny</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main content desktop -->
+        <main class="flex-1 overflow-y-auto bg-slate-900" id="desktop-main">
+            <div id="tab-dashboard" class="tab-content active p-8">
+                <div id="dashboard-content"></div>
+            </div>
+            <div id="tab-chat" class="tab-content p-6 h-full flex flex-col">
+                <div id="chat-content-desktop"></div>
+            </div>
+            <div id="tab-clients" class="tab-content p-8">
+                <div id="clients-content"></div>
+            </div>
+            <div id="tab-orders" class="tab-content p-8">
+                <div id="orders-content"></div>
+            </div>
+            <div id="tab-settings" class="tab-content p-8">
+                <div id="settings-content"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Layout -->
+    <div class="md:hidden flex flex-col" style="min-height:100dvh; min-height:100vh; background-color:#0f172a;">
+
+        <!-- Mobile Header -->
+        <header class="bg-slate-800 border-b border-slate-700 px-4 py-3 flex items-center justify-between flex-shrink-0">
+            <h1 class="text-base font-bold text-orange-400">SolarCRM <span class="text-slate-500 text-xs font-normal">v1.0</span></h1>
+            <div class="flex items-center gap-2">
+                <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                <span class="text-xs text-slate-500">Online</span>
+            </div>
+        </header>
+
+        <!-- Mobile Content Area -->
+        <div class="flex-1 overflow-y-auto" style="background-color:#0f172a;">
+            <div id="mobile-tab-dashboard" class="tab-content active">
+                <div id="mobile-dashboard-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-chat" class="tab-content h-full flex flex-col" style="background-color:#0f172a;">
+                <div id="mobile-chat-content" class="flex flex-col h-full"></div>
+            </div>
+            <div id="mobile-tab-clients" class="tab-content">
+                <div id="mobile-clients-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-orders" class="tab-content">
+                <div id="mobile-orders-content" class="p-4"></div>
+            </div>
+            <div id="mobile-tab-settings" class="tab-content">
+                <div id="mobile-settings-content" class="p-4"></div>
             </div>
         </div>
 
-        <div class="p-4 bg-slate-900 border-t border-slate-700 flex gap-2">
-            <input id="user-input" type="text" 
-                class="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-3 focus:outline-none focus:border-orange-500 transition-colors"
-                placeholder="Np. Podsumuj dzisiejsze zlecenia..."
-                onkeypress="if(event.key === 'Enter') askAI()">
-            <button onclick="askAI()" 
-                class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-6 py-3 rounded-lg transition-all active:scale-95">
-                Wyślij
-            </button>
-        </div>
+        <!-- Mobile Bottom Navigation -->
+        <nav class="bg-slate-800 border-t border-slate-700 flex-shrink-0 safe-bottom" style="padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);">
+            <div class="flex items-center justify-around px-2 pt-2 pb-1">
+                <button onclick="switchTab('dashboard')" class="nav-item active flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-dashboard">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span class="nav-label text-xs font-medium">Dashboard</span>
+                </button>
+                <button onclick="switchTab('chat')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-chat">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    <span class="nav-label text-xs font-medium">AI Chat</span>
+                </button>
+                <button onclick="switchTab('clients')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-clients">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="nav-label text-xs font-medium">Klienci</span>
+                </button>
+                <button onclick="switchTab('orders')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-orders">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    <span class="nav-label text-xs font-medium">Zlecenia</span>
+                </button>
+                <button onclick="switchTab('settings')" class="nav-item flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all min-w-0" id="nav-settings">
+                    <svg class="nav-icon w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="nav-label text-xs font-medium">Ustawienia</span>
+                </button>
+            </div>
+        </nav>
     </div>
 
     <script>
-        async function askAI() {
-            const input = document.getElementById('user-input');
-            const chatBox = document.getElementById('chat-box');
+        // ─── Tab switching ───────────────────────────────────────────────
+        const TABS = ['dashboard', 'chat', 'clients', 'orders', 'settings'];
+        let currentTab = 'dashboard';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            const isMobile = window.innerWidth < 768;
+
+            TABS.forEach(t => {
+                // Desktop
+                const dtab = document.getElementById('tab-' + t);
+                if (dtab) dtab.classList.toggle('active', t === tab);
+                const sitem = document.getElementById('sidebar-' + t);
+                if (sitem) {
+                    sitem.classList.toggle('active', t === tab);
+                    if (t !== tab) {
+                        sitem.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
+                        sitem.classList.remove('bg-slate-700');
+                    } else {
+                        sitem.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
+                    }
+                }
+                // Mobile
+                const mtab = document.getElementById('mobile-tab-' + t);
+                if (mtab) mtab.classList.toggle('active', t === tab);
+                const nitem = document.getElementById('nav-' + t);
+                if (nitem) nitem.classList.toggle('active', t === tab);
+            });
+
+            renderTabContent(tab);
+        }
+
+        // ─── Content renderers ──────────────────────────────────────────
+        function renderTabContent(tab) {
+            if (tab === 'dashboard') renderDashboard();
+            else if (tab === 'chat') renderChat();
+            else if (tab === 'clients') renderClients();
+            else if (tab === 'orders') renderOrders();
+            else if (tab === 'settings') renderSettings();
+        }
+
+        function dashboardHTML() {
+            return `
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100 mb-1">Dashboard</h2>
+                <p class="text-slate-500 text-sm mb-6">Witaj z powrotem! Oto przegląd dnia.</p>
+                <div class="grid grid-cols-2 gap-3 mb-6">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Klienci</p>
+                        <p class="text-2xl font-bold text-orange-400">24</p>
+                        <p class="text-slate-500 text-xs mt-1">+3 w tym miesiącu</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Zlecenia</p>
+                        <p class="text-2xl font-bold text-orange-400">8</p>
+                        <p class="text-slate-500 text-xs mt-1">2 do realizacji</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Przychód</p>
+                        <p class="text-2xl font-bold text-green-400">42k</p>
+                        <p class="text-slate-500 text-xs mt-1">PLN w tym miesiącu</p>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <p class="text-slate-500 text-xs mb-1">Instalacje</p>
+                        <p class="text-2xl font-bold text-blue-400">5</p>
+                        <p class="text-slate-500 text-xs mt-1">zaplanowane</p>
+                    </div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-4">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-3">Ostatnie zlecenia</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Jan Kowalski</p>
+                                <p class="text-xs text-slate-500">Instalacja 8kW · Warszawa</p>
+                            </div>
+                            <span class="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full">Gotowe</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Anna Nowak</p>
+                                <p class="text-xs text-slate-500">Oferta 12kW · Kraków</p>
+                            </div>
+                            <span class="text-xs bg-orange-900 text-orange-400 px-2 py-0.5 rounded-full">W trakcie</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-200">Piotr Wiśniewski</p>
+                                <p class="text-xs text-slate-500">Wycena 6kW · Gdańsk</p>
+                            </div>
+                            <span class="text-xs bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full">Nowe</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                    <h3 class="text-sm font-semibold text-slate-300 mb-2">Szybki AI Chat</h3>
+                    <p class="text-xs text-slate-500 mb-3">Zapytaj asystenta o dane klientów, zlecenia lub raporty.</p>
+                    <button onclick="switchTab('chat')" class="w-full bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all active:scale-95">
+                        Otwórz AI Asystenta
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function renderDashboard() {
+            const html = dashboardHTML();
+            const d = document.getElementById('dashboard-content');
+            const md = document.getElementById('mobile-dashboard-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
+
+        function chatHTML(isMobile) {
+            return `
+            <div class="flex flex-col ${isMobile ? 'h-full' : 'h-[calc(100vh-2rem)]'}" style="${isMobile ? 'min-height:calc(100dvh - 112px)' : ''}">
+                <div id="${isMobile ? 'mobile-chat-box' : 'desktop-chat-box'}" class="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col" style="scrollbar-width:thin; scrollbar-color:#334155 transparent;">
+                    <div class="bg-slate-700 self-start p-3 rounded-xl max-w-[85%] text-sm border border-slate-600">
+                        Witaj w SolarCRM. Jak mogę pomóc w zarządzaniu Twoimi klientami?
+                    </div>
+                </div>
+                <div class="p-3 bg-slate-800 border-t border-slate-700 flex gap-2 flex-shrink-0">
+                    <input id="${isMobile ? 'mobile-user-input' : 'desktop-user-input'}" type="text"
+                        class="flex-1 bg-slate-900 border border-slate-600 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                        placeholder="Zapytaj o klienta, zlecenie..."
+                        onkeypress="if(event.key==='Enter') askAI('${isMobile ? 'mobile' : 'desktop'}')">
+                    <button onclick="askAI('${isMobile ? 'mobile' : 'desktop'}')"
+                        class="bg-orange-600 hover:bg-orange-500 text-white font-bold px-5 py-2.5 rounded-xl transition-all active:scale-95 flex-shrink-0 text-sm">
+                        Wyślij
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function renderChat() {
+            const dc = document.getElementById('chat-content-desktop');
+            const mc = document.getElementById('mobile-chat-content');
+            if (dc && !dc.innerHTML.trim()) dc.innerHTML = chatHTML(false);
+            if (mc && !mc.innerHTML.trim()) mc.innerHTML = chatHTML(true);
+        }
+
+        function clientsHTML() {
+            return `
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-100">Klienci</h2>
+                    <button class="bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all active:scale-95">+ Dodaj</button>
+                </div>
+                <div class="bg-slate-800 border border-slate-700 rounded-xl mb-4">
+                    <div class="p-3 border-b border-slate-700">
+                        <input type="text" placeholder="Szukaj klienta..." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                    </div>
+                    <div class="divide-y divide-slate-700">
+                        ${[
+                            {name:'Jan Kowalski', city:'Warszawa', kw:'8 kW', status:'Aktywny', color:'green'},
+                            {name:'Anna Nowak', city:'Kraków', kw:'12 kW', status:'Oferta', color:'orange'},
+                            {name:'Piotr Wiśniewski', city:'Gdańsk', kw:'6 kW', status:'Nowy', color:'blue'},
+                            {name:'Maria Zielińska', city:'Wrocław', kw:'10 kW', status:'Aktywny', color:'green'},
+                            {name:'Tomasz Lewandowski', city:'Poznań', kw:'15 kW', status:'Instalacja', color:'purple'},
+                        ].map(c => `
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold text-orange-400 flex-shrink-0">${c.name.charAt(0)}</div>
+                                <div>
+                                    <p class="text-sm font-medium text-slate-200">${c.name}</p>
+                                    <p class="text-xs text-slate-500">${c.city} · ${c.kw}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-${c.color}-900 text-${c.color}-400 px-2 py-0.5 rounded-full flex-shrink-0">${c.status}</span>
+                        </div>`).join('')}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderClients() {
+            const html = clientsHTML();
+            const d = document.getElementById('clients-content');
+            const md = document.getElementById('mobile-clients-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
+
+        function ordersHTML() {
+            return `
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-slate-100">Zlecenia</h2>
+                    <button class="bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all active:scale-95">+ Nowe</button>
+                </div>
+                <div class="space-y-3">
+                    ${[
+                        {id:'#001', name:'Jan Kowalski', desc:'Instalacja paneli 8kW', date:'15.03.2026', status:'Gotowe', color:'green'},
+                        {id:'#002', name:'Anna Nowak', desc:'Wycena systemu 12kW', date:'18.03.2026', status:'W trakcie', color:'orange'},
+                        {id:'#003', name:'Piotr Wiśniewski', desc:'Wizja lokalna 6kW', date:'20.03.2026', status:'Zaplanowane', color:'blue'},
+                        {id:'#004', name:'Tomasz Lewandowski', desc:'Montaż falownika 15kW', date:'22.03.2026', status:'Nowe', color:'slate'},
+                    ].map(o => `
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <div class="flex items-start justify-between mb-2">
+                            <div>
+                                <p class="text-xs text-slate-500 mb-0.5">${o.id}</p>
+                                <p class="text-sm font-semibold text-slate-200">${o.name}</p>
+                                <p class="text-xs text-slate-500 mt-0.5">${o.desc}</p>
+                            </div>
+                            <span class="text-xs bg-${o.color}-900 text-${o.color}-400 px-2 py-0.5 rounded-full ml-2 flex-shrink-0">${o.status}</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Termin: ${o.date}</p>
+                    </div>`).join('')}
+                </div>
+            </div>`;
+        }
+
+        function renderOrders() {
+            const html = ordersHTML();
+            const d = document.getElementById('orders-content');
+            const md = document.getElementById('mobile-orders-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
+
+        function settingsHTML() {
+            return `
+            <div>
+                <h2 class="text-2xl font-bold text-slate-100 mb-6">Ustawienia</h2>
+                <div class="space-y-4">
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-3">Profil firmy</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-xs text-slate-500 block mb-1">Nazwa firmy</label>
+                                <input type="text" value="SolarPro Sp. z o.o." class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-500 block mb-1">Email</label>
+                                <input type="email" value="kontakt@solarpro.pl" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                        <h3 class="text-sm font-semibold text-slate-300 mb-3">AI Asystent</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-300">Model AI</p>
+                                    <p class="text-xs text-slate-500">Claude 3.5 Sonnet</p>
+                                </div>
+                                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-slate-300">Status API</p>
+                                    <p class="text-xs text-slate-500">Połączono z Anthropic</p>
+                                </div>
+                                <div class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold px-4 py-3 rounded-xl transition-all active:scale-95">
+                        Zapisz zmiany
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        function renderSettings() {
+            const html = settingsHTML();
+            const d = document.getElementById('settings-content');
+            const md = document.getElementById('mobile-settings-content');
+            if (d) d.innerHTML = html;
+            if (md) md.innerHTML = html;
+        }
+
+        // ─── AI Chat logic ───────────────────────────────────────────────
+        async function askAI(context) {
+            const inputId = context === 'mobile' ? 'mobile-user-input' : 'desktop-user-input';
+            const boxId   = context === 'mobile' ? 'mobile-chat-box'   : 'desktop-chat-box';
+            const input   = document.getElementById(inputId);
+            const chatBox = document.getElementById(boxId);
+            if (!input || !chatBox) return;
             const message = input.value.trim();
-            
             if (!message) return;
 
-            // Dodaj wiadomość użytkownika
-            chatBox.innerHTML += `<div class="bg-orange-600 self-end p-3 rounded-lg max-w-[80%] text-sm shadow-lg">${message}</div>`;
+            chatBox.innerHTML += `<div class="bg-orange-600 self-end p-3 rounded-xl max-w-[85%] text-sm shadow-lg">${escapeHTML(message)}</div>`;
             input.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            const thinking = document.createElement('div');
+            thinking.className = 'bg-slate-700 self-start p-3 rounded-xl max-w-[85%] text-sm border border-slate-600';
+            thinking.innerHTML = '<span class="animate-pulse text-slate-400">Myślę...</span>';
+            chatBox.appendChild(thinking);
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message })
                 });
-                
                 const data = await response.json();
                 const aiMessage = data.content[0].text;
-                
-                // Dodaj odpowiedź AI
-                chatBox.innerHTML += `<div class="bg-slate-700 self-start p-3 rounded-lg max-w-[80%] text-sm border border-slate-600 shadow-md"><strong>AI:</strong> ${aiMessage}</div>`;
+                thinking.innerHTML = '<strong class="text-orange-400">AI:</strong> ' + escapeHTML(aiMessage);
             } catch (err) {
-                chatBox.innerHTML += `<div class="text-red-400 text-xs text-center">Błąd: Upewnij się, że dodałeś ANTHROPIC_API_KEY na Vercelu.</div>`;
+                thinking.innerHTML = '<span class="text-red-400">Błąd: Upewnij się, że dodałeś ANTHROPIC_API_KEY na Vercelu.</span>';
             }
             chatBox.scrollTop = chatBox.scrollHeight;
         }
+
+        function escapeHTML(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ─── Init ────────────────────────────────────────────────────────
+        renderDashboard();
     </script>
 </body>
 </html>
