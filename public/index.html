@@ -11,8 +11,8 @@
             min-height: 100%;
             min-height: 100dvh;
         }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content { display: none !important; }
+        .tab-content.active { display: block !important; }
         .nav-item.active .nav-icon { color: #f97316; }
         .nav-item.active .nav-label { color: #f97316; }
         .nav-item .nav-icon { color: #94a3b8; }
@@ -101,19 +101,19 @@
 
         <!-- Mobile Content Area -->
         <div class="flex-1 overflow-y-auto" style="background-color:#0f172a;">
-            <div id="mobile-tab-dashboard" class="tab-content active">
+            <div id="mobile-tab-dashboard" class="tab-content active" style="background-color:#0f172a;">
                 <div id="mobile-dashboard-content" class="p-4"></div>
             </div>
-            <div id="mobile-tab-chat" class="tab-content h-full flex flex-col" style="background-color:#0f172a;">
-                <div id="mobile-chat-content" class="flex flex-col h-full"></div>
+            <div id="mobile-tab-chat" class="tab-content" style="background-color:#0f172a;">
+                <div id="mobile-chat-content" class="flex flex-col" style="min-height:calc(100dvh - 112px);"></div>
             </div>
-            <div id="mobile-tab-clients" class="tab-content">
+            <div id="mobile-tab-clients" class="tab-content" style="background-color:#0f172a;">
                 <div id="mobile-clients-content" class="p-4"></div>
             </div>
-            <div id="mobile-tab-orders" class="tab-content">
+            <div id="mobile-tab-orders" class="tab-content" style="background-color:#0f172a;">
                 <div id="mobile-orders-content" class="p-4"></div>
             </div>
-            <div id="mobile-tab-settings" class="tab-content">
+            <div id="mobile-tab-settings" class="tab-content" style="background-color:#0f172a;">
                 <div id="mobile-settings-content" class="p-4"></div>
             </div>
         </div>
@@ -152,27 +152,35 @@
 
         function switchTab(tab) {
             currentTab = tab;
-            const isMobile = window.innerWidth < 768;
 
             TABS.forEach(t => {
+                const isActive = t === tab;
+
                 // Desktop
                 const dtab = document.getElementById('tab-' + t);
-                if (dtab) dtab.classList.toggle('active', t === tab);
+                if (dtab) {
+                    dtab.style.display = isActive ? 'block' : 'none';
+                    dtab.classList.toggle('active', isActive);
+                }
                 const sitem = document.getElementById('sidebar-' + t);
                 if (sitem) {
-                    sitem.classList.toggle('active', t === tab);
-                    if (t !== tab) {
+                    sitem.classList.toggle('active', isActive);
+                    if (!isActive) {
                         sitem.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
                         sitem.classList.remove('bg-slate-700');
                     } else {
                         sitem.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-700');
                     }
                 }
+
                 // Mobile
                 const mtab = document.getElementById('mobile-tab-' + t);
-                if (mtab) mtab.classList.toggle('active', t === tab);
+                if (mtab) {
+                    mtab.style.display = isActive ? 'block' : 'none';
+                    mtab.classList.toggle('active', isActive);
+                }
                 const nitem = document.getElementById('nav-' + t);
-                if (nitem) nitem.classList.toggle('active', t === tab);
+                if (nitem) nitem.classList.toggle('active', isActive);
             });
 
             renderTabContent(tab);
@@ -457,6 +465,13 @@
         }
 
         // ─── Init ────────────────────────────────────────────────────────
+        // Set explicit inline display to override any Tailwind CDN injection
+        TABS.forEach(t => {
+            const dtab = document.getElementById('tab-' + t);
+            if (dtab) dtab.style.display = (t === 'dashboard') ? 'block' : 'none';
+            const mtab = document.getElementById('mobile-tab-' + t);
+            if (mtab) mtab.style.display = (t === 'dashboard') ? 'block' : 'none';
+        });
         renderDashboard();
     </script>
 </body>
