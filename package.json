@@ -1,0 +1,11 @@
+{
+  "name": "solarcrm",
+  "version": "2.0.0",
+  "type": "module",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "pg": "^8.13.3",
+    "stripe": "^16.12.0"
+  }
+}
