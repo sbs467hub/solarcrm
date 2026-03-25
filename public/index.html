@@ -6,6 +6,8 @@
 <title>SolarCRM PRO — CRM dla firm OZE</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -269,6 +271,7 @@ html{background:var(--bg)}
 .key-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
 .key-dot.active{background:var(--green);box-shadow:0 0 5px var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes leaflet-pulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.5);opacity:0}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .order-card{animation:fadeIn .2s ease both}
@@ -368,6 +371,55 @@ html{background:var(--bg)}
 
 /* ── PRINT ──────────────────────────────────────────────── */
 @media print{.sidebar,.topbar,.bottom-nav,.btn-primary,.btn-secondary,.btn-ai,.form-overlay,.search-wrap,.hamburger,.ai-panel{display:none!important}.main{margin-left:0!important}.content{padding:8px!important}.page{display:block!important;page-break-inside:avoid}}
+
+/* ── LEAFLET DARK THEME ─────────────────────────────────── */
+#leafletMap{height:440px;width:100%;border-radius:0}
+.leaflet-popup-content-wrapper{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);box-shadow:0 4px 24px rgba(0,0,0,.6);padding:0}
+.leaflet-popup-content{margin:12px 14px;line-height:1.6;font-size:12px}
+.leaflet-popup-tip-container{display:none}
+.leaflet-popup-close-button{color:var(--text3)!important;font-size:16px!important;padding:8px!important;top:4px!important;right:4px!important}
+.leaflet-popup-close-button:hover{color:var(--text)!important;background:none!important}
+.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--text)!important;border-color:var(--border)!important;font-size:14px}
+.leaflet-control-zoom a:hover{background:var(--bg3)!important;color:var(--green)!important}
+.leaflet-control-attribution{background:rgba(13,17,23,.85)!important;color:var(--text3)!important;font-size:9px!important}
+.leaflet-control-attribution a{color:var(--text3)!important}
+.leaflet-bar{border:1px solid var(--border)!important;box-shadow:none!important}
+
+/* ── WARRANTY & SERVICE ─────────────────────────────────── */
+.war-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .15s}
+.war-card:hover{border-color:var(--border2)}
+.war-card.expiring{border-left:3px solid var(--amber);border-radius:0 10px 10px 0}
+.war-card.expired{border-left:3px solid var(--red);border-radius:0 10px 10px 0}
+.war-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.war-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:14px}
+.war-date-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.war-date-val{font-size:12px;font-weight:600;font-family:'DM Mono',monospace}
+.war-date-val.ok{color:var(--green)}.war-date-val.warn{color:var(--amber)}.war-date-val.bad{color:var(--red)}
+.service-log{margin-top:12px}
+.service-log-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.service-entry{display:flex;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px;align-items:flex-start}
+.service-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:4px}
+.add-service-form{padding:12px;background:var(--bg3);border-radius:8px;border:1px dashed var(--border2);margin-top:10px;display:none}
+.add-service-form.open{display:block}
+@media(max-width:900px){.war-dates{grid-template-columns:1fr 1fr}}
+
+/* ── MATERIALS / INVENTORY ──────────────────────────────── */
+.mat-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:border-color .15s}
+.mat-row:hover{border-color:var(--border2)}
+.mat-row.low-stock{border-left:3px solid var(--red);border-radius:0 8px 8px 0}
+.mat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.mat-info{flex:1;min-width:0}
+.mat-name{font-size:13px;font-weight:500}
+.mat-supplier{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
+.mat-qty-wrap{text-align:right;min-width:70px}
+.mat-qty{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;line-height:1}
+.mat-qty.ok{color:var(--green)}.mat-qty.low{color:var(--red)}.mat-qty.warn{color:var(--amber)}
+.mat-unit{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
+.mat-price{font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);text-align:right;min-width:80px}
+.stock-bar-wrap{min-width:70px}
+.stock-bar-bg{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:4px}
+.stock-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+@media(max-width:900px){.stock-bar-wrap{display:none}.mat-price{display:none}}
 </style>
 </head>
 <body>
@@ -435,6 +487,15 @@ html{background:var(--bg)}
     <button class="nav-item" onclick="goPage('kalkulator',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       Kalkulator ROI
+    </button>
+    <div class="nav-section">Serwis & Logistyka</div>
+    <button class="nav-item" onclick="goPage('gwarancje',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Gwarancje & Serwis
+    </button>
+    <button class="nav-item" onclick="goPage('magazyn',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      Magazyn
     </button>
   </nav>
   <div class="sidebar-footer">
@@ -522,7 +583,11 @@ html{background:var(--bg)}
     <div class="page" id="page-zlecenia">
       <div class="page-header">
         <div><div class="page-title">Zlecenia</div><div class="page-sub">Zarządzaj projektami instalacyjnymi</div></div>
-        <button class="btn-primary" onclick="openForm()">+ Nowe zlecenie</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportOrders()">↓ CSV</button>
+          <button class="btn-secondary" onclick="exportClients()">↓ Klienci</button>
+          <button class="btn-primary" onclick="openForm()">+ Nowe zlecenie</button>
+        </div>
       </div>
       <div class="filter-row" style="margin-bottom:16px" id="statusFilters"></div>
       <div style="display:flex;flex-direction:column;gap:8px" id="orderListFull"></div>
@@ -540,15 +605,13 @@ html{background:var(--bg)}
         </div>
       </div>
       <div class="map-container">
-        <div class="map-svg-wrap">
-          <div id="mapTooltip" class="map-tooltip"></div>
-          <svg id="mapSvg" viewBox="0 0 760 340" style="width:100%;display:block"></svg>
-        </div>
+        <div id="leafletMap"></div>
         <div class="map-legend">
           <div class="map-legend-item"><div class="map-dot" style="background:#3fb950"></div>Zakończone</div>
           <div class="map-legend-item"><div class="map-dot" style="background:#d29922"></div>W realizacji</div>
           <div class="map-legend-item"><div class="map-dot" style="background:#58a6ff"></div>Zgłoszenie OSD</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#6e7681"></div>Wycena/Umowa</div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#39d353"></div>Umowa podpisana</div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#6e7681"></div>Wycena</div>
         </div>
       </div>
       <div class="map-detail" id="mapDetail">
@@ -561,6 +624,7 @@ html{background:var(--bg)}
       <div class="page-header">
         <div><div class="page-title">Faktury</div><div class="page-sub">Zarządzanie rozliczeniami</div></div>
         <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportInvoices()">↓ CSV</button>
           <button class="btn-secondary" onclick="window.print()">🖨 Drukuj / PDF</button>
           <button class="btn-primary" onclick="addInvoice()">+ Wystaw fakturę</button>
         </div>
@@ -736,6 +800,39 @@ html{background:var(--bg)}
       </div>
     </div>
 
+    <!-- GWARANCJE & SERWIS -->
+    <div class="page" id="page-gwarancje">
+      <div class="page-header">
+        <div><div class="page-title">Gwarancje & Serwis</div><div class="page-sub">Historia serwisowa i terminy gwarancji instalacji</div></div>
+        <button class="btn-primary" onclick="openWarrantyForm()">+ Dodaj gwarancję</button>
+      </div>
+      <div class="panel-3" style="margin-bottom:20px">
+        <div class="stat-card c-green"><div class="stat-label">Aktywne gwarancje</div><div class="stat-val green" id="war-active">0</div><div class="stat-sub">instalacji objętych</div></div>
+        <div class="stat-card c-amber"><div class="stat-label">Wygasające (90 dni)</div><div class="stat-val amber" id="war-soon">0</div><div class="stat-sub">wymagają uwagi</div></div>
+        <div class="stat-card c-blue"><div class="stat-label">Przeglądy serwisowe</div><div class="stat-val blue" id="war-services">0</div><div class="stat-sub">wszystkie wizyty</div></div>
+      </div>
+      <div id="warrantyList"></div>
+    </div>
+
+    <!-- MAGAZYN -->
+    <div class="page" id="page-magazyn">
+      <div class="page-header">
+        <div><div class="page-title">Magazyn & Materiały</div><div class="page-sub">Stan magazynowy komponentów i materiałów instalacyjnych</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportMaterials()">↓ CSV</button>
+          <button class="btn-primary" onclick="openMaterialForm()">+ Dodaj materiał</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="matStats">
+        <div class="stat-card c-green"><div class="stat-label">Pozycji magazynowych</div><div class="stat-val" id="mat-total">0</div></div>
+        <div class="stat-card c-red"><div class="stat-label">Niski stan</div><div class="stat-val red" id="mat-low">0</div><div class="stat-sub">poniżej minimum</div></div>
+        <div class="stat-card c-blue"><div class="stat-label">Wartość magazynu</div><div class="stat-val blue" id="mat-value">—</div></div>
+        <div class="stat-card c-amber"><div class="stat-label">Dostawców</div><div class="stat-val amber" id="mat-suppliers">0</div></div>
+      </div>
+      <div class="filter-row" style="margin-bottom:16px" id="matFilters"></div>
+      <div id="materialList"></div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -798,6 +895,66 @@ html{background:var(--bg)}
   </div>
 </div>
 
+<!-- WARRANTY FORM MODAL -->
+<div class="form-overlay" id="warrantyOverlay">
+  <div class="form-modal">
+    <div class="form-title">Dodaj gwarancję / serwis<button class="form-close" onclick="closeWarrantyForm()">✕</button></div>
+    <div class="form-grid">
+      <div class="form-field"><div class="form-label">Zlecenie</div>
+        <select class="form-select" id="war-order"></select>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Data montażu</div><input class="form-input" type="date" id="war-inst-date"/></div>
+        <div class="form-field"><div class="form-label">Koniec gwarancji inst.</div><input class="form-input" type="date" id="war-end-date"/></div>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Gwarancja falownika</div><input class="form-input" type="date" id="war-inv-date"/></div>
+        <div class="form-field"><div class="form-label">Gwarancja modułów</div><input class="form-input" type="date" id="war-mod-date"/></div>
+      </div>
+      <div class="form-field"><div class="form-label">Następny przegląd</div><input class="form-input" type="date" id="war-next-service"/></div>
+      <div class="form-field"><div class="form-label">Zakres / uwagi</div><textarea class="form-textarea" id="war-notes" placeholder="Zakres gwarancji, model falownika, numer seryjny..."></textarea></div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveWarranty()">Zapisz</button>
+      <button class="btn-secondary" onclick="closeWarrantyForm()">Anuluj</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATERIAL FORM MODAL -->
+<div class="form-overlay" id="materialOverlay">
+  <div class="form-modal">
+    <div class="form-title">Dodaj materiał / komponent<button class="form-close" onclick="closeMaterialForm()">✕</button></div>
+    <div class="form-grid">
+      <div class="form-field"><div class="form-label">Nazwa produktu</div><input class="form-input" id="mat-name-inp" placeholder="np. Panel PV Longi 415W"/></div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Kategoria</div>
+          <select class="form-select" id="mat-cat-inp">
+            <option>Panele PV</option><option>Falowniki</option><option>Okablowanie</option>
+            <option>Konstrukcja</option><option>Pompa ciepła</option><option>Magazyn energii</option><option>Inne</option>
+          </select>
+        </div>
+        <div class="form-field"><div class="form-label">Dostawca</div><input class="form-input" id="mat-supplier-inp" placeholder="Nazwa dostawcy"/></div>
+      </div>
+      <div class="form-grid form-grid-3" style="gap:10px">
+        <div class="form-field"><div class="form-label">Ilość</div><input class="form-input" type="number" id="mat-qty-inp" value="1" min="0"/></div>
+        <div class="form-field"><div class="form-label">Jednostka</div><input class="form-input" id="mat-unit-inp" placeholder="szt / rolka / kpl"/></div>
+        <div class="form-field"><div class="form-label">Min. stan</div><input class="form-input" type="number" id="mat-min-inp" value="1" min="0"/></div>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Cena jedn. (zł)</div><input class="form-input" type="number" id="mat-price-inp" value="0" min="0"/></div>
+        <div class="form-field"><div class="form-label">Ostatnie zamówienie</div><input class="form-input" type="date" id="mat-order-date"/></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveMaterial()">Zapisz</button>
+      <button class="btn-secondary" onclick="closeMaterialForm()">Anuluj</button>
+    </div>
+  </div>
+</div>
+
 <div class="notify" id="notify"></div>
 
 <script>
@@ -839,6 +996,26 @@ let reminders=[
   {clientId:4,type:"Przegląd serwisowy",date:"2025-04-10",channel:"SMS"},
 ];
 let docs={};
+let warranties=[
+  {id:1,orderId:4,instDate:"2025-03-01",warrantyEnd:"2030-03-01",inverterEnd:"2035-03-01",moduleEnd:"2050-03-01",notes:"Gwarancja instalacyjna 5 lat. Falownik Sofar 5kW — gwarancja 10 lat. Moduły Jinko Tiger — gwarancja wydajności 25 lat (80% po 25 latach).",nextService:"2026-03-01",serviceLog:[{date:"2025-03-01",type:"Odbiór końcowy",tech:"Adam Kowalczyk",notes:"Wszystkie parametry prawidłowe. Wydajność 98.4%. Brak usterek."}]},
+  {id:2,orderId:2,instDate:"2025-03-10",warrantyEnd:"2030-03-10",inverterEnd:"2035-03-10",moduleEnd:"2050-03-10",notes:"Hybryda PV + magazyn BYD HVM 10kWh. Gwarancja magazynu 10 lat lub 6000 cykli.",nextService:"2026-03-10",serviceLog:[]},
+  {id:3,orderId:1,instDate:"2025-03-15",warrantyEnd:"2030-03-15",inverterEnd:"2035-03-15",moduleEnd:"2050-03-15",notes:"Instalacja 49.5 kWp. Falownik Huawei SUN2000 — gwarancja 10 lat (rozszerzona). Moduły Longi Hi-Mo5 — gwarancja 25 lat wydajności.",nextService:"2026-03-15",serviceLog:[]}
+];
+let materials=[
+  {id:1,name:"Panel PV Longi Hi-Mo5 415W",cat:"Panele PV",qty:48,unit:"szt",minQty:20,supplier:"SolarTrade Sp. z o.o.",price:380,lastOrder:"2025-03-01"},
+  {id:2,name:"Panel PV Jinko Tiger Neo 430W",cat:"Panele PV",qty:8,unit:"szt",minQty:20,supplier:"InverterPro Polska",price:420,lastOrder:"2025-02-10"},
+  {id:3,name:"Falownik Huawei SUN2000-10KTL",cat:"Falowniki",qty:3,unit:"szt",minQty:2,supplier:"Huawei Polska",price:4200,lastOrder:"2025-02-15"},
+  {id:4,name:"Falownik Fronius Symo GEN24 8kW",cat:"Falowniki",qty:1,unit:"szt",minQty:2,supplier:"Fronius Polska",price:5100,lastOrder:"2025-01-20"},
+  {id:5,name:"Kabel solarny 6mm² (rolka 100m)",cat:"Okablowanie",qty:9,unit:"rolka",minQty:3,supplier:"CablePro",price:380,lastOrder:"2025-03-05"},
+  {id:6,name:"Złączki MC4 (opak. 50 par)",cat:"Okablowanie",qty:14,unit:"opak",minQty:5,supplier:"SolarTrade Sp. z o.o.",price:95,lastOrder:"2025-03-01"},
+  {id:7,name:"Konstrukcja dachowa inox (4 pary)",cat:"Konstrukcja",qty:6,unit:"kpl",minQty:3,supplier:"MountFix Polska",price:840,lastOrder:"2025-02-20"},
+  {id:8,name:"Magazyn BYD HVM 11.5kWh",cat:"Magazyn energii",qty:2,unit:"szt",minQty:1,supplier:"BYD Energy PL",price:18500,lastOrder:"2025-02-28"},
+  {id:9,name:"Pompa ciepła Mitsubishi Zubadan 16kW",cat:"Pompa ciepła",qty:0,unit:"szt",minQty:1,supplier:"Mitsubishi Electric PL",price:22000,lastOrder:"2025-03-01"},
+  {id:10,name:"Skrzynka rozdzielcza AC/DC",cat:"Inne",qty:4,unit:"szt",minQty:2,supplier:"ElektroPro",price:450,lastOrder:"2025-02-10"},
+  {id:11,name:"Kabel YKY 5x10mm² (100m)",cat:"Okablowanie",qty:2,unit:"rolka",minQty:3,supplier:"CablePro",price:520,lastOrder:"2025-01-15"},
+  {id:12,name:"Falownik Sofar Solar 5kW",cat:"Falowniki",qty:4,unit:"szt",minQty:2,supplier:"Sofar Solar PL",price:2800,lastOrder:"2025-03-08"},
+];
+let activeMatFilter='Wszystkie';
 let activeClient=null,selectedDocOrder=null,chatClient=null;
 
 // ── UTILS ──────────────────────────────────────────────────
@@ -856,7 +1033,7 @@ function typeTag(t){
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────
-const pageTitles={dashboard:"Dashboard",zlecenia:"Zlecenia",mapa:"Mapa instalacji",faktury:"Faktury",dofinansowania:"Dofinansowania",dokumenty:"Dokumenty & Zdjęcia",osd:"OSD Tracker",oferty:"Oferty & Umowy AI",chatbot:"Chatbot klienta",przypomnienia:"Przypomnienia",kalkulator:"Kalkulator ROI"};
+const pageTitles={dashboard:"Dashboard",zlecenia:"Zlecenia",mapa:"Mapa instalacji",faktury:"Faktury",dofinansowania:"Dofinansowania",dokumenty:"Dokumenty & Zdjęcia",osd:"OSD Tracker",oferty:"Oferty & Umowy AI",chatbot:"Chatbot klienta",przypomnienia:"Przypomnienia",kalkulator:"Kalkulator ROI",gwarancje:"Gwarancje & Serwis",magazyn:"Magazyn"};
 function goPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -865,7 +1042,7 @@ function goPage(name,el){
   if(window.innerWidth<=900)closeSidebar();
   document.getElementById('topbarTitle').textContent=pageTitles[name]||name;
   setBnav(name);
-  if(name==='mapa') renderMap();
+  if(name==='mapa') setTimeout(()=>renderMap(),30);
   if(name==='faktury') renderInvoices();
   if(name==='dofinansowania') renderGrants();
   if(name==='dokumenty'){renderDocOrders();renderDocList();}
@@ -876,6 +1053,8 @@ function goPage(name,el){
   if(name==='kalkulator') calcROI();
   if(name==='oferty') fillOfferOrderSelect();
   if(name==='dashboard') renderCharts();
+  if(name==='gwarancje') renderWarranties();
+  if(name==='magazyn') renderMaterials();
 }
 function goPageMobile(name){
   goPage(name,null);
@@ -978,39 +1157,74 @@ function saveOrder(){
   ['f-client','f-addr','f-kw','f-price','f-note'].forEach(id=>document.getElementById(id).value='');
 }
 
-// ── MAP ──────────────────────────────────────────────────
-let mapFilter='all';
+// ── MAP (Leaflet.js) ─────────────────────────────────────────
+let mapFilter='all',leafletMap=null,leafletMarkers=[];
+const GPS_CITY={
+  'kraków':[50.0647,19.9450],'krakow':[50.0647,19.9450],
+  'tarnów':[50.0121,20.9858],'tarnow':[50.0121,20.9858],
+  'wieliczka':[49.9884,20.0654],'myslenice':[49.8332,19.9420],'myślenice':[49.8332,19.9420],
+  'zakopane':[49.2992,19.9496],'chrzanów':[50.1355,19.3980],'chrzanow':[50.1355,19.3980],
+  'bochnia':[49.9700,20.4330],'dębica':[50.0527,21.4127],'debica':[50.0527,21.4127],
+  'nowy sącz':[49.6254,20.6930],'nowy targ':[49.4800,20.0320],
+  'oświęcim':[50.0348,19.2110],'limanowa':[49.7070,20.4240],
+  'wadowice':[49.8873,19.4997],'olkusz':[50.2778,19.5651],'gorlice':[49.6553,21.1580],
+};
+function getOrderGPS(o){
+  const addr=(o.addr||'').toLowerCase();
+  for(const[city,coords] of Object.entries(GPS_CITY)){
+    if(addr.includes(city)) return coords;
+  }
+  // deterministic jitter from order id so pins don't stack on default
+  const seed=o.id||1;
+  return[50.0647+(seed*0.037%0.4)-0.2, 19.9450+(seed*0.061%0.5)-0.25];
+}
 function renderMap(filter){
   if(filter) mapFilter=filter;
-  const svg=document.getElementById('mapSvg');
   const filtered=mapFilter==='all'?orders:orders.filter(o=>o.status===mapFilter);
-  const colMap={"Zakończone":"#3fb950","W realizacji":"#d29922","Zgłoszenie do OSD":"#58a6ff"};
-  const cities=[{x:190,y:70,n:"Kraków"},{x:445,y:100,n:"Tarnów"},{x:260,y:68,n:"Wieliczka"},{x:300,y:130,n:"Myślenice"},{x:325,y:170,n:"Zakopane"},{x:140,y:90,n:"Chrzanów"},{x:380,y:60,n:"Bochnia"},{x:520,y:80,n:"Dębica"}];
-  svg.innerHTML=`
-    <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs>
-    <rect width="760" height="340" fill="var(--bg3)"/>
-    <rect width="760" height="340" fill="url(#grid)"/>
-    ${cities.map(t=>`<text x="${t.x}" y="${t.y}" font-size="10" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.2)">${t.n}</text>`).join('')}
-    ${filtered.map(o=>{
-      const col=colMap[o.status]||"#6e7681";
-      return`<g class="map-pin" style="cursor:pointer" onclick="showMapDetail(${o.id})" onmouseover="showMapTip(event,${o.id})" onmouseout="hideMapTip()">
-        <circle cx="${o.lng}" cy="${o.lat}" r="14" fill="${col}" fill-opacity=".12"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}" fill-opacity=".3"><animate attributeName="r" from="7" to="18" dur="2s" repeatCount="indefinite"/><animate attributeName="fill-opacity" from=".3" to="0" dur="2s" repeatCount="indefinite"/></circle>
-        <text x="${o.lng}" y="${o.lat+18}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.4)">${o.kw}k</text>
-      </g>`;
-    }).join('')}`;
+  const colMap={"Zakończone":"#3fb950","W realizacji":"#d29922","Zgłoszenie do OSD":"#58a6ff","Umowa podpisana":"#39d353","Odbiór końcowy":"#ff7b72","Wycena":"#6e7681"};
+  if(!leafletMap){
+    leafletMap=L.map('leafletMap',{center:[50.0,20.1],zoom:9,zoomControl:true,scrollWheelZoom:true});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+      subdomains:'abcd',maxZoom:19
+    }).addTo(leafletMap);
+  }
+  leafletMap.invalidateSize();
+  leafletMarkers.forEach(m=>leafletMap.removeLayer(m));
+  leafletMarkers=[];
+  filtered.forEach(o=>{
+    const[lat,lng]=getOrderGPS(o);
+    const c=clients.find(cl=>cl.id===o.clientId);
+    const col=colMap[o.status]||'#6e7681';
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="position:relative;width:24px;height:24px">
+        <div style="position:absolute;inset:0;border-radius:50%;background:${col};opacity:.15;animation:leaflet-pulse 2s ease-out infinite"></div>
+        <div style="position:absolute;top:5px;left:5px;width:14px;height:14px;border-radius:50%;background:${col};border:2px solid rgba(255,255,255,.5);box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>
+      </div>`,
+      iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]
+    });
+    const marker=L.marker([lat,lng],{icon}).addTo(leafletMap);
+    marker.bindPopup(`<div style="font-family:'DM Mono',monospace;line-height:1.7">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;color:#e6edf3">${c?.name||''}</div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px">${o.title}</div>
+      <div style="font-size:11px"><span style="color:${col}">⬤</span> ${o.status} · <strong style="color:${col}">${o.kw} kWp</strong></div>
+      <div style="font-size:11px;color:#6e7681;margin-top:2px">${o.addr}</div>
+      <div style="font-size:13px;font-weight:700;color:#3fb950;margin-top:6px">${o.price.toLocaleString('pl-PL')} zł</div>
+    </div>`,{maxWidth:240});
+    marker.on('click',()=>showMapDetail(o.id));
+    leafletMarkers.push(marker);
+  });
+  if(leafletMarkers.length>0){
+    try{
+      const grp=L.featureGroup(leafletMarkers);
+      leafletMap.fitBounds(grp.getBounds().pad(0.15));
+    }catch(e){}
+  }
 }
-function showMapTip(e,id){
-  const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  const tip=document.getElementById('mapTooltip');
-  tip.innerHTML=`<strong>${c?.name}</strong><br>${o.title}<br><span style="color:var(--green)">${o.kw} kWp · ${o.status}</span>`;
-  tip.style.display="block";tip.style.left=(e.offsetX+14)+"px";tip.style.top=(e.offsetY-10)+"px";
-}
-function hideMapTip(){document.getElementById('mapTooltip').style.display='none';}
 function showMapDetail(id){
   const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  document.getElementById('mapDetail').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+  document.getElementById('mapDetail').innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
     <div><div class="stat-label">Klient</div><div style="font-size:13px;font-weight:600;margin-top:5px">${c?.name}</div></div>
     <div><div class="stat-label">Status</div><div style="margin-top:5px">${statusTag(o.status)}</div></div>
     <div><div class="stat-label">Moc</div><div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.kw} kWp</div></div>
@@ -1321,6 +1535,8 @@ function saveToStorage(){
     localStorage.setItem('solarcrm_osd',JSON.stringify(osdItems));
     localStorage.setItem('solarcrm_reminders',JSON.stringify(reminders));
     localStorage.setItem('solarcrm_docs',JSON.stringify(docs));
+    localStorage.setItem('solarcrm_warranties',JSON.stringify(warranties));
+    localStorage.setItem('solarcrm_materials',JSON.stringify(materials));
   }catch(e){}
 }
 function loadFromStorage(){
@@ -1332,6 +1548,8 @@ function loadFromStorage(){
     const osd=localStorage.getItem('solarcrm_osd');if(osd)osdItems=JSON.parse(osd);
     const r=localStorage.getItem('solarcrm_reminders');if(r)reminders=JSON.parse(r);
     const d=localStorage.getItem('solarcrm_docs');if(d)docs=JSON.parse(d);
+    const w=localStorage.getItem('solarcrm_warranties');if(w)warranties=JSON.parse(w);
+    const m=localStorage.getItem('solarcrm_materials');if(m)materials=JSON.parse(m);
   }catch(e){}
 }
 
@@ -1442,6 +1660,296 @@ function fillOfferFromOrder(){
   Array.from(ofType.options).forEach(opt=>{if(opt.value===mapped||opt.text===mapped)opt.selected=true;});
   document.getElementById('of-notes').value=o.note||'';
   notify('Dane wczytane ze zlecenia.');
+}
+
+// ── CSV EXPORT ───────────────────────────────────────────────
+function downloadCSV(rows,filename){
+  const bom='\uFEFF';
+  const csv=rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c);
+    return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(',')).join('\r\n');
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+}
+function exportOrders(){
+  const hdr=['ID','Klient','Tytuł','Typ instalacji','Moc (kWp)','Status','Wartość (zł)','Termin','Adres','Notatka'];
+  const rows=[hdr,...orders.map(o=>{
+    const c=clients.find(cl=>cl.id===o.clientId);
+    return[o.id,c?.name||'',o.title,o.type,o.kw,o.status,o.price,o.date,o.addr,o.note];
+  })];
+  downloadCSV(rows,`solarcrm_zlecenia_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Wyeksportowano zlecenia do CSV.');
+}
+function exportClients(){
+  const hdr=['ID','Nazwa','Typ','Telefon','E-mail','Liczba zleceń','Łączne kWp'];
+  const rows=[hdr,...clients.map(c=>{
+    const cnt=orders.filter(o=>o.clientId===c.id).length;
+    const kw=orders.filter(o=>o.clientId===c.id).reduce((a,b)=>a+(b.kw||0),0);
+    return[c.id,c.name,c.type,c.tel,c.email,cnt,kw.toFixed(1)];
+  })];
+  downloadCSV(rows,`solarcrm_klienci_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Wyeksportowano klientów do CSV.');
+}
+function exportInvoices(){
+  const sl={'paid':'Zapłacona','pending':'Do zapłaty','overdue':'Przeterminowana'};
+  const hdr=['Numer','Klient','Kwota (zł)','Status','Data'];
+  const rows=[hdr,...invoices.map(fv=>{
+    const c=clients.find(cl=>cl.id===fv.clientId);
+    return[fv.num,c?.name||'',fv.amount,sl[fv.status]||fv.status,fv.date];
+  })];
+  downloadCSV(rows,`solarcrm_faktury_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Wyeksportowano faktury do CSV.');
+}
+function exportMaterials(){
+  const hdr=['ID','Nazwa','Kategoria','Ilość','Jedn.','Min. stan','Dostawca','Cena jedn. (zł)','Wartość (zł)','Ostatnie zamówienie'];
+  const rows=[hdr,...materials.map(m=>[m.id,m.name,m.cat,m.qty,m.unit,m.minQty,m.supplier,m.price,(m.qty*m.price).toLocaleString('pl-PL'),m.lastOrder])];
+  downloadCSV(rows,`solarcrm_magazyn_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Wyeksportowano magazyn do CSV.');
+}
+
+// ── WARRANTIES ───────────────────────────────────────────────
+const WAR_TODAY=new Date();
+function warDaysLeft(d){return d?Math.ceil((new Date(d)-WAR_TODAY)/864e5):9999;}
+function warStatus(w){
+  const dl=warDaysLeft(w.warrantyEnd);
+  if(dl<0) return'expired';
+  if(dl<90) return'expiring';
+  return'active';
+}
+function renderWarranties(){
+  const actv=warranties.filter(w=>warStatus(w)==='active').length;
+  const soon=warranties.filter(w=>warStatus(w)==='expiring').length;
+  const svcs=warranties.reduce((a,w)=>a+(w.serviceLog||[]).length,0);
+  document.getElementById('war-active').textContent=actv;
+  document.getElementById('war-soon').textContent=soon;
+  document.getElementById('war-services').textContent=svcs;
+  const list=document.getElementById('warrantyList');
+  if(!warranties.length){list.innerHTML='<div class="empty">Brak gwarancji. Dodaj pierwszą gwarancję instalacji.</div>';return;}
+  list.innerHTML=warranties.map(w=>{
+    const o=orders.find(x=>x.id===w.orderId);
+    const c=o?clients.find(x=>x.id===o.clientId):null;
+    const ws=warStatus(w);
+    const wDL=warDaysLeft(w.warrantyEnd);
+    const nsDL=warDaysLeft(w.nextService);
+    const wCls=ws==='expired'?'bad':ws==='expiring'?'warn':'ok';
+    const svcHTML=(w.serviceLog||[]).length?
+      (w.serviceLog||[]).map(s=>`<div class="service-entry">
+        <div class="service-dot"></div>
+        <div>
+          <div style="font-size:12px;font-weight:500">${s.type} <span style="font-family:'DM Mono',monospace;color:var(--text3);font-size:10px">· ${s.date} · ${s.tech}</span></div>
+          <div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px;line-height:1.6">${s.notes}</div>
+        </div>
+      </div>`).join(''):
+      '<div style="font-size:11px;font-family:\'DM Mono\',monospace;color:var(--text3);padding:6px 0">Brak wpisów serwisowych.</div>';
+    return`<div class="war-card ${ws==='expired'?'expired':ws==='expiring'?'expiring':''}">
+      <div class="war-header">
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">${c?.name||'—'} <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);font-weight:400">· ${o?.title?.substring(0,45)||'—'}</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            ${ws==='expired'?'<span class="tag t-red">Wygasła</span>':ws==='expiring'?'<span class="tag t-amber">Wygasa wkrótce</span>':'<span class="tag t-green">Aktywna</span>'}
+            ${typeTag(o?.type||'Fotowoltaika')}
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--green)">${o?.kw||0} kWp</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-secondary" style="font-size:11px" onclick="toggleServiceForm(${w.id})">+ Serwis</button>
+          <button class="btn-danger" onclick="removeWarranty(${w.id})">Usuń</button>
+        </div>
+      </div>
+      <div class="war-dates">
+        <div class="war-date-item">
+          <div class="war-date-label">Data montażu</div>
+          <div class="war-date-val">${w.instDate||'—'}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">Koniec gwarancji inst.</div>
+          <div class="war-date-val ${wCls}">${w.warrantyEnd||'—'}${wDL>0&&wDL<365?` <span style="font-size:10px">(${wDL}d)</span>`:''}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">Gwarancja falownika</div>
+          <div class="war-date-val ok">${w.inverterEnd||'—'}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">Gwarancja modułów</div>
+          <div class="war-date-val ok">${w.moduleEnd||'—'}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);line-height:1.6;margin-bottom:12px">${w.notes||''}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${nsDL<30?'#f85149':nsDL<90?'#d29922':'#3fb950'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">Następny przegląd:</span>
+        <span style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:${nsDL<30?'var(--red)':nsDL<90?'var(--amber)':'var(--green)'}">${w.nextService||'—'}${nsDL>0&&nsDL<365?` · za ${nsDL} dni`:''}</span>
+      </div>
+      <div class="service-log">
+        <div class="service-log-title">Historia serwisowa</div>
+        ${svcHTML}
+      </div>
+      <div class="add-service-form" id="svc-form-${w.id}">
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Dodaj wizytę serwisową</div>
+        <div class="form-grid form-grid-2" style="gap:8px;margin-bottom:8px">
+          <div class="form-field"><div class="form-label">Data</div><input class="form-input" type="date" id="svc-date-${w.id}"/></div>
+          <div class="form-field"><div class="form-label">Typ wizyty</div>
+            <select class="form-select" id="svc-type-${w.id}">
+              <option>Przegląd roczny</option><option>Naprawa usterki</option><option>Czyszczenie paneli</option><option>Aktualizacja firmware</option><option>Wymiana komponentu</option><option>Odbiór końcowy</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2" style="gap:8px;margin-bottom:8px">
+          <div class="form-field"><div class="form-label">Technik</div><input class="form-input" id="svc-tech-${w.id}" placeholder="Imię i nazwisko"/></div>
+          <div class="form-field"><div class="form-label">Następny przegląd</div><input class="form-input" type="date" id="svc-next-${w.id}"/></div>
+        </div>
+        <div class="form-field" style="margin-bottom:8px"><div class="form-label">Notatki</div><textarea class="form-textarea" id="svc-notes-${w.id}" placeholder="Opis prac, wyniki pomiarów, zalecenia..."></textarea></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="font-size:11px" onclick="saveServiceEntry(${w.id})">Zapisz wizytę</button>
+          <button class="btn-secondary" style="font-size:11px" onclick="toggleServiceForm(${w.id})">Anuluj</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleServiceForm(id){
+  const el=document.getElementById(`svc-form-${id}`);
+  el.classList.toggle('open');
+  if(el.classList.contains('open')){
+    const today=new Date().toISOString().slice(0,10);
+    document.getElementById(`svc-date-${id}`).value=today;
+  }
+}
+function saveServiceEntry(id){
+  const w=warranties.find(x=>x.id===id);if(!w)return;
+  const date=document.getElementById(`svc-date-${id}`).value;
+  const type=document.getElementById(`svc-type-${id}`).value;
+  const tech=document.getElementById(`svc-tech-${id}`).value.trim()||'—';
+  const notes=document.getElementById(`svc-notes-${id}`).value.trim();
+  const next=document.getElementById(`svc-next-${id}`).value;
+  if(!date){notify('Podaj datę wizyty.');return;}
+  if(!w.serviceLog) w.serviceLog=[];
+  w.serviceLog.unshift({date,type,tech,notes});
+  if(next) w.nextService=next;
+  saveToStorage();renderWarranties();notify('Wizyta serwisowa zapisana.');
+}
+function removeWarranty(id){
+  warranties=warranties.filter(w=>w.id!==id);
+  saveToStorage();renderWarranties();notify('Gwarancja usunięta.');
+}
+function openWarrantyForm(){
+  const sel=document.getElementById('war-order');
+  sel.innerHTML=orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('war-inst-date').value=today;
+  document.getElementById('war-end-date').value=today.replace(/^(\d{4})/,y=>+y+5);
+  document.getElementById('war-inv-date').value=today.replace(/^(\d{4})/,y=>+y+10);
+  document.getElementById('war-mod-date').value=today.replace(/^(\d{4})/,y=>+y+25);
+  document.getElementById('war-next-service').value=today.replace(/^(\d{4})/,y=>+y+1);
+  document.getElementById('war-notes').value='';
+  document.getElementById('warrantyOverlay').classList.add('open');
+}
+function closeWarrantyForm(){document.getElementById('warrantyOverlay').classList.remove('open');}
+function saveWarranty(){
+  const orderId=parseInt(document.getElementById('war-order').value);
+  if(!orderId){notify('Wybierz zlecenie.');return;}
+  if(warranties.find(w=>w.orderId===orderId)){notify('Ta instalacja ma już gwarancję. Usuń poprzednią, aby dodać nową.');return;}
+  warranties.push({
+    id:warranties.length?Math.max(...warranties.map(w=>w.id))+1:1,
+    orderId,
+    instDate:document.getElementById('war-inst-date').value,
+    warrantyEnd:document.getElementById('war-end-date').value,
+    inverterEnd:document.getElementById('war-inv-date').value,
+    moduleEnd:document.getElementById('war-mod-date').value,
+    notes:document.getElementById('war-notes').value.trim(),
+    nextService:document.getElementById('war-next-service').value,
+    serviceLog:[]
+  });
+  closeWarrantyForm();saveToStorage();renderWarranties();notify('Gwarancja dodana.');
+}
+
+// ── MATERIALS ─────────────────────────────────────────────────
+const MAT_ICONS={'Panele PV':'☀️','Falowniki':'⚡','Okablowanie':'🔌','Konstrukcja':'🔧','Pompa ciepła':'❄️','Magazyn energii':'🔋','Inne':'📦'};
+const MAT_CATS=['Wszystkie','Panele PV','Falowniki','Okablowanie','Konstrukcja','Pompa ciepła','Magazyn energii','Inne'];
+const MAT_COLORS={'Panele PV':'var(--amber-dim)','Falowniki':'var(--blue-dim)','Okablowanie':'var(--green-bg)','Konstrukcja':'var(--bg4)','Pompa ciepła':'#0d2a3a','Magazyn energii':'#1a1a3a','Inne':'var(--bg4)'};
+function renderMaterials(){
+  const filtered=activeMatFilter==='Wszystkie'?materials:materials.filter(m=>m.cat===activeMatFilter);
+  const lowCnt=materials.filter(m=>m.qty<=m.minQty).length;
+  const totalVal=materials.reduce((a,m)=>a+m.qty*m.price,0);
+  const suppliers=[...new Set(materials.map(m=>m.supplier))].length;
+  document.getElementById('mat-total').textContent=materials.length;
+  document.getElementById('mat-low').textContent=lowCnt;
+  document.getElementById('mat-value').textContent=(totalVal/1000).toFixed(0)+'k zł';
+  document.getElementById('mat-suppliers').textContent=suppliers;
+  // category chips
+  const fEl=document.getElementById('matFilters');
+  if(!fEl.hasChildNodes()){
+    fEl.innerHTML=MAT_CATS.map(cat=>`<button class="filter-chip${cat==='Wszystkie'?' active':''}" onclick="filterMaterials('${cat}',this)">${cat}</button>`).join('');
+  }
+  const list=document.getElementById('materialList');
+  if(!filtered.length){list.innerHTML='<div class="empty">Brak materiałów w tej kategorii.</div>';return;}
+  list.innerHTML=filtered.map(m=>{
+    const isLow=m.qty<=m.minQty;
+    const pct=m.minQty>0?Math.min(100,Math.round(m.qty/Math.max(m.qty*1.5,m.minQty*2)*100)):100;
+    const barCol=isLow?'var(--red)':m.qty<=m.minQty*1.5?'var(--amber)':'var(--green)';
+    const qCls=isLow?'low':m.qty<=m.minQty*1.5?'warn':'ok';
+    return`<div class="mat-row${isLow?' low-stock':''}">
+      <div class="mat-icon" style="background:${MAT_COLORS[m.cat]||'var(--bg4)'}">
+        <span style="font-size:18px">${MAT_ICONS[m.cat]||'📦'}</span>
+      </div>
+      <div class="mat-info">
+        <div class="mat-name">${m.name}${isLow?` <span class="tag t-red" style="font-size:9px;margin-left:4px">⚠ niski stan</span>`:''}</div>
+        <div class="mat-supplier">${m.cat} · ${m.supplier} · ost. zam.: ${m.lastOrder}</div>
+      </div>
+      <div class="stock-bar-wrap">
+        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text3)">min: ${m.minQty} ${m.unit}</div>
+        <div class="stock-bar-bg"><div class="stock-bar-fill" style="width:${pct}%;background:${barCol}"></div></div>
+      </div>
+      <div class="mat-price">${m.price.toLocaleString('pl-PL')} zł/${m.unit}<br><span style="color:var(--text3);font-size:10px">val: ${(m.qty*m.price).toLocaleString('pl-PL')} zł</span></div>
+      <div class="mat-qty-wrap">
+        <div class="mat-qty ${qCls}">${m.qty}</div>
+        <div class="mat-unit">${m.unit}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn-primary" style="padding:4px 10px;font-size:10px" onclick="adjustStock(${m.id},1)">+</button>
+        <button class="btn-secondary" style="padding:4px 10px;font-size:10px" onclick="adjustStock(${m.id},-1)">−</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterMaterials(cat,el){
+  document.querySelectorAll('#matFilters .filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeMatFilter=cat;
+  renderMaterials();
+}
+function adjustStock(id,delta){
+  const m=materials.find(x=>x.id===id);
+  if(m){m.qty=Math.max(0,m.qty+delta);saveToStorage();renderMaterials();}
+}
+function openMaterialForm(){
+  ['mat-name-inp','mat-supplier-inp','mat-unit-inp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mat-qty-inp').value='1';
+  document.getElementById('mat-min-inp').value='1';
+  document.getElementById('mat-price-inp').value='0';
+  document.getElementById('mat-order-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('mat-unit-inp').value='szt';
+  document.getElementById('materialOverlay').classList.add('open');
+}
+function closeMaterialForm(){document.getElementById('materialOverlay').classList.remove('open');}
+function saveMaterial(){
+  const name=document.getElementById('mat-name-inp').value.trim();
+  if(!name){notify('Podaj nazwę materiału.');return;}
+  materials.push({
+    id:materials.length?Math.max(...materials.map(m=>m.id))+1:1,
+    name,
+    cat:document.getElementById('mat-cat-inp').value,
+    qty:parseInt(document.getElementById('mat-qty-inp').value)||0,
+    unit:document.getElementById('mat-unit-inp').value||'szt',
+    minQty:parseInt(document.getElementById('mat-min-inp').value)||1,
+    supplier:document.getElementById('mat-supplier-inp').value.trim()||'—',
+    price:parseFloat(document.getElementById('mat-price-inp').value)||0,
+    lastOrder:document.getElementById('mat-order-date').value||new Date().toISOString().slice(0,10)
+  });
+  closeMaterialForm();saveToStorage();renderMaterials();notify('Materiał dodany do magazynu.');
 }
 
 // ── MOBILE SIDEBAR ────────────────────────────────────────
