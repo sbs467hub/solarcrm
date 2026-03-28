@@ -271,6 +271,7 @@ html{background:var(--bg)}
 .key-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
 .key-dot.active{background:var(--green);box-shadow:0 0 5px var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
+.lang-btn{background:none;color:var(--text3);border:none;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
 .lang-btn.active{background:var(--green)!important;color:#0d1117!important}
 .lang-btn:not(.active):hover{color:var(--text)!important;background:var(--bg4)!important}
 @keyframes leaflet-pulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.5);opacity:0}}
@@ -482,6 +483,14 @@ html{background:var(--bg)}
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       <span data-i18n="chatbot">Klantchatbot</span>
     </button>
+    <button class="nav-item" onclick="goPage('portaal',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <span data-i18n="portaal">Klantportaal</span>
+    </button>
+    <button class="nav-item" onclick="goPage('dakanalyse',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-i18n="dakanalyse">Dakanalyse AI</span>
+    </button>
     <button class="nav-item" onclick="goPage('przypomnienia',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span data-i18n="herinneringen">Herinneringen</span>
@@ -525,8 +534,8 @@ html{background:var(--bg)}
       </div>
       <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)" id="topbarDate"></div>
       <div style="display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px">
-        <button class="lang-btn active" data-lang="nl" onclick="setLang('nl')" style="background:var(--green);color:#0d1117;border:none;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s">NL</button>
-        <button class="lang-btn" data-lang="en" onclick="setLang('en')" style="background:none;color:var(--text3);border:none;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s">EN</button>
+        <button class="lang-btn active" data-lang="nl" onclick="setLang('nl')">NL</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
       </div>
       <button class="btn-secondary" onclick="openForm()" data-i18n="btn_new">+ Nieuw project</button>
     </div>
@@ -839,6 +848,60 @@ html{background:var(--bg)}
       <div id="materialList"></div>
     </div>
 
+    <!-- KLANTPORTAAL -->
+    <div class="page" id="page-portaal">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="portal_title">Klantportaal</div><div class="page-sub" data-i18n="portal_sub">Gedeeld overzicht voor de klant</div></div>
+      </div>
+      <div class="panel-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title" data-i18n="f_klant">Klant</div></div>
+          <div id="portalClientList"></div>
+        </div>
+        <div class="card" id="portalContent">
+          <div class="empty" data-i18n="portal_no_client">Kies een klant uit de lijst.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAKANALYSE AI -->
+    <div class="page" id="page-dakanalyse">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="dak_title">Dakanalyse AI</div><div class="page-sub" data-i18n="dak_sub">Upload een foto van het dak voor AI-analyse</div></div>
+      </div>
+      <div class="panel-2c">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_title">Dakanalyse AI</div>
+          <div class="dropzone" id="dakDropzone" onclick="document.getElementById('dakFileInput').click()" ondragover="event.preventDefault()" ondrop="handleDakDrop(event)">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)" data-i18n="dak_drop">Sleep een dakfoto hierheen of klik om te uploaden</div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px" data-i18n="dak_hint">JPG, PNG of WEBP · max 10 MB</div>
+          </div>
+          <input type="file" id="dakFileInput" style="display:none" accept="image/*" onchange="handleDakUpload(event)"/>
+          <div id="dakPreviewWrap" style="display:none;margin-bottom:14px">
+            <img id="dakPreview" style="width:100%;border-radius:8px;border:1px solid var(--border);max-height:260px;object-fit:cover"/>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-ai" id="dakBtn" onclick="analyseDak()">
+              <div class="spinner" id="dakSpin"></div>
+              <span id="dakLabel" data-i18n="dak_btn">Analyseer dak ↗</span>
+            </button>
+            <button class="btn-secondary" id="dakApplyBtn" style="display:none" onclick="applyDakToROI()" data-i18n="dak_apply">Toepassen in ROI Calculator</button>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px" data-i18n="off_fill">Project koppelen</div>
+            <select class="form-select" id="dakOrderSel" style="margin-bottom:0">
+              <option value="">— optioneel —</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_result_title">Analyseresultaat</div>
+          <div id="dakResult" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.9;white-space:pre-wrap;min-height:280px" data-i18n="off_placeholder">Vul het formulier links in en klik op "Analyseer dak" om een AI-analyse te starten.</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
 </div><!-- /main -->
 
@@ -957,6 +1020,36 @@ html{background:var(--bg)}
     <div class="form-actions">
       <button class="btn-primary" onclick="saveMaterial()" data-i18n="mat_add">Materiaal opslaan</button>
       <button class="btn-secondary" onclick="closeMaterialForm()" data-i18n="btn_cancel">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION MODAL -->
+<div class="form-overlay" id="notifOverlay">
+  <div class="form-modal" style="width:480px">
+    <div class="form-title">
+      <span data-i18n="notif_title">Notificatie versturen</span>
+      <button class="form-close" onclick="closeNotifModal()">✕</button>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;font-weight:600" id="notifClientName"></div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:2px"><span id="notifType"></span> · <span id="notifDate"></span></div>
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label" data-i18n="notif_preview">Berichtvoorbeeld</div>
+      <textarea class="form-textarea" id="notifMsg" style="min-height:90px" placeholder="Klik op 'Genereer bericht' of schrijf zelf…"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn-ai" onclick="genNotifMsg()">✦ <span data-i18n="notif_gen">Genereer bericht ↗</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions" style="flex-wrap:wrap">
+      <button class="btn-primary" onclick="sendNotifEmail()" data-i18n="notif_email">E-mail opstellen</button>
+      <button class="btn-secondary" onclick="sendNotifSMS()" data-i18n="notif_sms">SMS kopiëren</button>
+      <button class="btn-secondary" onclick="sendNotifWhatsApp()" data-i18n="notif_whatsapp">WhatsApp</button>
+      <button class="btn-secondary" onclick="markNotifSent()" style="margin-left:auto" data-i18n="notif_mark_sent">Markeer als verstuurd</button>
     </div>
   </div>
 </div>
@@ -1157,9 +1250,41 @@ nl:{
   // Topbar
   date_short:'nl-NL',
   // Misc
-  no_selection:'Klik op een locatiepin om installatidetails te bekijken.',
+  no_selection:'Klik op een locatiepin om installatiedetails te bekijken.',
   week_prefix:'Week',
+  filter_all:'Alles', filter_all_status:'Alle statussen',
+  mat_cats_0:'Alles',
+  // Pages (new)
+  portaal:'Klantportaal', dakanalyse:'Dakanalyse AI',
+  // Client portal
+  portal_title:'Klantportaal', portal_sub:'Gedeeld overzicht voor de klant',
+  portal_share:'Portaallink kopiëren', portal_copied:'Link gekopieerd!',
+  portal_no_client:'Kies een klant uit de lijst.',
+  portal_projects:'Projecten', portal_invoices:'Facturen',
+  portal_next_svc:'Volgend onderhoud', portal_status:'Status',
+  portal_welcome:'Welkom bij uw projectoverzicht van',
+  // Dakanalyse AI
+  dak_title:'Dakanalyse AI', dak_sub:'Upload een foto van het dak voor AI-analyse',
+  dak_drop:'Sleep een dakfoto hierheen of klik om te uploaden',
+  dak_hint:'JPG, PNG of WEBP · max 10 MB',
+  dak_btn:'Analyseer dak ↗', dak_analyzing:'Analyseren…',
+  dak_result_title:'Analyseresultaat',
+  dak_apply:'Resultaat toepassen in ROI Calculator',
+  dak_applied:'Gegevens ingeladen in ROI Calculator.',
+  dak_no_img:'Upload eerst een dakfoto.',
+  dak_no_key:'Stel eerst de API-sleutel in.',
+  // Notifications
+  notif_send:'Verstuur notificatie', notif_title:'Notificatie versturen',
+  notif_email:'E-mail opstellen', notif_sms:'SMS kopiëren',
+  notif_whatsapp:'WhatsApp', notif_preview:'Berichtvoorbeeld',
+  notif_gen:'Genereer bericht ↗', notif_sent:'Notificatie verstuurd.',
+  notif_mark_sent:'Markeer als verstuurd',
+  // Misc hardcoded strings
+  rem_no_date:'Kies een datum.', war_select_proj:'Selecteer een project.',
+  mat_no_name:'Vul een productnaam in.', svc_no_date:'Kies een datum voor het bezoek.',
+  key_no_key:'Geen API-sleutel', key_set:'API:',
 },
+
 en:{
   ns_main:'Main', ns_finance:'Finance', ns_installs:'Installations', ns_ai:'AI & Smart', ns_service:'Service & Logistics',
   dashboard:'Dashboard', projecten:'Projects', kaart:'Installation Map',
@@ -1260,6 +1385,32 @@ en:{
   date_short:'en-GB',
   no_selection:'Click a location pin to view installation details.',
   week_prefix:'Week',
+  filter_all:'All', filter_all_status:'All statuses',
+  mat_cats_0:'All',
+  portaal:'Client Portal', dakanalyse:'Roof Analysis AI',
+  portal_title:'Client Portal', portal_sub:'Shared overview for the client',
+  portal_share:'Copy portal link', portal_copied:'Link copied!',
+  portal_no_client:'Choose a client from the list.',
+  portal_projects:'Projects', portal_invoices:'Invoices',
+  portal_next_svc:'Next maintenance', portal_status:'Status',
+  portal_welcome:'Welcome to your project overview from',
+  dak_title:'Roof Analysis AI', dak_sub:'Upload a roof photo for AI analysis',
+  dak_drop:'Drag a roof photo here or click to upload',
+  dak_hint:'JPG, PNG or WEBP · max 10 MB',
+  dak_btn:'Analyse roof ↗', dak_analyzing:'Analysing…',
+  dak_result_title:'Analysis result',
+  dak_apply:'Apply results to ROI Calculator',
+  dak_applied:'Data loaded into ROI Calculator.',
+  dak_no_img:'Please upload a roof photo first.',
+  dak_no_key:'Please set an API key first.',
+  notif_send:'Send notification', notif_title:'Send notification',
+  notif_email:'Draft email', notif_sms:'Copy SMS',
+  notif_whatsapp:'WhatsApp', notif_preview:'Message preview',
+  notif_gen:'Generate message ↗', notif_sent:'Notification sent.',
+  notif_mark_sent:'Mark as sent',
+  rem_no_date:'Please choose a date.', war_select_proj:'Please select a project.',
+  mat_no_name:'Please enter a product name.', svc_no_date:'Please choose a date for the visit.',
+  key_no_key:'No API key', key_set:'API:',
 }};
 function t(k){return T[lang]?.[k]??T.nl[k]??k;}
 function setLang(l){
@@ -1275,43 +1426,52 @@ function setLang(l){
   });
   // Update language toggle buttons
   document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  // Update topbar title + date for current page
+  const curPage=document.querySelector('.page.active');
+  if(curPage) document.getElementById('topbarTitle').textContent=getPageTitle(curPage.id.replace('page-',''));
+  document.getElementById('topbarDate').textContent=new Date().toLocaleDateString(t('date_short'),{weekday:'short',day:'numeric',month:'short',year:'numeric'});
   // Re-render dynamic content
   renderAll();
-  const pg=document.querySelector('.page.active');
+  buildStatusFilters();
+  const pg=curPage;
   if(pg){const pid=pg.id.replace('page-','');
     if(pid==='mapa') setTimeout(()=>renderMap(),30);
     if(pid==='faktury') renderInvoices();
-    if(pid==='dofinansowania'||pid==='subsidies') renderGrants();
+    if(pid==='dofinansowania') renderGrants();
     if(pid==='dokumenty') {renderDocOrders();renderDocList();}
     if(pid==='osd') renderOSD();
-    if(pid==='przypomnienia'||pid==='herinneringen') renderReminders();
+    if(pid==='przypomnienia') renderReminders();
     if(pid==='chatbot') renderChatClients();
-    if(pid==='zlecenia'||pid==='projecten') renderOrdersFull();
+    if(pid==='zlecenia') renderOrdersFull();
     if(pid==='kalkulator') calcROI();
-    if(pid==='oferty'||pid==='offertes') fillOfferOrderSelect();
+    if(pid==='oferty') fillOfferOrderSelect();
     if(pid==='gwarancje') renderWarranties();
     if(pid==='magazijn') renderMaterials();
+    if(pid==='portaal') renderPortaal();
   }
 }
 
 function statusTag(s){
   const m={"Afgerond":"t-green","In uitvoering":"t-amber","Contract getekend":"t-teal","Aanmelding netbeheerder":"t-blue","Offerte":"t-gray","Oplevering":"t-coral"};
-  return`<span class="tag ${m[s]||'t-gray'}">${escapeHTML(s)}</span>`;
+  const k={"Afgerond":"s_afgerond","In uitvoering":"s_uitvoering","Contract getekend":"s_contract","Aanmelding netbeheerder":"s_netbeheerder","Offerte":"s_offerte","Oplevering":"s_oplevering"};
+  return`<span class="tag ${m[s]||'t-gray'}">${escapeHTML(k[s]?t(k[s]):s)}</span>`;
 }
 function typeTag(tp){
   const m={"Zonnepanelen":"t-amber","Warmtepomp":"t-blue","Zonnecollectoren":"t-teal","Batterijopslag":"t-green","Hybride PV+WP":"t-coral"};
-  return`<span class="tag ${m[tp]||'t-gray'}">${escapeHTML(tp)}</span>`;
+  const k={"Zonnepanelen":"t_pv","Warmtepomp":"t_wp","Zonnecollectoren":"t_coll","Batterijopslag":"t_accu","Hybride PV+WP":"t_hybrid"};
+  return`<span class="tag ${m[tp]||'t-gray'}">${escapeHTML(k[tp]?t(k[tp]):tp)}</span>`;
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────
-const pageTitles={dashboard:"Dashboard",zlecenia:"Projecten",mapa:"Installatiekaart",faktury:"Facturen",dofinansowania:"Subsidies",dokumenty:"Documenten & Foto's",osd:"Netbeheerder Tracker",oferty:"Offertes & Contracten AI",chatbot:"Klantchatbot",przypomnienia:"Herinneringen",kalkulator:"ROI Calculator",gwarancje:"Garanties & Service",magazijn:"Magazijn"};
+const pageTitleKeys={dashboard:"dashboard",zlecenia:"projecten",mapa:"kaart",faktury:"facturen",dofinansowania:"subsidies",dokumenty:"documenten",osd:"netbeheerder",oferty:"offertes",chatbot:"chatbot",przypomnienia:"herinneringen",kalkulator:"roi",gwarancje:"garanties",magazijn:"magazijn",portaal:"portaal",dakanalyse:"dakanalyse"};
+function getPageTitle(name){return t(pageTitleKeys[name])||name;}
 function goPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
   if(window.innerWidth<=900)closeSidebar();
-  document.getElementById('topbarTitle').textContent=pageTitles[name]||name;
+  document.getElementById('topbarTitle').textContent=getPageTitle(name);
   setBnav(name);
   if(name==='mapa') setTimeout(()=>renderMap(),30);
   if(name==='faktury') renderInvoices();
@@ -1326,6 +1486,8 @@ function goPage(name,el){
   if(name==='dashboard') renderCharts();
   if(name==='gwarancje') renderWarranties();
   if(name==='magazijn') renderMaterials();
+  if(name==='portaal') renderPortaal();
+  if(name==='dakanalyse'){fillOfferOrderSelect();const s=document.getElementById('dakOrderSel');if(s)s.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');}
 }
 function goPageMobile(name){
   goPage(name,null);
@@ -1391,15 +1553,31 @@ function orderCardHTML(o){
     <div class="order-note">${escapeHTML(o.note)}</div>
   </div>`;
 }
+function buildStatusFilters(){
+  const statuses=[
+    {nl:"Alles",key:"filter_all"},
+    {nl:"Offerte",key:"s_offerte"},
+    {nl:"Contract getekend",key:"s_contract"},
+    {nl:"In uitvoering",key:"s_uitvoering"},
+    {nl:"Oplevering",key:"s_oplevering"},
+    {nl:"Aanmelding netbeheerder",key:"s_netbeheerder"},
+    {nl:"Afgerond",key:"s_afgerond"}
+  ];
+  const sf=document.getElementById('statusFilters');
+  const active=sf.querySelector('.filter-chip.active')?.dataset.val||'Alles';
+  sf.innerHTML=statuses.map((s,i)=>`<button class="filter-chip${(active===s.nl||(!active&&i===0))?' active':''}" data-val="${s.nl}" onclick="filterOrdersFull('${s.nl}',this)">${t(s.key)||s.nl}</button>`).join('');
+  // also rebuild filterStatus select in dashboard
+  const sel=document.getElementById('filterStatus');
+  const selVal=sel.value;
+  sel.innerHTML=`<option value="">${t('filter_all_status')}</option>`+
+    statuses.slice(1).map(s=>`<option value="${s.nl}"${selVal===s.nl?' selected':''}>${t(s.key)||s.nl}</option>`).join('');
+}
 function renderOrdersFull(){
   const list=document.getElementById('orderListFull');
-  // status filter chips
-  const statuses=["Alles","Offerte","Contract getekend","In uitvoering","Oplevering","Aanmelding netbeheerder","Afgerond"];
-  const sf=document.getElementById('statusFilters');
-  if(!sf.hasChildNodes()){
-    sf.innerHTML=statuses.map((s,i)=>`<button class="filter-chip${i===0?' active':''}" onclick="filterOrdersFull('${s}',this)">${s}</button>`).join('');
-  }
-  list.innerHTML=orders.map(o=>orderCardHTML(o)).join('');
+  buildStatusFilters();
+  const activeVal=document.getElementById('statusFilters').querySelector('.filter-chip.active')?.dataset.val||'Alles';
+  const filtered=activeVal==='Alles'?orders:orders.filter(o=>o.status===activeVal);
+  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">${t('no_projects')}</div>`;
 }
 function filterOrdersFull(status,el){
   document.querySelectorAll('#statusFilters .filter-chip').forEach(c=>c.classList.remove('active'));
@@ -1603,6 +1781,7 @@ function addInvoice(){
 function renderGrants(){
   const list=document.getElementById('grantList');
   const sc={"Goedgekeurd":"t-green","In behandeling":"t-amber","Ingediend":"t-blue","Afgewezen":"t-red"};
+  const sk={"Goedgekeurd":"grant_status_approved","In behandeling":"grant_status_pending","Ingediend":"grant_status_submitted","Afgewezen":"grant_status_rejected"};
   list.innerHTML=grants.map(g=>{
     const c=clients.find(cl=>cl.id===g.clientId);
     return`<div class="grant-row">
@@ -1612,7 +1791,7 @@ function renderGrants(){
         <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${escapeHTML(g.program)} · ${t('grant_submitted')}: ${g.submitted} · ${t('grant_expected')}: ${g.expected}</div>
       </div>
       <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${fmtEur(g.amount)}</div>
-      <span class="tag ${sc[g.status]||'t-gray'}">${escapeHTML(g.status)}</span>
+      <span class="tag ${sc[g.status]||'t-gray'}">${t(sk[g.status])||escapeHTML(g.status)}</span>
     </div>`;
   }).join('');
 }
@@ -1648,7 +1827,7 @@ function renderReminders(){
   const sel=document.getElementById('r-client');
   sel.innerHTML=clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   const list=document.getElementById('remindList');
-  const months=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+  const months=lang==='nl'?["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"]:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   list.innerHTML=reminders.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(r=>{
     const c=clients.find(cl=>cl.id===r.clientId);
     const d=new Date(r.date);const dl=Math.ceil((d-TODAY)/864e5);
@@ -1658,6 +1837,7 @@ function renderReminders(){
       <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c?.name}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${r.type}</div></div>
       <span class="tag ${dl<=1?'t-red':dl<=7?'t-amber':'t-blue'}">${r.channel}</span>
       ${dl<=3?`<span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--red)">${dl===0?t('rem_today'):dl===1?t('rem_tomorrow'):dl+'d'}</span>`:''}
+      ${r.sent?`<span class="tag t-green" style="font-size:9px">✓ ${lang==='nl'?'verstuurd':'sent'}</span>`:`<button class="btn-secondary" style="font-size:10px;padding:3px 9px" onclick="openNotifModal(${reminders.indexOf(r)})">${t('notif_send')}</button>`}
     </div>`;
   }).join('');
 }
@@ -1666,7 +1846,7 @@ function addReminder(){
   const type=document.getElementById('r-type').value;
   const date=document.getElementById('r-date').value;
   const channel=document.getElementById('r-channel').value;
-  if(!date){notify('Kies een datum.');return;}
+  if(!date){notify(t('rem_no_date'));return;}
   reminders.push({clientId,type,date,channel});
   renderReminders();saveToStorage();notify(t('rem_added'));
 }
@@ -1779,7 +1959,7 @@ function updateKeyIndicator(){
     lbl.textContent='API: sk-...'+ANTHROPIC_API_KEY.slice(-4);
   } else {
     dot.classList.remove('active');
-    lbl.textContent='Geen API-sleutel';
+    lbl.textContent=t('key_no_key');
   }
 }
 async function saveApiKey(){
@@ -1864,7 +2044,7 @@ function closeSearch(){
 
 // ── REVENUE CHARTS ─────────────────────────────────────────
 function renderCharts(){
-  const months=['okt','nov','dec','jan','feb','mrt'];
+  const months=lang==='nl'?['okt','nov','dec','jan','feb','mrt']:['Oct','Nov','Dec','Jan','Feb','Mar'];
   const baseRev=[118000,95000,142000,67000,185000,233500];
   const baseKw=[28,19,42,12,65,73.4];
   // overlay real invoice data on most recent months
@@ -2115,7 +2295,7 @@ function saveServiceEntry(id){
   const tech=document.getElementById(`svc-tech-${id}`).value.trim()||'—';
   const notes=document.getElementById(`svc-notes-${id}`).value.trim();
   const next=document.getElementById(`svc-next-${id}`).value;
-  if(!date){notify('Kies een datum voor het bezoek.');return;}
+  if(!date){notify(t('svc_no_date'));return;}
   if(!w.serviceLog) w.serviceLog=[];
   w.serviceLog.unshift({date,type,tech,notes});
   if(next) w.nextService=next;
@@ -2140,7 +2320,7 @@ function openWarrantyForm(){
 function closeWarrantyForm(){document.getElementById('warrantyOverlay').classList.remove('open');}
 function saveWarranty(){
   const orderId=parseInt(document.getElementById('war-order').value);
-  if(!orderId){notify('Selecteer een project.');return;}
+  if(!orderId){notify(t('war_select_proj'));return;}
   if(warranties.find(w=>w.orderId===orderId)){notify(t('war_exists'));return;}
   warranties.push({
     id:warranties.length?Math.max(...warranties.map(w=>w.id))+1:1,
@@ -2169,11 +2349,10 @@ function renderMaterials(){
   document.getElementById('mat-low').textContent=lowCnt;
   document.getElementById('mat-value').textContent=fmtEur(Math.round(totalVal));
   document.getElementById('mat-suppliers').textContent=suppliers;
-  // category chips
+  // category chips — re-render with translated labels
   const fEl=document.getElementById('matFilters');
-  if(!fEl.hasChildNodes()){
-    fEl.innerHTML=MAT_CATS.map(cat=>`<button class="filter-chip${cat==='Wszystkie'?' active':''}" onclick="filterMaterials('${cat}',this)">${cat}</button>`).join('');
-  }
+  const tCats=t('mat_cats')||MAT_CATS;
+  fEl.innerHTML=MAT_CATS.map((cat,i)=>`<button class="filter-chip${cat===activeMatFilter?' active':''}" data-val="${cat}" onclick="filterMaterials('${cat}',this)">${tCats[i]||cat}</button>`).join('');
   const list=document.getElementById('materialList');
   if(!filtered.length){list.innerHTML=`<div class="empty">${t('mat_no_items')}</div>`;return;}
   list.innerHTML=filtered.map(m=>{
@@ -2227,7 +2406,7 @@ function openMaterialForm(){
 function closeMaterialForm(){document.getElementById('materialOverlay').classList.remove('open');}
 function saveMaterial(){
   const name=document.getElementById('mat-name-inp').value.trim();
-  if(!name){notify('Vul een productnaam in.');return;}
+  if(!name){notify(t('mat_no_name'));return;}
   materials.push({
     id:materials.length?Math.max(...materials.map(m=>m.id))+1:1,
     name,
@@ -2240,6 +2419,175 @@ function saveMaterial(){
     lastOrder:document.getElementById('mat-order-date').value||new Date().toISOString().slice(0,10)
   });
   closeMaterialForm();saveToStorage();renderMaterials();notify(t('mat_saved'));
+}
+
+// ── CLIENT PORTAL ─────────────────────────────────────────
+let portalClient=null;
+function renderPortaal(){
+  const list=document.getElementById('portalClientList');
+  list.innerHTML=clients.map(c=>`
+    <div class="client-row${portalClient===c.id?' active':''}" onclick="selectPortalClient(${c.id})">
+      <div class="av ${c.col}">${escapeHTML(c.av)}</div>
+      <div style="flex:1;min-width:0"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-sub">${escapeHTML(c.type)}</div></div>
+    </div>`).join('');
+  if(portalClient) showPortalContent(portalClient);
+}
+function selectPortalClient(id){
+  portalClient=id;
+  renderPortaal();
+  showPortalContent(id);
+}
+function showPortalContent(id){
+  const c=clients.find(x=>x.id===id);
+  const ords=orders.filter(o=>o.clientId===id);
+  const invs=invoices.filter(f=>f.clientId===id);
+  const war=warranties.find(w=>ords.some(o=>o.id===w.orderId));
+  const link=window.location.origin+window.location.pathname+'?portal='+id;
+  const el=document.getElementById('portalContent');
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:15px;font-weight:700">${escapeHTML(c.name)}</div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${escapeHTML(c.type)} · ${escapeHTML(c.email)} · ${escapeHTML(c.tel)}</div>
+      </div>
+      <button class="btn-secondary" style="font-size:11px" onclick="copyPortalLink(${id})">🔗 ${t('portal_share')}</button>
+    </div>
+    <div style="padding:14px;background:var(--green-bg);border:1px solid var(--green-dim);border-radius:8px;margin-bottom:16px;font-size:12px;font-family:'DM Mono',monospace;color:#b3f0b8;line-height:1.7">
+      ${t('portal_welcome')} <strong>${escapeHTML(c.name)}</strong>.<br>${ords.length} ${t('portal_projects').toLowerCase()} · ${invs.length} ${t('portal_invoices').toLowerCase()}${war?` · ${t('portal_next_svc')}: ${war.nextService}`:''}
+    </div>
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">${t('portal_projects')}</div>
+    ${ords.map(o=>`<div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:500">${escapeHTML(o.title)}</div>
+        <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${fmtEur(o.price)}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        ${statusTag(o.status)}${typeTag(o.type)}
+        <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-left:auto">${t('deadline')}: ${o.date}</span>
+      </div>
+      ${o.note?`<div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;line-height:1.6">${escapeHTML(o.note)}</div>`:''}
+    </div>`).join('')}
+    ${invs.length?`<div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 10px">${t('portal_invoices')}</div>
+    ${invs.map(f=>{const sc={"paid":"t-green","pending":"t-amber","overdue":"t-red"};const sl={"paid":t('inv_status_paid'),"pending":t('inv_status_pending'),"overdue":t('inv_status_overdue')};return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px"><span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2)">${escapeHTML(f.num)}</span><span style="flex:1;font-family:'DM Mono',monospace;font-size:13px;font-weight:700">${fmtEur(f.amount)}</span><span class="tag ${sc[f.status]}">${sl[f.status]}</span><span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${f.date}</span></div>`;}).join('')}`:''}`;
+}
+function copyPortalLink(id){
+  const link=window.location.origin+window.location.pathname+'?portal='+id;
+  navigator.clipboard?.writeText(link).then(()=>notify(t('portal_copied')));
+}
+
+// ── DAKANALYSE AI ─────────────────────────────────────────
+let dakImageB64=null,dakMimeType='image/jpeg',dakAnalysisResult=null;
+function handleDakUpload(e){
+  const file=e.target.files[0];if(!file)return;loadDakFile(file);
+}
+function handleDakDrop(e){
+  e.preventDefault();
+  const file=e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;loadDakFile(file);
+}
+function loadDakFile(file){
+  dakMimeType=file.type||'image/jpeg';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    dakImageB64=ev.target.result.split(',')[1];
+    const prev=document.getElementById('dakPreview');
+    prev.src=ev.target.result;
+    document.getElementById('dakPreviewWrap').style.display='block';
+    document.getElementById('dakDropzone').style.display='none';
+    document.getElementById('dakApplyBtn').style.display='none';
+    document.getElementById('dakResult').textContent=t('off_placeholder');
+    dakAnalysisResult=null;
+  };
+  reader.readAsDataURL(file);
+  // populate project select
+  const sel=document.getElementById('dakOrderSel');
+  sel.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+
+    orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
+}
+async function analyseDak(){
+  if(!dakImageB64){notify(t('dak_no_img'));return;}
+  const btn=document.getElementById('dakBtn');
+  const spin=document.getElementById('dakSpin');
+  const label=document.getElementById('dakLabel');
+  const result=document.getElementById('dakResult');
+  spin.classList.add('show');label.textContent=t('dak_analyzing');btn.disabled=true;
+  const prompt=lang==='nl'
+    ?`Je bent een zonne-energiespecialist. Analyseer deze dakfoto en geef een gedetailleerde beoordeling:\n\n1. **Dakoriëntatie** — schat de richting (Zuid, ZO, ZW, Oost/West)\n2. **Dakoppervlak** — schat het bruikbare dakoppervlak in m²\n3. **Schaduw & obstakels** — dakramen, schoorstenen, bomen, beschaduwing\n4. **Daktype & helling** — zadeldak, plat dak, mansarde; geschatte hellingshoek\n5. **Aanbevolen capaciteit** — aanbevolen kWp, aantal panelen (415W standaard)\n6. **Verwachte jaarproductie** — in kWh bij Nederlandse instraling\n7. **Opmerkingen** — aandachtspunten voor de installateur\n\nWees specifiek en praktisch. Geef getallen waar mogelijk.`
+    :`You are a solar energy specialist. Analyse this roof photo and provide a detailed assessment:\n\n1. **Roof orientation** — estimate the direction (South, SE, SW, East/West)\n2. **Roof area** — estimate the usable roof area in m²\n3. **Shading & obstacles** — skylights, chimneys, trees, shading\n4. **Roof type & pitch** — gable, flat, mansard; estimated pitch angle\n5. **Recommended capacity** — recommended kWp, number of panels (415W standard)\n6. **Expected annual production** — in kWh for Netherlands irradiation\n7. **Notes** — points of attention for the installer\n\nBe specific and practical. Give numbers where possible.`;
+  try{
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",max_tokens:900,
+      messages:[{role:"user",content:[
+        {type:"image",source:{type:"base64",media_type:dakMimeType,data:dakImageB64}},
+        {type:"text",text:prompt}
+      ]}]
+    })});
+    const data=await res.json();
+    dakAnalysisResult=data.content?.find(b=>b.type==="text")?.text||"Fout bij analyseren.";
+    result.textContent=dakAnalysisResult;
+    document.getElementById('dakApplyBtn').style.display='';
+    // try to extract kWp for ROI prefill
+    const kwpMatch=dakAnalysisResult.match(/(\d+[.,]\d+|\d+)\s*kWp/i);
+    if(kwpMatch) document.getElementById('dakApplyBtn').dataset.kwp=kwpMatch[1].replace(',','.');
+  }catch(e){result.textContent=lang==='nl'?"Verbindingsfout met AI.":"Connection error with AI.";}
+  spin.classList.remove('show');label.textContent=t('dak_btn');btn.disabled=false;
+}
+function applyDakToROI(){
+  if(!dakAnalysisResult)return;
+  const kwp=parseFloat(document.getElementById('dakApplyBtn').dataset.kwp)||0;
+  if(kwp>0){document.getElementById('roi-kwp').value=kwp;calcROI();}
+  goPage('kalkulator',document.querySelector('.nav-item[onclick*="kalkulator"]'));
+  notify(t('dak_applied'));
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────
+let notifReminder=null;
+function openNotifModal(idx){
+  notifReminder=idx;
+  const r=reminders[idx];
+  const c=clients.find(x=>x.id===r.clientId);
+  const modal=document.getElementById('notifOverlay');
+  document.getElementById('notifClientName').textContent=c?.name||'';
+  document.getElementById('notifType').textContent=r.type;
+  document.getElementById('notifDate').textContent=r.date;
+  document.getElementById('notifMsg').textContent='';
+  modal.classList.add('open');
+}
+function closeNotifModal(){document.getElementById('notifOverlay').classList.remove('open');}
+async function genNotifMsg(){
+  const r=reminders[notifReminder];
+  const c=clients.find(x=>x.id===r.clientId);
+  const ords=orders.filter(o=>o.clientId===r.clientId);
+  const msgEl=document.getElementById('notifMsg');
+  msgEl.textContent=lang==='nl'?'Genereren…':'Generating…';
+  const prompt=lang==='nl'
+    ?`Schrijf een korte, vriendelijke notificatie voor klant ${c?.name} over: ${r.type} op ${r.date}. Projecten: ${ords.map(o=>o.title).join(', ')}. Maximaal 3 zinnen. Professioneel maar warm. Nederlands.`
+    :`Write a short, friendly notification for client ${c?.name} about: ${r.type} on ${r.date}. Projects: ${ords.map(o=>o.title).join(', ')}. Maximum 3 sentences. Professional but warm. English.`;
+  try{
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:120,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    msgEl.textContent=data.content?.find(b=>b.type==="text")?.text||'';
+  }catch(e){msgEl.textContent=lang==='nl'?'Verbindingsfout.':'Connection error.';}
+}
+function sendNotifEmail(){
+  const r=reminders[notifReminder];
+  const c=clients.find(x=>x.id===r.clientId);
+  const msg=document.getElementById('notifMsg').textContent;
+  const subject=encodeURIComponent(`SolarCRM — ${r.type}`);
+  const body=encodeURIComponent(msg||`${r.type} — ${r.date}`);
+  window.open(`mailto:${c?.email||''}?subject=${subject}&body=${body}`);
+}
+function sendNotifSMS(){
+  const msg=document.getElementById('notifMsg').textContent;
+  if(msg){navigator.clipboard?.writeText(msg).then(()=>notify(t('portal_copied')));}
+}
+function sendNotifWhatsApp(){
+  const r=reminders[notifReminder];
+  const msg=document.getElementById('notifMsg').textContent||`${r.type} — ${r.date}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+}
+function markNotifSent(){
+  if(notifReminder!==null){reminders[notifReminder].sent=true;saveToStorage();renderReminders();}
+  closeNotifModal();notify(t('notif_sent'));
 }
 
 // ── MOBILE SIDEBAR ────────────────────────────────────────
@@ -2261,6 +2609,7 @@ function renderAll(){renderStats();renderClients();renderOrders();renderCharts()
 loadFromStorage();
 document.getElementById('topbarDate').textContent=new Date().toLocaleDateString(t('date_short'),{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 renderAll();
+buildStatusFilters();
 calcROI();
 
 // Add API key modal HTML
