@@ -1,29 +1,29 @@
-export default async function handler(req, res) {
-    // Sprawdź czy to zapytanie POST
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method not allowed' });
-    }
-  
-    const { message } = req.body;
-  
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'claude-3-5-sonnet-20240620',
-          max_tokens: 1024,
-          messages: [{ role: 'user', content: message }]
-        })
-      });
-  
-      const data = await response.json();
-      res.status(200).json(data);
-    } catch (error) {
-      res.status(500).json({ error: 'Błąd połączenia z AI' });
-    }
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Use key from request header (user-provided) or env var (server-side)
+  const apiKey = req.headers['x-api-key'] || process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(401).json({ error: 'No API key provided' });
+  }
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify(req.body)
+    });
+
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Connection error with AI' });
+  }
+};
