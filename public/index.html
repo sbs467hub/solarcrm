@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SolarCRM PRO — CRM dla firm OZE</title>
+<title>SolarCRM PRO — CRM voor zonne-energiebedrijven</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -269,6 +271,10 @@ html{background:var(--bg)}
 .key-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
 .key-dot.active{background:var(--green);box-shadow:0 0 5px var(--green)}
 @keyframes spin{to{transform:rotate(360deg)}}
+.lang-btn{background:none;color:var(--text3);border:none;border-radius:4px;padding:3px 8px;font-size:10px;font-weight:700;cursor:pointer;font-family:'DM Mono',monospace;transition:all .15s}
+.lang-btn.active{background:var(--green)!important;color:#0d1117!important}
+.lang-btn:not(.active):hover{color:var(--text)!important;background:var(--bg4)!important}
+@keyframes leaflet-pulse{0%{transform:scale(1);opacity:.4}100%{transform:scale(2.5);opacity:0}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .order-card{animation:fadeIn .2s ease both}
@@ -326,6 +332,97 @@ html{background:var(--bg)}
   .btn-ai{width:100%;justify-content:center}
   .map-toolbar{flex-direction:column;align-items:flex-start}
 }
+
+/* ── BOTTOM NAV (mobile only) ───────────────────────────── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);z-index:100;padding-bottom:env(safe-area-inset-bottom,0px)}
+.bnav-items{display:flex;justify-content:space-around}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 2px 12px;gap:3px;cursor:pointer;border:none;background:none;color:var(--text3);font-size:9px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.4px;transition:color .15s;-webkit-tap-highlight-color:transparent;min-width:0}
+.bnav-item.active{color:var(--green)}
+.bnav-item svg{flex-shrink:0}
+@media(max-width:900px){.bottom-nav{display:block}.content{padding-bottom:84px}}
+
+/* ── ROI CALCULATOR ─────────────────────────────────────── */
+.roi-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.roi-result{display:grid;grid-template-columns:1fr 1fr;gap:14px;background:var(--green-bg);border:1px solid var(--green-dim);border-radius:10px;padding:20px;margin-top:8px}
+.roi-val{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);line-height:1}
+.roi-lbl{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.roi-bar-wrap{margin-top:20px}
+.roi-bar-bg{background:var(--bg4);border-radius:4px;height:8px;margin-top:6px;overflow:hidden}
+.roi-bar-fill{height:100%;background:var(--green);border-radius:4px;transition:width .6s ease}
+@media(max-width:900px){.roi-inputs{grid-template-columns:1fr}.roi-result{grid-template-columns:1fr 1fr}}
+
+/* ── GLOBAL SEARCH ──────────────────────────────────────── */
+.search-wrap{position:relative}
+.search-bar{display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;transition:border-color .15s}
+.search-bar:focus-within{border-color:var(--green)}
+.search-input{background:none;border:none;outline:none;font-size:12px;font-family:'DM Mono',monospace;color:var(--text);width:150px}
+.search-input::placeholder{color:var(--text3)}
+.search-results{position:fixed;top:52px;background:var(--bg2);border:1px solid var(--border);border-radius:0 0 10px 10px;z-index:200;width:360px;max-height:320px;overflow-y:auto;display:none;box-shadow:0 8px 30px rgba(0,0,0,.6)}
+.search-results.open{display:block}
+.sr-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--border)}
+.sr-item:last-child{border-bottom:none}
+.sr-item:hover{background:var(--bg3)}
+.sr-type{font-size:9px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;min-width:52px}
+.sr-name{font-size:12px;font-weight:500}
+.sr-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+@media(max-width:900px){.search-input{width:90px}.search-results{width:calc(100vw - 20px);left:10px}}
+
+/* ── REVENUE CHART ──────────────────────────────────────── */
+.chart-wrap{overflow:visible}
+.chart-bar{transition:opacity .15s;cursor:pointer}
+.chart-bar:hover{opacity:.75}
+
+/* ── PRINT ──────────────────────────────────────────────── */
+@media print{.sidebar,.topbar,.bottom-nav,.btn-primary,.btn-secondary,.btn-ai,.form-overlay,.search-wrap,.hamburger,.ai-panel{display:none!important}.main{margin-left:0!important}.content{padding:8px!important}.page{display:block!important;page-break-inside:avoid}}
+
+/* ── LEAFLET DARK THEME ─────────────────────────────────── */
+#leafletMap{height:440px;width:100%;border-radius:0}
+.leaflet-popup-content-wrapper{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;color:var(--text);box-shadow:0 4px 24px rgba(0,0,0,.6);padding:0}
+.leaflet-popup-content{margin:12px 14px;line-height:1.6;font-size:12px}
+.leaflet-popup-tip-container{display:none}
+.leaflet-popup-close-button{color:var(--text3)!important;font-size:16px!important;padding:8px!important;top:4px!important;right:4px!important}
+.leaflet-popup-close-button:hover{color:var(--text)!important;background:none!important}
+.leaflet-control-zoom a{background:var(--bg2)!important;color:var(--text)!important;border-color:var(--border)!important;font-size:14px}
+.leaflet-control-zoom a:hover{background:var(--bg3)!important;color:var(--green)!important}
+.leaflet-control-attribution{background:rgba(13,17,23,.85)!important;color:var(--text3)!important;font-size:9px!important}
+.leaflet-control-attribution a{color:var(--text3)!important}
+.leaflet-bar{border:1px solid var(--border)!important;box-shadow:none!important}
+
+/* ── WARRANTY & SERVICE ─────────────────────────────────── */
+.war-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px;transition:border-color .15s}
+.war-card:hover{border-color:var(--border2)}
+.war-card.expiring{border-left:3px solid var(--amber);border-radius:0 10px 10px 0}
+.war-card.expired{border-left:3px solid var(--red);border-radius:0 10px 10px 0}
+.war-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.war-dates{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border);margin-bottom:14px}
+.war-date-label{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.war-date-val{font-size:12px;font-weight:600;font-family:'DM Mono',monospace}
+.war-date-val.ok{color:var(--green)}.war-date-val.warn{color:var(--amber)}.war-date-val.bad{color:var(--red)}
+.service-log{margin-top:12px}
+.service-log-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.service-entry{display:flex;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px;align-items:flex-start}
+.service-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:4px}
+.add-service-form{padding:12px;background:var(--bg3);border-radius:8px;border:1px dashed var(--border2);margin-top:10px;display:none}
+.add-service-form.open{display:block}
+@media(max-width:900px){.war-dates{grid-template-columns:1fr 1fr}}
+
+/* ── MATERIALS / INVENTORY ──────────────────────────────── */
+.mat-row{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px;transition:border-color .15s}
+.mat-row:hover{border-color:var(--border2)}
+.mat-row.low-stock{border-left:3px solid var(--red);border-radius:0 8px 8px 0}
+.mat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.mat-info{flex:1;min-width:0}
+.mat-name{font-size:13px;font-weight:500}
+.mat-supplier{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
+.mat-qty-wrap{text-align:right;min-width:70px}
+.mat-qty{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;line-height:1}
+.mat-qty.ok{color:var(--green)}.mat-qty.low{color:var(--red)}.mat-qty.warn{color:var(--amber)}
+.mat-unit{font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)}
+.mat-price{font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);text-align:right;min-width:80px}
+.stock-bar-wrap{min-width:70px}
+.stock-bar-bg{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-top:4px}
+.stock-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+@media(max-width:900px){.stock-bar-wrap{display:none}.mat-price{display:none}}
 </style>
 </head>
 <body>
@@ -341,60 +438,81 @@ html{background:var(--bg)}
       </div>
       <div>
         <div class="logo-name">Solar<span>CRM</span></div>
-        <div class="logo-tag">PRO · OZE Platform</div>
+        <div class="logo-tag">PRO · Energie Platform</div>
       </div>
     </div>
   </div>
   <nav class="nav">
-    <div class="nav-section">Główne</div>
+    <div class="nav-section" data-i18n="ns_main">Hoofdmenu</div>
     <button class="nav-item active" onclick="goPage('dashboard',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
+      <span data-i18n="dashboard">Dashboard</span>
     </button>
     <button class="nav-item" onclick="goPage('zlecenia',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Zlecenia
+      <span data-i18n="projecten">Projecten</span>
     </button>
     <button class="nav-item" onclick="goPage('mapa',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-      Mapa instalacji
+      <span data-i18n="kaart">Installatiekaart</span>
     </button>
-    <div class="nav-section">Finanse</div>
+    <div class="nav-section" data-i18n="ns_finance">Financiën</div>
     <button class="nav-item" onclick="goPage('faktury',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      Faktury
+      <span data-i18n="facturen">Facturen</span>
     </button>
     <button class="nav-item" onclick="goPage('dofinansowania',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      Dofinansowania
+      <span data-i18n="subsidies">Subsidies</span>
     </button>
-    <div class="nav-section">Instalacje</div>
+    <div class="nav-section" data-i18n="ns_installs">Installaties</div>
     <button class="nav-item" onclick="goPage('dokumenty',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-      Dokumenty & Zdjęcia
+      <span data-i18n="documenten">Documenten &amp; Foto's</span>
     </button>
     <button class="nav-item" onclick="goPage('osd',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      OSD Tracker
+      <span data-i18n="netbeheerder">Netbeheerder Tracker</span>
     </button>
-    <div class="nav-section">AI & Smart</div>
+    <div class="nav-section" data-i18n="ns_ai">AI &amp; Smart</div>
     <button class="nav-item" onclick="goPage('oferty',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-      Oferty & Umowy AI
+      <span data-i18n="offertes">Offertes &amp; Contracten AI</span>
     </button>
     <button class="nav-item" onclick="goPage('chatbot',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      Chatbot klienta
+      <span data-i18n="chatbot">Klantchatbot</span>
+    </button>
+    <button class="nav-item" onclick="goPage('portaal',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <span data-i18n="portaal">Klantportaal</span>
+    </button>
+    <button class="nav-item" onclick="goPage('dakanalyse',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span data-i18n="dakanalyse">Dakanalyse AI</span>
     </button>
     <button class="nav-item" onclick="goPage('przypomnienia',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Przypomnienia
+      <span data-i18n="herinneringen">Herinneringen</span>
+    </button>
+    <button class="nav-item" onclick="goPage('kalkulator',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <span data-i18n="roi">ROI Calculator</span>
+    </button>
+    <div class="nav-section" data-i18n="ns_service">Service &amp; Logistiek</div>
+    <button class="nav-item" onclick="goPage('gwarancje',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span data-i18n="garanties">Garanties &amp; Service</span>
+    </button>
+    <button class="nav-item" onclick="goPage('magazijn',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+      <span data-i18n="magazijn">Magazijn</span>
     </button>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-user">
-      <div class="user-av">AK</div>
-      <div><div class="user-name">Adam Kowalczyk</div><div class="user-role">Manager OZE</div></div>
+      <div class="user-av">JV</div>
+      <div><div class="user-name">Jan de Vries</div><div class="user-role">Installatiebedrijf</div></div>
     </div>
   </div>
 </aside>
@@ -407,8 +525,19 @@ html{background:var(--bg)}
     </button>
     <div class="topbar-title" id="topbarTitle">Dashboard</div>
     <div class="topbar-actions">
+      <div class="search-wrap">
+        <div class="search-bar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" id="searchInput" data-i18n-ph="search_ph" placeholder="Zoeken…" autocomplete="off" oninput="doSearch()" onblur="setTimeout(()=>closeSearch(),200)"/>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
       <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)" id="topbarDate"></div>
-      <button class="btn-secondary" onclick="openForm()">+ Nowe zlecenie</button>
+      <div style="display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:2px">
+        <button class="lang-btn active" data-lang="nl" onclick="setLang('nl')">NL</button>
+        <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      </div>
+      <button class="btn-secondary" onclick="openForm()" data-i18n="btn_new">+ Nieuw project</button>
     </div>
   </div>
   <div class="content">
@@ -416,37 +545,48 @@ html{background:var(--bg)}
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
       <div class="page-header">
-        <div><div class="page-title">Przegląd tygodnia</div><div class="page-sub">Małopolska · Tydzień 11/2025</div></div>
+        <div><div class="page-title" data-i18n="dashboard">Dashboard</div><div class="page-sub" data-i18n="sub_dashboard">Nederland · Week 13/2025</div></div>
       </div>
       <div class="stats-grid" id="statsGrid"></div>
       <div class="panel-2">
         <div class="card">
-          <div class="card-header"><div class="card-title">Klienci</div><span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)" id="clientCount"></span></div>
+          <div class="card-header"><div class="card-title" data-i18n="f_klant">Klanten</div><span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)" id="clientCount"></span></div>
           <div class="client-list" id="clientList"></div>
         </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title" id="ordersLabel">Wszystkie zlecenia</div>
+            <div class="card-title" id="ordersLabel">Alle projecten</div>
             <select class="ai-select" id="filterStatus" onchange="renderOrders()">
-              <option value="">Wszystkie statusy</option>
-              <option>Wycena</option><option>Umowa podpisana</option><option>W realizacji</option><option>Odbiór końcowy</option><option>Zgłoszenie do OSD</option><option>Zakończone</option>
+              <option value="">Alle statussen</option>
+              <option>Offerte</option><option>Contract getekend</option><option>In uitvoering</option><option>Oplevering</option><option>Aanmelding netbeheerder</option><option>Afgerond</option>
             </select>
           </div>
           <div class="order-list" id="orderList"></div>
         </div>
       </div>
+      <div class="panel-2c" style="margin-bottom:20px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Maandelijkse omzet (€)</div></div>
+          <svg id="revChart" class="chart-wrap" viewBox="0 0 400 130" style="width:100%;display:block" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Geïnstalleerd kWp / mnd</div></div>
+          <svg id="kwChart" class="chart-wrap" viewBox="0 0 400 130" style="width:100%;display:block" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+
       <div class="ai-panel">
         <div class="ai-header">
-          <div class="ai-title">Asystent AI <span class="ai-badge">GPT-4 powered</span></div>
+          <div class="ai-title"><span data-i18n="ai_title">AI-assistent</span> <span class="ai-badge">Claude powered</span></div>
           <div class="ai-controls">
             <select class="ai-select" id="aiScope">
-              <option value="ryzyko">Analiza ryzyka opóźnień</option>
-              <option value="tydzien">Podsumowanie tygodnia</option>
-              <option value="priorytet">Priorytety na jutro</option>
-              <option value="osd_ai">Status zgłoszeń OSD</option>
+              <option value="ryzyko" data-i18n-val="ai_scope_risk">Risicoanalyse vertragingen</option>
+              <option value="tydzien" data-i18n-val="ai_scope_week">Weekoverzicht</option>
+              <option value="priorytet" data-i18n-val="ai_scope_prio">Prioriteiten voor morgen</option>
+              <option value="osd_ai" data-i18n-val="ai_scope_nbe">Status netbeheerderaanvragen</option>
             </select>
             <button class="btn-ai" id="aiBtn" onclick="generateReport()">
-              <div class="spinner" id="spin"></div><span id="aiLabel">Analizuj ↗</span>
+              <div class="spinner" id="spin"></div><span id="aiLabel" data-i18n="btn_analyse">Analyseer ↗</span>
             </button>
           </div>
         </div>
@@ -457,8 +597,12 @@ html{background:var(--bg)}
     <!-- ZLECENIA -->
     <div class="page" id="page-zlecenia">
       <div class="page-header">
-        <div><div class="page-title">Zlecenia</div><div class="page-sub">Zarządzaj projektami instalacyjnymi</div></div>
-        <button class="btn-primary" onclick="openForm()">+ Nowe zlecenie</button>
+        <div><div class="page-title" data-i18n="projecten">Projecten</div><div class="page-sub" data-i18n="sub_projecten">Beheer installatieprojecten</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportOrders()">↓ CSV</button>
+          <button class="btn-secondary" onclick="exportClients()">↓ <span data-i18n="f_klant">Klanten</span></button>
+          <button class="btn-primary" onclick="openForm()" data-i18n="btn_new">+ Nieuw project</button>
+        </div>
       </div>
       <div class="filter-row" style="margin-bottom:16px" id="statusFilters"></div>
       <div style="display:flex;flex-direction:column;gap:8px" id="orderListFull"></div>
@@ -467,71 +611,73 @@ html{background:var(--bg)}
     <!-- MAPA -->
     <div class="page" id="page-mapa">
       <div class="page-header">
-        <div><div class="page-title">Mapa instalacji</div><div class="page-sub">Małopolska i okolice</div></div>
+        <div><div class="page-title" data-i18n="kaart">Installatiekaart</div><div class="page-sub" data-i18n="sub_kaart">Nederland — installatielocaties</div></div>
         <div class="filter-row">
-          <button class="filter-chip active" onclick="filterMap('all',this)">Wszystkie</button>
-          <button class="filter-chip" onclick="filterMap('W realizacji',this)">W realizacji</button>
-          <button class="filter-chip" onclick="filterMap('Zakończone',this)">Zakończone</button>
-          <button class="filter-chip" onclick="filterMap('Zgłoszenie do OSD',this)">OSD</button>
+          <button class="filter-chip active" onclick="filterMap('all',this)" data-i18n="mat_cats_0">Alles</button>
+          <button class="filter-chip" onclick="filterMap('In uitvoering',this)" data-i18n="s_uitvoering">In uitvoering</button>
+          <button class="filter-chip" onclick="filterMap('Afgerond',this)" data-i18n="s_afgerond">Afgerond</button>
+          <button class="filter-chip" onclick="filterMap('Aanmelding netbeheerder',this)" data-i18n="netbeheerder">Netbeheerder</button>
         </div>
       </div>
       <div class="map-container">
-        <div class="map-svg-wrap">
-          <div id="mapTooltip" class="map-tooltip"></div>
-          <svg id="mapSvg" viewBox="0 0 760 340" style="width:100%;display:block"></svg>
-        </div>
+        <div id="leafletMap"></div>
         <div class="map-legend">
-          <div class="map-legend-item"><div class="map-dot" style="background:#3fb950"></div>Zakończone</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#d29922"></div>W realizacji</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#58a6ff"></div>Zgłoszenie OSD</div>
-          <div class="map-legend-item"><div class="map-dot" style="background:#6e7681"></div>Wycena/Umowa</div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#3fb950"></div><span data-i18n="s_afgerond">Afgerond</span></div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#d29922"></div><span data-i18n="s_uitvoering">In uitvoering</span></div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#58a6ff"></div><span data-i18n="s_netbeheerder">Aanmelding netbeheerder</span></div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#39d353"></div><span data-i18n="s_contract">Contract getekend</span></div>
+          <div class="map-legend-item"><div class="map-dot" style="background:#6e7681"></div><span data-i18n="s_offerte">Offerte</span></div>
         </div>
       </div>
       <div class="map-detail" id="mapDetail">
-        <div class="empty">Kliknij pin na mapie, aby zobaczyć szczegóły instalacji.</div>
+        <div class="empty" data-i18n="no_selection">Klik op een locatiepin om installatiedetails te bekijken.</div>
       </div>
     </div>
 
     <!-- FAKTURY -->
     <div class="page" id="page-faktury">
       <div class="page-header">
-        <div><div class="page-title">Faktury</div><div class="page-sub">Zarządzanie rozliczeniami</div></div>
-        <button class="btn-primary" onclick="addInvoice()">+ Wystaw fakturę</button>
+        <div><div class="page-title" data-i18n="facturen">Facturen</div><div class="page-sub" data-i18n="sub_facturen">Financieel beheer</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportInvoices()">↓ CSV</button>
+          <button class="btn-secondary" onclick="window.print()" data-i18n="btn_print">🖨 Afdrukken / PDF</button>
+          <button class="btn-primary" onclick="addInvoice()" data-i18n="btn_invoice">+ Factuur aanmaken</button>
+        </div>
       </div>
       <div class="panel-3" style="margin-bottom:20px">
-        <div class="stat-card c-green"><div class="stat-label">Zapłacone (mies.)</div><div class="stat-val green" id="fv-paid">0 zł</div></div>
-        <div class="stat-card c-amber"><div class="stat-label">Do zapłaty</div><div class="stat-val amber" id="fv-pending">0 zł</div></div>
-        <div class="stat-card c-red"><div class="stat-label">Przeterminowane</div><div class="stat-val red" id="fv-overdue">0 zł</div></div>
+        <div class="stat-card c-green"><div class="stat-label" data-i18n="inv_paid">Betaald (mnd)</div><div class="stat-val green" id="fv-paid">€ 0</div></div>
+        <div class="stat-card c-amber"><div class="stat-label" data-i18n="inv_pending">Te betalen</div><div class="stat-val amber" id="fv-pending">€ 0</div></div>
+        <div class="stat-card c-red"><div class="stat-label" data-i18n="inv_overdue">Achterstallig</div><div class="stat-val red" id="fv-overdue">€ 0</div></div>
       </div>
-      <div class="card"><div class="card-header"><div class="card-title">Lista faktur</div></div><div id="fvList"></div></div>
+      <div class="card"><div class="card-header"><div class="card-title" data-i18n="inv_all">Alle facturen</div></div><div id="fvList"></div></div>
     </div>
 
     <!-- DOFINANSOWANIA -->
     <div class="page" id="page-dofinansowania">
       <div class="page-header">
-        <div><div class="page-title">Dofinansowania</div><div class="page-sub">Czyste Powietrze, Mój Prąd, ulgi</div></div>
-        <button class="btn-primary" onclick="addGrant()">+ Dodaj wniosek</button>
+        <div><div class="page-title" data-i18n="subsidies">Subsidies</div><div class="page-sub" data-i18n="sub_subs">SDE++, ISDE, Salderingsregeling</div></div>
+        <button class="btn-primary" onclick="addGrant()" data-i18n="btn_add_sub">+ Subsidie toevoegen</button>
       </div>
       <div class="panel-3">
-        <div class="grant-program"><div class="grant-program-name">Czyste Powietrze</div><div class="grant-program-val">66 000 zł</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Aktywny program</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">PV + Pompa ciepła + termomodernizacja</div></div>
-        <div class="grant-program"><div class="grant-program-name">Mój Prąd 6.0</div><div class="grant-program-val">7 000 zł</div><div style="font-size:10px;color:var(--amber);font-family:'DM Mono',monospace;margin-top:4px">⚡ Sprawdź dostępność</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">PV + magazyn energii</div></div>
-        <div class="grant-program"><div class="grant-program-name">Ulga termomodernizacyjna</div><div class="grant-program-val">53 000 zł</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Odliczenie PIT/CIT</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Pompa ciepła, PV, ocieplenie</div></div>
+        <div class="grant-program"><div class="grant-program-name">SDE++</div><div class="grant-program-val">€ 0,11/kWh</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Actief programma</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Zonnepanelen, wind, biogas · 15 jaar</div></div>
+        <div class="grant-program"><div class="grant-program-name">ISDE</div><div class="grant-program-val">€ 4.000</div><div style="font-size:10px;color:var(--amber);font-family:'DM Mono',monospace;margin-top:4px">⚡ Controleer beschikbaarheid</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Warmtepomp, zonneboiler</div></div>
+        <div class="grant-program"><div class="grant-program-name">Salderingsregeling</div><div class="grant-program-val">100%</div><div style="font-size:10px;color:#3fb950;font-family:'DM Mono',monospace;margin-top:4px">● Terugleverkorting</div><div style="font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:2px">Wordt afgebouwd t/m 2031</div></div>
       </div>
-      <div class="card"><div class="card-header"><div class="card-title">Wnioski klientów</div></div><div id="grantList"></div></div>
+      <div class="card"><div class="card-header"><div class="card-title" data-i18n="grant_clients">Aanvragen klanten</div></div><div id="grantList"></div></div>
     </div>
 
     <!-- DOKUMENTY -->
     <div class="page" id="page-dokumenty">
-      <div class="page-header"><div><div class="page-title">Dokumenty & Zdjęcia</div><div class="page-sub">Protokoły, zdjęcia z montażu, certyfikaty</div></div></div>
+      <div class="page-header"><div><div class="page-title" data-i18n="documenten">Documenten &amp; Foto's</div><div class="page-sub" data-i18n="sub_docs">Protocollen, foto's, certificaten</div></div></div>
       <div class="panel-2">
-        <div class="card"><div class="card-header"><div class="card-title">Wybierz zlecenie</div></div><div class="client-list" id="docOrderList"></div></div>
+        <div class="card"><div class="card-header"><div class="card-title" data-i18n="docs_choose">Kies een project</div></div><div class="client-list" id="docOrderList"></div></div>
         <div class="card">
-          <div class="card-header"><div class="card-title" id="docTitle">Dokumenty</div><button class="btn-secondary" style="font-size:11px" onclick="document.getElementById('fileInput').click()">+ Dodaj</button></div>
+          <div class="card-header"><div class="card-title" id="docTitle">Documenten</div><button class="btn-secondary" style="font-size:11px" onclick="document.getElementById('fileInput').click()">+ Toevoegen</button></div>
           <input type="file" id="fileInput" style="display:none" multiple accept="image/*,.pdf,.doc,.docx" onchange="handleUpload(event)"/>
           <div class="dropzone" onclick="document.getElementById('fileInput').click()">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)">Przeciągnij lub kliknij aby dodać pliki</div>
-            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px">Zdjęcia z montażu, protokoły PDF, umowy</div>
+            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)" data-i18n="docs_drop">Sleep bestanden of klik hier</div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px" data-i18n="docs_hint">Installatiefoto's, protocollen PDF, contracten</div>
           </div>
           <div class="doc-list" id="docList"></div>
         </div>
@@ -540,61 +686,110 @@ html{background:var(--bg)}
 
     <!-- OSD -->
     <div class="page" id="page-osd">
-      <div class="page-header"><div><div class="page-title">OSD Tracker</div><div class="page-sub">Status zgłoszeń do operatorów sieci (Tauron, PGE, Energa)</div></div></div>
+      <div class="page-header"><div><div class="page-title" data-i18n="netbeheerder">Netbeheerder Tracker</div><div class="page-sub" data-i18n="sub_nbe">Status aansluitaanvragen bij netbeheerders (Liander, Enexis, Stedin)</div></div></div>
       <div id="osdList"></div>
     </div>
 
     <!-- OFERTY AI -->
     <div class="page" id="page-oferty">
-      <div class="page-header"><div><div class="page-title">Oferty & Umowy AI</div><div class="page-sub">Generator dokumentów oparty na AI</div></div></div>
+      <div class="page-header"><div><div class="page-title" data-i18n="offertes">Offertes &amp; Contracten AI</div><div class="page-sub" data-i18n="sub_offertes">AI-gestuurde documentgenerator</div></div></div>
       <div class="panel-2c">
         <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Parametry dokumentu</div>
+          <div class="card-title" style="margin-bottom:14px" data-i18n="off_params">Documentparameters</div>
           <div class="form-grid" style="gap:12px">
-            <div class="form-field"><div class="form-label">Klient</div><input class="form-input" id="of-client" placeholder="Jan Kowalski / Firma XYZ"/></div>
-            <div class="form-field"><div class="form-label">Adres instalacji</div><input class="form-input" id="of-addr" placeholder="ul. Słoneczna 12, Kraków"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="off_fill">Vul uit project</div>
+              <select class="form-select" id="of-order" onchange="fillOfferFromOrder()">
+                <option value="">— kies een project —</option>
+              </select>
+            </div>
+            <div class="form-field"><div class="form-label" data-i18n="off_client">Klant</div><input class="form-input" id="of-client" placeholder="Familie van den Berg / ProBouw BV"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="off_addr">Installatieadres</div><input class="form-input" id="of-addr" placeholder="Zonstraat 12, Utrecht"/></div>
             <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Typ instalacji</div><select class="form-select" id="of-type"><option>Fotowoltaika</option><option>Pompa ciepła</option><option>Hybryda PV + PC</option><option>Magazyn energii</option></select></div>
-              <div class="form-field"><div class="form-label">Moc (kWp)</div><input class="form-input" id="of-kw" type="number" value="9.9" step="0.5"/></div>
+              <div class="form-field"><div class="form-label" data-i18n="off_type">Type installatie</div><select class="form-select" id="of-type"><option>Zonnepanelen</option><option>Warmtepomp</option><option>Hybride PV+WP</option><option>Batterijopslag</option></select></div>
+              <div class="form-field"><div class="form-label" data-i18n="off_kwp">Vermogen (kWp)</div><input class="form-input" id="of-kw" type="number" value="9.9" step="0.5"/></div>
             </div>
             <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Wartość netto (zł)</div><input class="form-input" id="of-price" type="number" value="28000"/></div>
-              <div class="form-field"><div class="form-label">Typ dokumentu</div><select class="form-select" id="of-doctype"><option value="oferta">Oferta handlowa</option><option value="umowa">Umowa instalacyjna</option><option value="protokol">Protokół odbioru</option></select></div>
+              <div class="form-field"><div class="form-label" data-i18n="off_price">Nettobedrag (€)</div><input class="form-input" id="of-price" type="number" value="15000"/></div>
+              <div class="form-field"><div class="form-label" data-i18n="off_doctype">Documenttype</div><select class="form-select" id="of-doctype"><option value="oferta">Offerte</option><option value="umowa">Installatiecontract</option><option value="protokol">Opleveringsprotocol</option></select></div>
             </div>
-            <div class="form-field"><div class="form-label">Uwagi dodatkowe</div><textarea class="form-textarea" id="of-notes" placeholder="Dofinansowanie Czyste Powietrze, dach skośny 35°, licznik dwukierunkowy..."></textarea></div>
-            <div style="display:flex;gap:8px">
-              <button class="btn-ai" id="offerBtn" onclick="genOffer()"><div class="spinner" id="ofSpin"></div><span id="ofLabel">Generuj AI ↗</span></button>
-              <button class="btn-secondary" onclick="copyOffer()">Kopiuj</button>
+            <div class="form-field"><div class="form-label" data-i18n="off_notes">Aanvullende opmerkingen</div><textarea class="form-textarea" id="of-notes" placeholder="SDE++ subsidie, schuin dak 35°, terugleveringsmeter, ISDE aanvraag..."></textarea></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn-ai" id="offerBtn" onclick="genOffer()"><div class="spinner" id="ofSpin"></div><span id="ofLabel" data-i18n="btn_gen_ai">Genereer AI ↗</span></button>
+              <button class="btn-secondary" onclick="copyOffer()" data-i18n="btn_copy">Kopiëren</button>
+              <button class="btn-secondary" onclick="window.print()">🖨 PDF</button>
             </div>
           </div>
         </div>
         <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Podgląd dokumentu</div>
-          <div id="offerPreview" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.8;white-space:pre-wrap;min-height:300px">Wypełnij formularz po lewej i kliknij "Generuj AI" aby stworzyć profesjonalny dokument.</div>
+          <div class="card-title" style="margin-bottom:14px" data-i18n="off_preview">Documentvoorbeeld</div>
+          <div id="offerPreview" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.8;white-space:pre-wrap;min-height:300px" data-i18n="off_placeholder">Vul het formulier links in en klik op "Genereer AI" om een professioneel document te maken.</div>
         </div>
       </div>
     </div>
 
     <!-- CHATBOT -->
     <div class="page" id="page-chatbot">
-      <div class="page-header"><div><div class="page-title">Chatbot klienta</div><div class="page-sub">AI asystent statusu instalacji dla klienta</div></div></div>
+      <div class="page-header"><div><div class="page-title" data-i18n="chatbot">Klantchatbot</div><div class="page-sub" data-i18n="sub_chat">AI-assistent installatiestatus voor de klant</div></div></div>
       <div class="panel-2c">
         <div class="chat-client-list">
-          <div class="card-title" style="margin-bottom:12px">Wybierz klienta</div>
+          <div class="card-title" style="margin-bottom:12px" data-i18n="chat_client_lbl">Kies een klant</div>
           <div id="chatClientList"></div>
         </div>
         <div class="chat-window">
           <div class="chat-header">
             <div class="chat-av"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3fb950" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg></div>
-            <div><div class="chat-title" id="chatClientName">SolarBot</div><div class="chat-sub">Asystent instalacji OZE</div></div>
+            <div><div class="chat-title" id="chatClientName">SolarBot</div><div class="chat-sub" data-i18n="chat_sub">AI-assistent installatiestatus</div></div>
             <div class="chat-online"></div>
           </div>
           <div class="chat-msgs" id="chatMsgs">
-            <div class="msg bot">Cześć! Jestem asystentem SolarCRM. Wybierz klienta z listy lub zadaj mi pytanie o zlecenia.</div>
+            <div class="msg bot" data-i18n="chat_welcome">Hallo! Ik ben de assistent van SolarCRM. Kies een klant uit de lijst of stel een vraag over de projecten.</div>
           </div>
           <div class="chat-input-row">
-            <input class="chat-input" id="chatInput" placeholder="Napisz wiadomość..." onkeydown="if(event.key==='Enter')sendChat()"/>
-            <button class="btn-primary" style="padding:7px 14px" onclick="sendChat()">Wyślij</button>
+            <input class="chat-input" id="chatInput" data-i18n-ph="chat_placeholder" placeholder="Schrijf een bericht..." onkeydown="if(event.key==='Enter')sendChat()"/>
+            <button class="btn-primary" style="padding:7px 14px" onclick="sendChat()" data-i18n="btn_send">Versturen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KALKULATOR ROI -->
+    <div class="page" id="page-kalkulator">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="roi">ROI Calculator</div><div class="page-sub" data-i18n="sub_roi">Bereken terugverdientijd en besparingen voor de klant</div></div>
+      </div>
+      <div class="panel-2c">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:16px" data-i18n="roi_params">Installatieparameters</div>
+          <div class="roi-inputs">
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_kwh">Jaarverbruik (kWh)</div><input class="form-input" id="roi-kwh" type="number" value="3500" oninput="calcROI()"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_kwp">Vermogen installatie (kWp)</div><input class="form-input" id="roi-kwp" type="number" value="9.9" step="0.1" oninput="calcROI()"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_cost">Installatiekosten (€)</div><input class="form-input" id="roi-cost" type="number" value="15000" oninput="calcROI()"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_price">Energieprijs (€/kWh)</div><input class="form-input" id="roi-price" type="number" value="0.35" step="0.01" oninput="calcROI()"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_sub">Subsidie (€)</div><input class="form-input" id="roi-grant" type="number" value="2000" oninput="calcROI()"/></div>
+            <div class="form-field"><div class="form-label" data-i18n="roi_input_dir">Dakrichting</div>
+              <select class="form-select" id="roi-dir" onchange="calcROI()">
+                <option value="1.0" data-i18n-val="roi_dir_s">Zuid (100%)</option>
+                <option value="0.93" data-i18n-val="roi_dir_se">ZO / ZW (93%)</option>
+                <option value="0.82" data-i18n-val="roi_dir_ew">Oost / West (82%)</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="calcROI()" style="width:100%" data-i18n="roi_btn">Bereken ROI</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:4px" data-i18n="roi_results">Analyseresultaten</div>
+          <div class="roi-result" id="roiResult">
+            <div><div class="roi-val" id="roi-prod">—</div><div class="roi-lbl" data-i18n="roi_prod">Productie/jaar (kWh)</div></div>
+            <div><div class="roi-val" id="roi-save">—</div><div class="roi-lbl" data-i18n="roi_save">Besparing / jaar (€)</div></div>
+            <div><div class="roi-val" id="roi-payback">—</div><div class="roi-lbl" data-i18n="roi_payback">Terugverdientijd (jr)</div></div>
+            <div><div class="roi-val" id="roi-25y">—</div><div class="roi-lbl" data-i18n="roi_25y">Besparing 25 jaar (€)</div></div>
+            <div><div class="roi-val" id="roi-co2">—</div><div class="roi-lbl" data-i18n="roi_co2">CO₂-reductie / jaar (t)</div></div>
+            <div><div class="roi-val" id="roi-net">—</div><div class="roi-lbl" data-i18n="roi_net">Nettokostprijs (€)</div></div>
+          </div>
+          <div class="roi-bar-wrap">
+            <div style="display:flex;justify-content:space-between;font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)"><span data-i18n="roi_progress">Terugverdienvoortgang</span><span id="roi-pct">0%</span></div>
+            <div class="roi-bar-bg"><div class="roi-bar-fill" id="roi-bar" style="width:0%"></div></div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:6px" data-i18n="roi_hint">Aanname: 900 kWh/kWp/jaar · energieprijsstijging 5%/jaar · Nederland</div>
           </div>
         </div>
       </div>
@@ -602,55 +797,259 @@ html{background:var(--bg)}
 
     <!-- PRZYPOMNIENIA -->
     <div class="page" id="page-przypomnienia">
-      <div class="page-header"><div><div class="page-title">Przypomnienia SMS & Email</div><div class="page-sub">Automatyczne powiadomienia dla klientów</div></div></div>
+      <div class="page-header"><div><div class="page-title" data-i18n="herinneringen">Herinneringen</div><div class="page-sub" data-i18n="sub_rem">Automatische meldingen voor klanten</div></div></div>
       <div class="panel-2c">
-        <div><div class="section-title">Nadchodzące terminy</div><div id="remindList"></div></div>
+        <div><div class="section-title" data-i18n="rem_upcoming">Aankomende termijnen</div><div id="remindList"></div></div>
         <div class="card">
-          <div class="card-title" style="margin-bottom:14px">Dodaj przypomnienie</div>
+          <div class="card-title" style="margin-bottom:14px" data-i18n="rem_add">Herinnering toevoegen</div>
           <div class="form-grid" style="gap:11px">
-            <div class="form-field"><div class="form-label">Klient</div><select class="form-select" id="r-client"></select></div>
-            <div class="form-field"><div class="form-label">Typ zdarzenia</div><select class="form-select" id="r-type"><option>Termin montażu</option><option>Przegląd serwisowy</option><option>Płatność faktury</option><option>Dokumenty do OSD</option><option>Odbiór instalacji</option></select></div>
+            <div class="form-field"><div class="form-label" data-i18n="f_klant">Klant</div><select class="form-select" id="r-client"></select></div>
+            <div class="form-field"><div class="form-label" data-i18n="rem_type">Type afspraak</div><select class="form-select" id="r-type"><option>Installatiedatum</option><option>Jaarlijks onderhoud</option><option>Factuur betaling</option><option>Aanvraag netbeheerder</option><option>Oplevering installatie</option></select></div>
             <div class="form-grid form-grid-2" style="gap:8px">
-              <div class="form-field"><div class="form-label">Data</div><input class="form-input" type="date" id="r-date"/></div>
-              <div class="form-field"><div class="form-label">Kanał</div><select class="form-select" id="r-channel"><option>SMS</option><option>Email</option><option>SMS + Email</option></select></div>
+              <div class="form-field"><div class="form-label" data-i18n="rem_date">Datum</div><input class="form-input" type="date" id="r-date"/></div>
+              <div class="form-field"><div class="form-label" data-i18n="rem_channel">Kanaal</div><select class="form-select" id="r-channel"><option>SMS</option><option>Email</option><option>SMS + Email</option></select></div>
             </div>
-            <button class="btn-primary" onclick="addReminder()" style="align-self:flex-start">Dodaj przypomnienie</button>
+            <button class="btn-primary" onclick="addReminder()" style="align-self:flex-start" data-i18n="btn_add_rem">Herinnering toevoegen</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GWARANCJE & SERWIS -->
+    <div class="page" id="page-gwarancje">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="garanties">Garanties &amp; Service</div><div class="page-sub" data-i18n="sub_gar">Garantiebeheer en onderhoudshistorie</div></div>
+        <button class="btn-primary" onclick="openWarrantyForm()" data-i18n="btn_add_war">+ Garantie toevoegen</button>
+      </div>
+      <div class="panel-3" style="margin-bottom:20px">
+        <div class="stat-card c-green"><div class="stat-label" data-i18n="war_active_lbl">Actieve garanties</div><div class="stat-val green" id="war-active">0</div></div>
+        <div class="stat-card c-amber"><div class="stat-label" data-i18n="war_soon_lbl">Verloopt (90 dagen)</div><div class="stat-val amber" id="war-soon">0</div></div>
+        <div class="stat-card c-blue"><div class="stat-label" data-i18n="war_svc_lbl">Servicebezoeken</div><div class="stat-val blue" id="war-services">0</div></div>
+      </div>
+      <div id="warrantyList"></div>
+    </div>
+
+    <!-- MAGAZIJN -->
+    <div class="page" id="page-magazijn">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="magazijn">Magazijn</div><div class="page-sub" data-i18n="sub_mag">Voorraad componenten en materialen</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" onclick="exportMaterials()">↓ CSV</button>
+          <button class="btn-primary" onclick="openMaterialForm()" data-i18n="btn_add_mat">+ Materiaal toevoegen</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="matStats">
+        <div class="stat-card c-green"><div class="stat-label" data-i18n="mat_total_lbl">Magazijnposities</div><div class="stat-val" id="mat-total">0</div></div>
+        <div class="stat-card c-red"><div class="stat-label" data-i18n="mat_low_lbl">Lage voorraad</div><div class="stat-val red" id="mat-low">0</div><div class="stat-sub" data-i18n="mat_low_sub">onder minimum</div></div>
+        <div class="stat-card c-blue"><div class="stat-label" data-i18n="mat_value_lbl">Magazijnwaarde</div><div class="stat-val blue" id="mat-value">—</div></div>
+        <div class="stat-card c-amber"><div class="stat-label" data-i18n="mat_sup_lbl">Leveranciers</div><div class="stat-val amber" id="mat-suppliers">0</div></div>
+      </div>
+      <div class="filter-row" style="margin-bottom:16px" id="matFilters"></div>
+      <div id="materialList"></div>
+    </div>
+
+    <!-- KLANTPORTAAL -->
+    <div class="page" id="page-portaal">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="portal_title">Klantportaal</div><div class="page-sub" data-i18n="portal_sub">Gedeeld overzicht voor de klant</div></div>
+      </div>
+      <div class="panel-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title" data-i18n="f_klant">Klant</div></div>
+          <div id="portalClientList"></div>
+        </div>
+        <div class="card" id="portalContent">
+          <div class="empty" data-i18n="portal_no_client">Kies een klant uit de lijst.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAKANALYSE AI -->
+    <div class="page" id="page-dakanalyse">
+      <div class="page-header">
+        <div><div class="page-title" data-i18n="dak_title">Dakanalyse AI</div><div class="page-sub" data-i18n="dak_sub">Upload een foto van het dak voor AI-analyse</div></div>
+      </div>
+      <div class="panel-2c">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_title">Dakanalyse AI</div>
+          <div class="dropzone" id="dakDropzone" onclick="document.getElementById('dakFileInput').click()" ondragover="event.preventDefault()" ondrop="handleDakDrop(event)">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)" data-i18n="dak_drop">Sleep een dakfoto hierheen of klik om te uploaden</div>
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px" data-i18n="dak_hint">JPG, PNG of WEBP · max 10 MB</div>
+          </div>
+          <input type="file" id="dakFileInput" style="display:none" accept="image/*" onchange="handleDakUpload(event)"/>
+          <div id="dakPreviewWrap" style="display:none;margin-bottom:14px">
+            <img id="dakPreview" style="width:100%;border-radius:8px;border:1px solid var(--border);max-height:260px;object-fit:cover"/>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-ai" id="dakBtn" onclick="analyseDak()">
+              <div class="spinner" id="dakSpin"></div>
+              <span id="dakLabel" data-i18n="dak_btn">Analyseer dak ↗</span>
+            </button>
+            <button class="btn-secondary" id="dakApplyBtn" style="display:none" onclick="applyDakToROI()" data-i18n="dak_apply">Toepassen in ROI Calculator</button>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px" data-i18n="off_fill">Project koppelen</div>
+            <select class="form-select" id="dakOrderSel" style="margin-bottom:0">
+              <option value="">— optioneel —</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_result_title">Analyseresultaat</div>
+          <div id="dakResult" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.9;white-space:pre-wrap;min-height:280px" data-i18n="off_placeholder">Vul het formulier links in en klik op "Analyseer dak" om een AI-analyse te starten.</div>
         </div>
       </div>
     </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bnav-items">
+    <button class="bnav-item active" id="bnav-dashboard" onclick="goPageMobile('dashboard')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Home
+    </button>
+    <button class="bnav-item" id="bnav-zlecenia" onclick="goPageMobile('zlecenia')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Projecten
+    </button>
+    <button class="bnav-item" id="bnav-kalkulator" onclick="goPageMobile('kalkulator')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      ROI
+    </button>
+    <button class="bnav-item" id="bnav-chatbot" onclick="goPageMobile('chatbot')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chat AI
+    </button>
+    <button class="bnav-item" id="bnav-more" onclick="toggleSidebar()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Meer
+    </button>
+  </div>
+</nav>
+
 </div><!-- /shell -->
 
 <!-- ADD ORDER FORM MODAL -->
 <div class="form-overlay" id="formOverlay">
   <div class="form-modal">
     <div class="form-title">
-      Nowe zlecenie OZE
+      <span data-i18n="form_new_project">Nieuw installatieproject</span>
       <button class="form-close" onclick="closeForm()">✕</button>
     </div>
     <div class="form-grid">
       <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Klient</div><input class="form-input" id="f-client" placeholder="Nazwa firmy lub osoby"/></div>
-        <div class="form-field"><div class="form-label">Adres instalacji</div><input class="form-input" id="f-addr" placeholder="ul. Słoneczna 5, Kraków"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_klant">Klant</div><input class="form-input" id="f-client" data-i18n-ph="form_client_ph" placeholder="Bedrijfsnaam of persoon"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_adres">Installatieadres</div><input class="form-input" id="f-addr" data-i18n-ph="form_addr_ph" placeholder="Meentheweg 22, Drachten"/></div>
       </div>
       <div class="form-grid form-grid-3" style="gap:10px">
-        <div class="form-field"><div class="form-label">Typ instalacji</div><select class="form-select" id="f-type"><option>Fotowoltaika</option><option>Pompa ciepła</option><option>Kolektory słoneczne</option><option>Magazyn energii</option><option>Hybryda PV+PC</option></select></div>
-        <div class="form-field"><div class="form-label">Moc (kWp)</div><input class="form-input" id="f-kw" type="number" step="0.1" placeholder="9.9"/></div>
-        <div class="form-field"><div class="form-label">Wartość (zł)</div><input class="form-input" id="f-price" type="number" placeholder="28000"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_type">Type installatie</div><select class="form-select" id="f-type"><option>Zonnepanelen</option><option>Warmtepomp</option><option>Zonnecollectoren</option><option>Batterijopslag</option><option>Hybride PV+WP</option></select></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_kwp">Vermogen (kWp)</div><input class="form-input" id="f-kw" type="number" step="0.1" placeholder="9.9"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_waarde">Waarde (€)</div><input class="form-input" id="f-price" type="number" placeholder="28000"/></div>
       </div>
       <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Status</div><select class="form-select" id="f-status"><option>Wycena</option><option>Umowa podpisana</option><option>W realizacji</option><option>Odbiór końcowy</option><option>Zgłoszenie do OSD</option><option>Zakończone</option></select></div>
-        <div class="form-field"><div class="form-label">Termin realizacji</div><input class="form-input" id="f-date" type="date"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_status">Status</div><select class="form-select" id="f-status"><option>Offerte</option><option>Contract getekend</option><option>In uitvoering</option><option>Oplevering</option><option>Aanmelding netbeheerder</option><option>Afgerond</option></select></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_datum">Verwachte oplevering</div><input class="form-input" id="f-date" type="date"/></div>
       </div>
-      <div class="form-field"><div class="form-label">Notatka</div><textarea class="form-textarea" id="f-note" placeholder="Typ dachu, falownik, uwagi montażowe..."></textarea></div>
+      <div class="form-field"><div class="form-label" data-i18n="f_notitie">Notitie</div><textarea class="form-textarea" id="f-note" data-i18n-ph="form_note_ph" placeholder="Daktype, omvormermodel, montage-opmerkingen..."></textarea></div>
     </div>
     <div class="divider"></div>
     <div class="form-actions">
-      <button class="btn-primary" onclick="saveOrder()">Zapisz zlecenie</button>
-      <button class="btn-secondary" onclick="closeForm()">Anuluj</button>
+      <button class="btn-primary" onclick="saveOrder()" data-i18n="btn_save_proj">Project opslaan</button>
+      <button class="btn-secondary" onclick="closeForm()" data-i18n="btn_cancel">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- WARRANTY FORM MODAL -->
+<div class="form-overlay" id="warrantyOverlay">
+  <div class="form-modal">
+    <div class="form-title"><span data-i18n="btn_add_war">+ Garantie toevoegen</span><button class="form-close" onclick="closeWarrantyForm()">✕</button></div>
+    <div class="form-grid">
+      <div class="form-field"><div class="form-label" data-i18n="f_order">Project</div>
+        <select class="form-select" id="war-order"></select>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label" data-i18n="war_instdate">Installatiedatum</div><input class="form-input" type="date" id="war-inst-date"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="war_end">Garantie installatie t/m</div><input class="form-input" type="date" id="war-end-date"/></div>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label" data-i18n="war_inv">Garantie omvormer t/m</div><input class="form-input" type="date" id="war-inv-date"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="war_mod">Garantie panelen t/m</div><input class="form-input" type="date" id="war-mod-date"/></div>
+      </div>
+      <div class="form-field"><div class="form-label" data-i18n="war_next">Volgende onderhoud</div><input class="form-input" type="date" id="war-next-service"/></div>
+      <div class="form-field"><div class="form-label" data-i18n="f_notitie">Notities</div><textarea class="form-textarea" id="war-notes" data-i18n-ph="war_notes_ph" placeholder="Garantieomschrijving, omvormernummer, serienummers..."></textarea></div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveWarranty()" data-i18n="war_add">Garantie opslaan</button>
+      <button class="btn-secondary" onclick="closeWarrantyForm()" data-i18n="btn_cancel">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- MATERIAL FORM MODAL -->
+<div class="form-overlay" id="materialOverlay">
+  <div class="form-modal">
+    <div class="form-title"><span data-i18n="btn_add_mat">+ Materiaal toevoegen</span><button class="form-close" onclick="closeMaterialForm()">✕</button></div>
+    <div class="form-grid">
+      <div class="form-field"><div class="form-label">Productnaam</div><input class="form-input" id="mat-name-inp" data-i18n-ph="mat_name_ph" placeholder="bijv. Zonnepaneel Longi 415W"/></div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Categorie</div>
+          <select class="form-select" id="mat-cat-inp">
+            <option>Zonnepanelen</option><option>Omvormers</option><option>Bekabeling</option>
+            <option>Montage</option><option>Warmtepompen</option><option>Batterijopslag</option><option>Overig</option>
+          </select>
+        </div>
+        <div class="form-field"><div class="form-label">Leverancier</div><input class="form-input" id="mat-supplier-inp" placeholder="Naam leverancier"/></div>
+      </div>
+      <div class="form-grid form-grid-3" style="gap:10px">
+        <div class="form-field"><div class="form-label">Aantal</div><input class="form-input" type="number" id="mat-qty-inp" value="1" min="0"/></div>
+        <div class="form-field"><div class="form-label">Eenheid</div><input class="form-input" id="mat-unit-inp" placeholder="st / rol / set"/></div>
+        <div class="form-field"><div class="form-label">Min. voorraad</div><input class="form-input" type="number" id="mat-min-inp" value="1" min="0"/></div>
+      </div>
+      <div class="form-grid form-grid-2" style="gap:10px">
+        <div class="form-field"><div class="form-label">Stukprijs (€)</div><input class="form-input" type="number" id="mat-price-inp" value="0" min="0"/></div>
+        <div class="form-field"><div class="form-label">Laatste bestelling</div><input class="form-input" type="date" id="mat-order-date"/></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="saveMaterial()" data-i18n="mat_add">Materiaal opslaan</button>
+      <button class="btn-secondary" onclick="closeMaterialForm()" data-i18n="btn_cancel">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION MODAL -->
+<div class="form-overlay" id="notifOverlay">
+  <div class="form-modal" style="width:480px">
+    <div class="form-title">
+      <span data-i18n="notif_title">Notificatie versturen</span>
+      <button class="form-close" onclick="closeNotifModal()">✕</button>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:14px;padding:12px;background:var(--bg3);border-radius:8px;border:1px solid var(--border)">
+      <div>
+        <div style="font-size:13px;font-weight:600" id="notifClientName"></div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:2px"><span id="notifType"></span> · <span id="notifDate"></span></div>
+      </div>
+    </div>
+    <div class="form-field" style="margin-bottom:12px">
+      <div class="form-label" data-i18n="notif_preview">Berichtvoorbeeld</div>
+      <textarea class="form-textarea" id="notifMsg" style="min-height:90px" placeholder="Klik op 'Genereer bericht' of schrijf zelf…"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="btn-ai" onclick="genNotifMsg()">✦ <span data-i18n="notif_gen">Genereer bericht ↗</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="form-actions" style="flex-wrap:wrap">
+      <button class="btn-primary" onclick="sendNotifEmail()" data-i18n="notif_email">E-mail opstellen</button>
+      <button class="btn-secondary" onclick="sendNotifSMS()" data-i18n="notif_sms">SMS kopiëren</button>
+      <button class="btn-secondary" onclick="sendNotifWhatsApp()" data-i18n="notif_whatsapp">WhatsApp</button>
+      <button class="btn-secondary" onclick="markNotifSent()" style="margin-left:auto" data-i18n="notif_mark_sent">Markeer als verstuurd</button>
     </div>
   </div>
 </div>
@@ -660,68 +1059,421 @@ html{background:var(--bg)}
 <script>
 // ── DATA ──────────────────────────────────────────────────
 const clients=[
-  {id:1,name:"Farma Wiatrakowa Sp. z o.o.",type:"Agro",av:"FW",col:"av-g",tel:"501 234 567",email:"biuro@farmawiatrakowa.pl"},
-  {id:2,name:"Jan Kowalski",type:"Dom jednorodzinny",av:"JK",col:"av-a",tel:"602 111 222",email:"jan.kowalski@gmail.com"},
-  {id:3,name:"Hurtownia BudMax",type:"Przemysł / magazyn",av:"BM",col:"av-b",tel:"12 345 67 89",email:"kontakt@budmax.pl"},
-  {id:4,name:"Anna Wiśniewska",type:"Dom + pompa ciepła",av:"AW",col:"av-t",tel:"793 456 789",email:"anna.wisniewska@wp.pl"},
-  {id:5,name:"Gmina Zielona Dolina",type:"Samorząd",av:"GZ",col:"av-r",tel:"12 987 65 43",email:"urzad@zielona-dolina.pl"},
+  {id:1,name:"Agrarisch Bedrijf De Zonnehoeve BV",type:"Agrarisch",av:"DZ",col:"av-g",tel:"0511 23 45 67",email:"info@dezonnehoeve.nl"},
+  {id:2,name:"Familie van den Berg",type:"Woonhuis",av:"VB",col:"av-a",tel:"030 211 33 44",email:"f.vandenberg@gmail.com"},
+  {id:3,name:"ProBouw Materialen BV",type:"Industrie / Magazijn",av:"PB",col:"av-b",tel:"010 456 78 90",email:"info@probouw.nl"},
+  {id:4,name:"Mevrouw A. Jansen-De Vries",type:"Woonhuis + warmtepomp",av:"JV",col:"av-t",tel:"040 765 43 21",email:"a.jansen@hotmail.nl"},
+  {id:5,name:"Gemeente Groene Vallei",type:"Gemeentelijk",av:"GV",col:"av-r",tel:"026 987 65 43",email:"info@groenevallei.nl"},
 ];
 let orders=[
-  {id:1,clientId:1,title:"Instalacja PV 49.5 kWp – stodoła",type:"Fotowoltaika",kw:49.5,status:"W realizacji",price:148000,note:"Montaż dach dwuspadowy. Falownik Huawei SUN2000. Czekamy na moduły Longi.",date:"2025-03-15",addr:"Wiejska 22, Kraków",lat:170,lng:170},
-  {id:2,clientId:2,title:"Fotowoltaika 9.9 kWp + magazyn 10kWh",type:"Hybryda PV+PC",kw:9.9,status:"Zgłoszenie do OSD",price:47000,note:"Zgłoszono do Tauron 10.03. Magazyn BYD HVM. Czekamy na warunki przyłączenia.",date:"2025-03-20",addr:"Słoneczna 5, Tarnów",lat:195,lng:440},
-  {id:3,clientId:3,title:"Pompa ciepła 16 kW – hala produkcyjna",type:"Pompa ciepła",kw:16,status:"Umowa podpisana",price:38000,note:"Kontrakt podpisany. Czekamy na dostawę jednostki zewnętrznej Mitsubishi Zubadan.",date:"2025-04-01",addr:"Przemysłowa 88, Wieliczka",lat:155,lng:258},
-  {id:4,clientId:4,title:"Kolektory słoneczne 6-tubowe + CWU",type:"Kolektory słoneczne",kw:4.2,status:"Zakończone",price:14500,note:"Odebrane, protokół podpisany. Gwarancja 5 lat do 03.2030.",date:"2025-03-01",addr:"Różana 3, Myślenice",lat:228,lng:298},
-  {id:5,clientId:5,title:"PV 99 kWp – dach hali sportowej",type:"Fotowoltaika",kw:99,status:"Wycena",price:280000,note:"Przetarg publiczny, wycena do 25.03. Potrzebna ekspertyza statyczna dachu.",date:"2025-03-25",addr:"Sportowa 1, Zakopane",lat:278,lng:318},
-  {id:6,clientId:2,title:"Przegląd serwisowy PV – rok 1",type:"Fotowoltaika",kw:9.9,status:"Wycena",price:450,note:"Umówiony 18.03. Sprawdzić wydajność i logi falownika.",date:"2025-03-18",addr:"Słoneczna 5, Tarnów",lat:200,lng:445},
+  {id:1,clientId:1,title:"Zonnepanelen 52.2 kWp – staldak",type:"Zonnepanelen",kw:52.2,status:"In uitvoering",price:148000,note:"Montage met Mitek dakbeugels RVS. Omvormer Huawei SUN2000. Wachten op Longi Hi-Mo5 panelen.",date:"2025-04-15",addr:"Meentheweg 22, Drachten"},
+  {id:2,clientId:2,title:"Zonnepanelen 9.9 kWp + accu 10kWh",type:"Hybride PV+WP",kw:9.9,status:"Aanmelding netbeheerder",price:24500,note:"Aangemeld bij Stedin op 10-03. Accu BYD HVM. Wachten op bevestiging teruglevertarief.",date:"2025-04-20",addr:"Zonstraat 5, Utrecht"},
+  {id:3,clientId:3,title:"Warmtepomp 16 kW – bedrijfshal",type:"Warmtepomp",kw:16,status:"Contract getekend",price:38000,note:"Contract getekend. Wachten op levering Mitsubishi Zubadan buitenunit.",date:"2025-05-01",addr:"Industrieweg 88, Barendrecht"},
+  {id:4,clientId:4,title:"Zonnecollectoren 6-buizige + boiler",type:"Zonnecollectoren",kw:4.2,status:"Afgerond",price:8500,note:"Opgeleverd, protocol ondertekend. Garantie 5 jaar t/m 03-2030.",date:"2025-03-01",addr:"Roosstraat 3, Eindhoven"},
+  {id:5,clientId:5,title:"PV 103.5 kWp – dak sporthal",type:"Zonnepanelen",kw:103.5,status:"Offerte",price:185000,note:"Openbare aanbesteding, offerte uiterlijk 25-04. Statisch dakonderzoek noodzakelijk.",date:"2025-04-25",addr:"Sportlaan 1, Arnhem"},
+  {id:6,clientId:2,title:"Onderhoudsbeurt PV – jaar 1",type:"Zonnepanelen",kw:9.9,status:"Offerte",price:350,note:"Ingepland op 18-03. Omvormerlogs en rendement controleren.",date:"2025-03-18",addr:"Zonstraat 5, Utrecht"},
 ];
 let invoices=[
-  {id:1,num:"FV/2025/03/001",clientId:1,amount:148000,status:"paid",date:"2025-03-01"},
-  {id:2,num:"FV/2025/03/002",clientId:2,amount:47000,status:"pending",date:"2025-03-10"},
-  {id:3,num:"FV/2025/02/015",clientId:3,amount:38000,status:"overdue",date:"2025-02-15"},
-  {id:4,num:"FV/2025/03/003",clientId:4,amount:14500,status:"paid",date:"2025-03-05"},
+  {id:1,num:"F/2025/03/001",clientId:1,amount:148000,status:"paid",date:"2025-03-01"},
+  {id:2,num:"F/2025/03/002",clientId:2,amount:24500,status:"pending",date:"2025-03-10"},
+  {id:3,num:"F/2025/02/015",clientId:3,amount:38000,status:"overdue",date:"2025-02-15"},
+  {id:4,num:"F/2025/03/003",clientId:4,amount:8500,status:"paid",date:"2025-03-05"},
 ];
 let grants=[
-  {id:1,clientId:2,program:"Czyste Powietrze",amount:20000,status:"W trakcie",submitted:"2025-02-01",expected:"2025-05-01"},
-  {id:2,clientId:4,program:"Mój Prąd 6.0",amount:7000,status:"Zatwierdzone",submitted:"2025-01-15",expected:"2025-03-15"},
-  {id:3,clientId:1,program:"Czyste Powietrze",amount:35000,status:"Złożony",submitted:"2025-03-01",expected:"2025-06-01"},
+  {id:1,clientId:2,program:"SDE++",amount:12000,status:"In behandeling",submitted:"2025-02-01",expected:"2025-05-01"},
+  {id:2,clientId:4,program:"ISDE",amount:2000,status:"Goedgekeurd",submitted:"2025-01-15",expected:"2025-03-15"},
+  {id:3,clientId:1,program:"SDE++",amount:45000,status:"Ingediend",submitted:"2025-03-01",expected:"2025-06-01"},
 ];
 let osdItems=[
-  {id:1,orderId:2,operator:"Tauron Dystrybucja",submitted:"2025-03-10",step:2,steps:["Złożono wniosek","Warunki przyłączenia","Umowa przyłączeniowa","Montaż licznika","Aktywacja — odczyt"]},
-  {id:2,orderId:5,operator:"Tauron Dystrybucja",submitted:"2025-03-01",step:0,steps:["Złożono wniosek","Warunki przyłączenia","Umowa przyłączeniowa","Montaż licznika","Aktywacja — odczyt"]},
+  {id:1,orderId:2,operator:"Stedin",submitted:"2025-03-10",step:2,steps:["Aanvraag ingediend","Aansluitingsvoorwaarden ontvangen","Aansluitingsovereenkomst","Teruglevermeter geplaatst","Activatie — eerste meting"]},
+  {id:2,orderId:5,operator:"Liander",submitted:"2025-03-01",step:0,steps:["Aanvraag ingediend","Aansluitingsvoorwaarden ontvangen","Aansluitingsovereenkomst","Teruglevermeter geplaatst","Activatie — eerste meting"]},
 ];
 let reminders=[
-  {clientId:2,type:"Termin montażu",date:"2025-03-18",channel:"SMS"},
-  {clientId:1,type:"Odbiór instalacji",date:"2025-03-15",channel:"Email"},
-  {clientId:3,type:"Płatność faktury",date:"2025-03-20",channel:"SMS + Email"},
-  {clientId:4,type:"Przegląd serwisowy",date:"2025-04-10",channel:"SMS"},
+  {clientId:2,type:"Installatiedatum",date:"2025-03-18",channel:"SMS"},
+  {clientId:1,type:"Oplevering installatie",date:"2025-03-15",channel:"Email"},
+  {clientId:3,type:"Factuur betaling",date:"2025-03-20",channel:"SMS + Email"},
+  {clientId:4,type:"Jaarlijkse onderhoudsbeurt",date:"2025-04-10",channel:"SMS"},
 ];
 let docs={};
+let warranties=[
+  {id:1,orderId:4,instDate:"2025-03-01",warrantyEnd:"2030-03-01",inverterEnd:"2035-03-01",moduleEnd:"2050-03-01",notes:"Installatiegarantie 5 jaar. Omvormer Sofar 5kW — garantie 10 jaar. Panelen Jinko Tiger — prestatiegarantie 25 jaar (80% na 25 jaar).",nextService:"2026-03-01",serviceLog:[{date:"2025-03-01",type:"Eindoplevering",tech:"Jan de Vries",notes:"Alle parameters correct. Rendement 98,4%. Geen gebreken geconstateerd."}]},
+  {id:2,orderId:2,instDate:"2025-03-10",warrantyEnd:"2030-03-10",inverterEnd:"2035-03-10",moduleEnd:"2050-03-10",notes:"Hybride PV + accu BYD HVM 10kWh. Garantie accu 10 jaar of 6.000 laadcycli.",nextService:"2026-03-10",serviceLog:[]},
+  {id:3,orderId:1,instDate:"2025-03-15",warrantyEnd:"2030-03-15",inverterEnd:"2035-03-15",moduleEnd:"2050-03-15",notes:"Installatie 52.2 kWp. Omvormer Huawei SUN2000 — garantie 10 jaar (uitgebreid). Panelen Longi Hi-Mo5 — prestatiegarantie 25 jaar.",nextService:"2026-03-15",serviceLog:[]}
+];
+let materials=[
+  {id:1,name:"Zonnepaneel Longi Hi-Mo5 415W",cat:"Zonnepanelen",qty:48,unit:"st",minQty:20,supplier:"SolarDirect NL BV",price:165,lastOrder:"2025-03-01"},
+  {id:2,name:"Zonnepaneel Jinko Tiger Neo 430W",cat:"Zonnepanelen",qty:8,unit:"st",minQty:20,supplier:"EnergiePro NL",price:175,lastOrder:"2025-02-10"},
+  {id:3,name:"Omvormer Huawei SUN2000-10KTL",cat:"Omvormers",qty:3,unit:"st",minQty:2,supplier:"Huawei Nederland",price:1850,lastOrder:"2025-02-15"},
+  {id:4,name:"Omvormer Fronius Symo GEN24 8kW",cat:"Omvormers",qty:1,unit:"st",minQty:2,supplier:"Fronius Nederland",price:2200,lastOrder:"2025-01-20"},
+  {id:5,name:"Zonnekabel 6mm² (rol 100m)",cat:"Bekabeling",qty:9,unit:"rol",minQty:3,supplier:"CableMax BV",price:145,lastOrder:"2025-03-05"},
+  {id:6,name:"MC4 aansluitingen (doos 50 paar)",cat:"Bekabeling",qty:14,unit:"doos",minQty:5,supplier:"SolarDirect NL BV",price:38,lastOrder:"2025-03-01"},
+  {id:7,name:"Dakbeugels RVS (set 4 paar)",cat:"Montage",qty:6,unit:"set",minQty:3,supplier:"MountFix NL",price:285,lastOrder:"2025-02-20"},
+  {id:8,name:"Accu BYD HVM 11.5kWh",cat:"Batterijopslag",qty:2,unit:"st",minQty:1,supplier:"BYD Energy NL",price:7800,lastOrder:"2025-02-28"},
+  {id:9,name:"Warmtepomp Mitsubishi Zubadan 16kW",cat:"Warmtepompen",qty:0,unit:"st",minQty:1,supplier:"Mitsubishi Electric NL",price:9500,lastOrder:"2025-03-01"},
+  {id:10,name:"Verdeelinrichting AC/DC",cat:"Overig",qty:4,unit:"st",minQty:2,supplier:"ElektroPro NL",price:195,lastOrder:"2025-02-10"},
+  {id:11,name:"Kabel CYKY 5x10mm² (100m)",cat:"Bekabeling",qty:2,unit:"rol",minQty:3,supplier:"CableMax BV",price:220,lastOrder:"2025-01-15"},
+  {id:12,name:"Omvormer Sofar Solar 5kW",cat:"Omvormers",qty:4,unit:"st",minQty:2,supplier:"Sofar Solar NL",price:1200,lastOrder:"2025-03-08"},
+];
+let activeMatFilter='Alles';
 let activeClient=null,selectedDocOrder=null,chatClient=null;
 
 // ── UTILS ──────────────────────────────────────────────────
 const TODAY=new Date("2025-03-14");
 function daysLeft(d){return Math.ceil((new Date(d)-TODAY)/(864e5));}
 function notify(msg){const n=document.getElementById('notify');n.textContent=msg;n.style.display='block';setTimeout(()=>n.style.display='none',2500);}
+function escapeHTML(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function fmtEur(v){return'€\u202f'+(+v).toLocaleString('nl-NL');}
+
+// ── TRANSLATIONS ─────────────────────────────────────────────
+let lang='nl';
+const T={
+nl:{
+  // Nav sections
+  ns_main:'Hoofdmenu', ns_finance:'Financiën', ns_installs:'Installaties', ns_ai:'AI & Smart', ns_service:'Service & Logistiek',
+  // Nav items
+  dashboard:'Dashboard', projecten:'Projecten', kaart:'Installatiekaart',
+  facturen:'Facturen', subsidies:'Subsidies', documenten:"Documenten & Foto's",
+  netbeheerder:'Netbeheerder Tracker', offertes:'Offertes & Contracten AI',
+  chatbot:'Klantchatbot', herinneringen:'Herinneringen', roi:'ROI Calculator',
+  garanties:'Garanties & Service', magazijn:'Magazijn',
+  // Buttons
+  btn_new:'+ Nieuw project', btn_save:'Opslaan', btn_cancel:'Annuleren',
+  btn_send:'Versturen', btn_print:'🖨 Afdrukken / PDF', btn_invoice:'+ Factuur aanmaken',
+  btn_analyse:'Analyseer ↗', btn_gen_ai:'Genereer AI ↗', btn_copy:'Kopiëren',
+  btn_add_sub:'+ Subsidie toevoegen', btn_add_rem:'Herinnering toevoegen',
+  btn_next_step:'Volgende stap →', btn_save_proj:'Project opslaan',
+  btn_add_war:'+ Garantie toevoegen', btn_add_mat:'+ Materiaal toevoegen',
+  btn_service:'+ Service', btn_add_svc:'Bezoek opslaan',
+  // Status labels
+  s_offerte:'Offerte', s_contract:'Contract getekend', s_uitvoering:'In uitvoering',
+  s_oplevering:'Oplevering', s_netbeheerder:'Aanmelding netbeheerder', s_afgerond:'Afgerond',
+  // Types
+  t_pv:'Zonnepanelen', t_wp:'Warmtepomp', t_coll:'Zonnecollectoren',
+  t_accu:'Batterijopslag', t_hybrid:'Hybride PV+WP',
+  // Fields
+  f_klant:'Klant', f_adres:'Installatieadres', f_type:'Type installatie',
+  f_kwp:'Vermogen (kWp)', f_waarde:'Waarde (€)', f_status:'Status',
+  f_datum:'Verwachte oplevering', f_notitie:'Notitie', f_order:'Laden uit project',
+  // Pages sub
+  sub_dashboard:'Nederland · Week 13/2025', sub_projecten:'Beheer installatieprojecten',
+  sub_kaart:'Nederland — installatielocaties', sub_facturen:'Financieel beheer',
+  sub_subs:'SDE++, ISDE, Salderingsregeling', sub_docs:'Protocollen, foto\'s, certificaten',
+  sub_nbe:'Status aansluitaanvragen bij netbeheerders (Liander, Enexis, Stedin)',
+  sub_offertes:'AI-gestuurde documentgenerator', sub_chat:'AI-assistent installatiestatus voor de klant',
+  sub_rem:'Automatische meldingen voor klanten', sub_roi:'Bereken terugverdientijd en besparingen',
+  sub_gar:'Garantiebeheer en onderhoudshistorie', sub_mag:'Voorraad componenten en materialen',
+  // Stats labels
+  stat_active:'Actieve projecten', stat_inwork:'In uitvoering', stat_pipeline:'Pipeline (€)',
+  stat_kwp:'Geïnstalleerd kWp', stat_nbe:'Wacht op netbeheerder',
+  stat_total:'Totaal',stat_onsite:'op locatie',stat_quotes_contracts:'offertes + contracten',stat_completed_proj:'afgeronde projecten',stat_active_requests:'actieve aanvragen',
+  // Orders
+  all_projects:'Alle projecten', no_projects:'Geen projecten gevonden.',
+  deadline:'Deadline',
+  // Clients
+  clients_lbl:'bedrijven',
+  // Invoices
+  inv_paid:'Betaald (mnd)', inv_pending:'Te betalen', inv_overdue:'Achterstallig',
+  inv_all:'Alle facturen', inv_status_paid:'Betaald', inv_status_pending:'Te betalen', inv_status_overdue:'Achterstallig',
+  inv_pay:'Betalen', inv_marked_paid:'Factuur gemarkeerd als betaald.',
+  inv_created:'Factuur aangemaakt.', inv_number:'Factuurnummer',
+  // Grants
+  grant_progs:'Subsidieregelingen', grant_clients:'Aanvragen klanten', grant_add:'Aanvraag toegevoegd.',
+  grant_status_approved:'Goedgekeurd', grant_status_pending:'In behandeling',
+  grant_status_submitted:'Ingediend', grant_status_rejected:'Afgewezen',
+  grant_submitted:'ingediend', grant_expected:'verwacht',
+  // OSD
+  osd_step:'Stap', osd_next:'Volgende stap →', osd_updated:'Stap bijgewerkt.', osd_operator:'Netbeheerder',
+  // Docs
+  docs_choose:'Kies een project', docs_drop:'Sleep bestanden of klik hier',
+  docs_hint:"Installatiefoto's, protocollen PDF, contracten", docs_files:'bestanden',
+  docs_added:'Bestanden toegevoegd.', docs_no_files:'Geen bestanden. Voeg foto\'s of documenten toe.',
+  // ROI
+  roi_input_kwh:'Jaarverbruik (kWh)', roi_input_kwp:'Vermogen installatie (kWp)',
+  roi_input_cost:'Installatiekosten (€)', roi_input_price:'Energieprijs (€/kWh)',
+  roi_input_sub:'Subsidie (€)', roi_input_dir:'Dakrichting',
+  roi_dir_s:'Zuid (100%)', roi_dir_se:'ZO / ZW (93%)', roi_dir_ew:'Oost / West (82%)',
+  roi_btn:'Bereken ROI',
+  roi_prod:'Productie/jaar (kWh)', roi_save:'Besparing / jaar (€)',
+  roi_payback:'Terugverdientijd (jr)', roi_25y:'Besparing 25 jaar (€)',
+  roi_co2:'CO₂-reductie / jaar (t)', roi_net:'Nettokostprijs (€)',
+  roi_progress:'Terugverdienvoortgang', roi_hint:'Aanname: 900 kWh/kWp/jaar · energieprijsstijging 5%/jaar · Nederland',
+  roi_results:'Analyseresultaten', roi_params:'Installatieparameters',
+  // Reminders
+  rem_upcoming:'Aankomende termijnen', rem_add:'Herinnering toevoegen',
+  rem_type:'Type afspraak', rem_date:'Datum', rem_channel:'Kanaal',
+  rem_types:['Installatiedatum','Jaarlijks onderhoud','Factuur betaling','Aanvraag netbeheerder','Oplevering installatie'],
+  rem_channels:['SMS','Email','SMS + Email'],
+  rem_today:'Vandaag', rem_tomorrow:'Morgen', rem_added:'Herinnering toegevoegd.',
+  // Chat
+  chat_title:'Klantchatbot', chat_sub:'AI-assistent installatiestatus voor de klant',
+  chat_placeholder:'Schrijf een bericht...', chat_welcome:'Hallo! Ik ben de assistent van SolarCRM. Kies een klant uit de lijst of stel een vraag over de projecten.',
+  chat_client_lbl:'Kies een klant', chat_online:'online',
+  // Offers
+  off_title:'Offertes & Contracten AI', off_params:'Documentparameters', off_preview:'Documentvoorbeeld',
+  off_client:'Klant', off_addr:'Installatieadres', off_type:'Type installatie',
+  off_kwp:'Vermogen (kWp)', off_price:'Nettobedrag (€)', off_doctype:'Documenttype',
+  off_notes:'Aanvullende opmerkingen', off_fill:'Vul uit project',
+  off_types:['Offerte','Installatiecontract','Opleveringsprotocol'],
+  off_placeholder:'Vul het formulier links in en klik op "Genereer AI" om een professioneel document te maken.',
+  off_loaded:'Projectgegevens geladen.', off_copied:'Gekopieerd naar klembord.',
+  // AI panel
+  ai_title:'AI-assistent', ai_scope_risk:'Risicoanalyse vertragingen', ai_scope_week:'Weekoverzicht',
+  ai_scope_prio:'Prioriteiten voor morgen', ai_scope_nbe:'Status netbeheerderaanvragen',
+  // Warranty
+  war_instdate:'Installatiedatum', war_end:'Garantie installatie t/m', war_inv:'Garantie omvormer t/m', war_mod:'Garantie panelen t/m',
+  war_next:'Volgende onderhoud', war_log:'Onderhoudshistorie', war_active_lbl:'Actieve garanties',
+  war_soon_lbl:'Verloopt (90 dagen)', war_svc_lbl:'Servicebezoeken',
+  war_add:'Garantie opslaan', war_saved:'Garantie toegevoegd.', war_removed:'Garantie verwijderd.',
+  war_svc_saved:'Servicebezoek opgeslagen.',war_exists:'Deze installatie heeft al een garantie.',
+  war_active_tag:'Actief', war_expiring_tag:'Verloopt binnenkort', war_expired_tag:'Verlopen',
+  war_notes_ph:'Garantieomschrijving, omvormernummer, serienummers...',
+  svc_type:'Type bezoek', svc_tech:'Monteur', svc_next:'Volgend onderhoud', svc_notes:'Notities',
+  svc_ph:'Beschrijving werkzaamheden, meetresultaten, aanbevelingen...',
+  svc_types:['Jaarlijkse inspectie','Storingsreparatie','Reiniging panelen','Firmware-update','Componentvervanging','Eindoplevering'],
+  svc_no_entries:'Geen servicebezoeken geregistreerd.',
+  // Materials
+  mat_add:'Materiaal opslaan', mat_name_ph:'bijv. Zonnepaneel Longi 415W',
+  mat_saved:'Materiaal toegevoegd aan magazijn.', mat_total_lbl:'Magazijnposities',
+  mat_low_lbl:'Lage voorraad', mat_value_lbl:'Magazijnwaarde', mat_sup_lbl:'Leveranciers',
+  mat_low_tag:'⚠ lage voorraad', mat_no_items:'Geen materialen in deze categorie.',
+  mat_min:'min', mat_value:'waarde', mat_cats:['Alles','Zonnepanelen','Omvormers','Bekabeling','Montage','Warmtepompen','Batterijopslag','Overig'],
+  // Search
+  search_ph:'Zoeken…', search_no:'Geen resultaten voor',
+  search_type_client:'Klant', search_type_project:'Project', search_type_inv:'Factuur',
+  // Form
+  form_new_project:'Nieuw installatieproject',
+  form_types:['Zonnepanelen','Warmtepomp','Zonnecollectoren','Batterijopslag','Hybride PV+WP'],
+  form_statuses:['Offerte','Contract getekend','In uitvoering','Oplevering','Aanmelding netbeheerder','Afgerond'],
+  form_note_ph:'Daktype, omvormermodel, montage-opmerkingen...',
+  form_addr_ph:'Meentheweg 22, Drachten', form_client_ph:'Bedrijfsnaam of persoon',
+  form_saved:'Project opgeslagen.', form_no_client:'Vul een klantnaam in.',
+  // Topbar
+  date_short:'nl-NL',
+  // Misc
+  no_selection:'Klik op een locatiepin om installatiedetails te bekijken.',
+  week_prefix:'Week',
+  filter_all:'Alles', filter_all_status:'Alle statussen',
+  mat_cats_0:'Alles',
+  // Pages (new)
+  portaal:'Klantportaal', dakanalyse:'Dakanalyse AI',
+  // Client portal
+  portal_title:'Klantportaal', portal_sub:'Gedeeld overzicht voor de klant',
+  portal_share:'Portaallink kopiëren', portal_copied:'Link gekopieerd!',
+  portal_no_client:'Kies een klant uit de lijst.',
+  portal_projects:'Projecten', portal_invoices:'Facturen',
+  portal_next_svc:'Volgend onderhoud', portal_status:'Status',
+  portal_welcome:'Welkom bij uw projectoverzicht van',
+  // Dakanalyse AI
+  dak_title:'Dakanalyse AI', dak_sub:'Upload een foto van het dak voor AI-analyse',
+  dak_drop:'Sleep een dakfoto hierheen of klik om te uploaden',
+  dak_hint:'JPG, PNG of WEBP · max 10 MB',
+  dak_btn:'Analyseer dak ↗', dak_analyzing:'Analyseren…',
+  dak_result_title:'Analyseresultaat',
+  dak_apply:'Resultaat toepassen in ROI Calculator',
+  dak_applied:'Gegevens ingeladen in ROI Calculator.',
+  dak_no_img:'Upload eerst een dakfoto.',
+  dak_no_key:'Stel eerst de API-sleutel in.',
+  // Notifications
+  notif_send:'Verstuur notificatie', notif_title:'Notificatie versturen',
+  notif_email:'E-mail opstellen', notif_sms:'SMS kopiëren',
+  notif_whatsapp:'WhatsApp', notif_preview:'Berichtvoorbeeld',
+  notif_gen:'Genereer bericht ↗', notif_sent:'Notificatie verstuurd.',
+  notif_mark_sent:'Markeer als verstuurd',
+  // Misc hardcoded strings
+  rem_no_date:'Kies een datum.', war_select_proj:'Selecteer een project.',
+  mat_no_name:'Vul een productnaam in.', svc_no_date:'Kies een datum voor het bezoek.',
+  key_no_key:'Geen API-sleutel', key_set:'API:',
+},
+
+en:{
+  ns_main:'Main', ns_finance:'Finance', ns_installs:'Installations', ns_ai:'AI & Smart', ns_service:'Service & Logistics',
+  dashboard:'Dashboard', projecten:'Projects', kaart:'Installation Map',
+  facturen:'Invoices', subsidies:'Grants & Subsidies', documenten:'Documents & Photos',
+  netbeheerder:'Grid Operator Tracker', offertes:'Quotes & Contracts AI',
+  chatbot:'Client Chatbot', herinneringen:'Reminders', roi:'ROI Calculator',
+  garanties:'Warranties & Service', magazijn:'Inventory',
+  btn_new:'+ New project', btn_save:'Save', btn_cancel:'Cancel',
+  btn_send:'Send', btn_print:'🖨 Print / PDF', btn_invoice:'+ Create invoice',
+  btn_analyse:'Analyse ↗', btn_gen_ai:'Generate AI ↗', btn_copy:'Copy',
+  btn_add_sub:'+ Add application', btn_add_rem:'Add reminder',
+  btn_next_step:'Next step →', btn_save_proj:'Save project',
+  btn_add_war:'+ Add warranty', btn_add_mat:'+ Add material',
+  btn_service:'+ Service', btn_add_svc:'Save visit',
+  s_offerte:'Quote', s_contract:'Contract signed', s_uitvoering:'In progress',
+  s_oplevering:'Handover', s_netbeheerder:'Grid operator filing', s_afgerond:'Completed',
+  t_pv:'Solar panels', t_wp:'Heat pump', t_coll:'Solar collectors',
+  t_accu:'Battery storage', t_hybrid:'Hybrid PV+HP',
+  f_klant:'Client', f_adres:'Installation address', f_type:'Installation type',
+  f_kwp:'Power (kWp)', f_waarde:'Value (€)', f_status:'Status',
+  f_datum:'Expected completion', f_notitie:'Note', f_order:'Load from project',
+  sub_dashboard:'Netherlands · Week 13/2025', sub_projecten:'Manage installation projects',
+  sub_kaart:'Netherlands — installation locations', sub_facturen:'Financial management',
+  sub_subs:'SDE++, ISDE, Net metering', sub_docs:'Protocols, photos, certificates',
+  sub_nbe:'Status of grid connection requests (Liander, Enexis, Stedin)',
+  sub_offertes:'AI-powered document generator', sub_chat:'AI assistant for client installation status',
+  sub_rem:'Automated notifications for clients', sub_roi:'Calculate payback period and savings',
+  sub_gar:'Warranty management and service history', sub_mag:'Component and material stock',
+  stat_active:'Active projects', stat_inwork:'In progress', stat_pipeline:'Pipeline (€)',
+  stat_kwp:'Installed kWp', stat_nbe:'Awaiting grid operator',
+  stat_total:'Total',stat_onsite:'on site',stat_quotes_contracts:'quotes + contracts',stat_completed_proj:'completed projects',stat_active_requests:'active requests',
+  all_projects:'All projects', no_projects:'No projects found.',
+  deadline:'Deadline',
+  clients_lbl:'clients',
+  inv_paid:'Paid (mo)', inv_pending:'Outstanding', inv_overdue:'Overdue',
+  inv_all:'All invoices', inv_status_paid:'Paid', inv_status_pending:'Outstanding', inv_status_overdue:'Overdue',
+  inv_pay:'Mark paid', inv_marked_paid:'Invoice marked as paid.',
+  inv_created:'Invoice created.', inv_number:'Invoice number',
+  grant_progs:'Grant programmes', grant_clients:'Client applications', grant_add:'Application added.',
+  grant_status_approved:'Approved', grant_status_pending:'In progress',
+  grant_status_submitted:'Submitted', grant_status_rejected:'Rejected',
+  grant_submitted:'submitted', grant_expected:'expected',
+  osd_step:'Step', osd_next:'Next step →', osd_updated:'Step updated.', osd_operator:'Grid operator',
+  docs_choose:'Choose a project', docs_drop:'Drag files or click here',
+  docs_hint:'Installation photos, PDF protocols, contracts', docs_files:'files',
+  docs_added:'Files added.', docs_no_files:'No files. Add photos or documents.',
+  roi_input_kwh:'Annual consumption (kWh)', roi_input_kwp:'System power (kWp)',
+  roi_input_cost:'Installation cost (€)', roi_input_price:'Energy price (€/kWh)',
+  roi_input_sub:'Subsidy (€)', roi_input_dir:'Roof direction',
+  roi_dir_s:'South (100%)', roi_dir_se:'SE / SW (93%)', roi_dir_ew:'East / West (82%)',
+  roi_btn:'Calculate ROI',
+  roi_prod:'Annual production (kWh)', roi_save:'Savings / year (€)',
+  roi_payback:'Payback period (yr)', roi_25y:'25-year savings (€)',
+  roi_co2:'CO₂ reduction / year (t)', roi_net:'Net cost (€)',
+  roi_progress:'Payback progress', roi_hint:'Assumption: 900 kWh/kWp/yr · energy price +5%/yr · Netherlands',
+  roi_results:'Analysis results', roi_params:'Installation parameters',
+  rem_upcoming:'Upcoming deadlines', rem_add:'Add reminder',
+  rem_type:'Event type', rem_date:'Date', rem_channel:'Channel',
+  rem_types:['Installation date','Annual maintenance','Invoice payment','Grid operator filing','Project handover'],
+  rem_channels:['SMS','Email','SMS + Email'],
+  rem_today:'Today', rem_tomorrow:'Tomorrow', rem_added:'Reminder added.',
+  chat_title:'Client Chatbot', chat_sub:'AI assistant for installation status',
+  chat_placeholder:'Type a message...', chat_welcome:'Hi! I\'m the SolarCRM assistant. Choose a client or ask me about your projects.',
+  chat_client_lbl:'Choose a client', chat_online:'online',
+  off_title:'Quotes & Contracts AI', off_params:'Document parameters', off_preview:'Document preview',
+  off_client:'Client', off_addr:'Installation address', off_type:'Installation type',
+  off_kwp:'Power (kWp)', off_price:'Net amount (€)', off_doctype:'Document type',
+  off_notes:'Additional notes', off_fill:'Load from project',
+  off_types:['Quote','Installation contract','Handover protocol'],
+  off_placeholder:'Fill in the form on the left and click "Generate AI" to create a professional document.',
+  off_loaded:'Project data loaded.', off_copied:'Copied to clipboard.',
+  ai_title:'AI Assistant', ai_scope_risk:'Risk analysis — delays', ai_scope_week:'Weekly overview',
+  ai_scope_prio:'Priorities for tomorrow', ai_scope_nbe:'Grid operator filing status',
+  war_instdate:'Installation date', war_end:'Installation warranty until', war_inv:'Inverter warranty until', war_mod:'Panel warranty until',
+  war_next:'Next maintenance', war_log:'Service history', war_active_lbl:'Active warranties',
+  war_soon_lbl:'Expiring (90 days)', war_svc_lbl:'Service visits',
+  war_add:'Save warranty', war_saved:'Warranty added.', war_removed:'Warranty removed.',
+  war_svc_saved:'Service visit saved.',war_exists:'This installation already has a warranty.',
+  war_active_tag:'Active', war_expiring_tag:'Expiring soon', war_expired_tag:'Expired',
+  war_notes_ph:'Warranty description, inverter serial number, panel serial numbers...',
+  svc_type:'Visit type', svc_tech:'Technician', svc_next:'Next maintenance', svc_notes:'Notes',
+  svc_ph:'Description of work, measurement results, recommendations...',
+  svc_types:['Annual inspection','Fault repair','Panel cleaning','Firmware update','Component replacement','Final handover'],
+  svc_no_entries:'No service visits recorded.',
+  mat_add:'Save material', mat_name_ph:'e.g. Solar panel Longi 415W',
+  mat_saved:'Material added to inventory.', mat_total_lbl:'Inventory items',
+  mat_low_lbl:'Low stock', mat_value_lbl:'Inventory value', mat_sup_lbl:'Suppliers',
+  mat_low_tag:'⚠ low stock', mat_no_items:'No materials in this category.',
+  mat_min:'min', mat_value:'value', mat_cats:['All','Solar panels','Inverters','Cabling','Mounting','Heat pumps','Battery storage','Other'],
+  search_ph:'Search…', search_no:'No results for',
+  search_type_client:'Client', search_type_project:'Project', search_type_inv:'Invoice',
+  form_new_project:'New installation project',
+  form_types:['Solar panels','Heat pump','Solar collectors','Battery storage','Hybrid PV+HP'],
+  form_statuses:['Quote','Contract signed','In progress','Handover','Grid operator filing','Completed'],
+  form_note_ph:'Roof type, inverter model, installation notes...',
+  form_addr_ph:'Meentheweg 22, Drachten', form_client_ph:'Company name or person',
+  form_saved:'Project saved.', form_no_client:'Please enter a client name.',
+  date_short:'en-GB',
+  no_selection:'Click a location pin to view installation details.',
+  week_prefix:'Week',
+  filter_all:'All', filter_all_status:'All statuses',
+  mat_cats_0:'All',
+  portaal:'Client Portal', dakanalyse:'Roof Analysis AI',
+  portal_title:'Client Portal', portal_sub:'Shared overview for the client',
+  portal_share:'Copy portal link', portal_copied:'Link copied!',
+  portal_no_client:'Choose a client from the list.',
+  portal_projects:'Projects', portal_invoices:'Invoices',
+  portal_next_svc:'Next maintenance', portal_status:'Status',
+  portal_welcome:'Welcome to your project overview from',
+  dak_title:'Roof Analysis AI', dak_sub:'Upload a roof photo for AI analysis',
+  dak_drop:'Drag a roof photo here or click to upload',
+  dak_hint:'JPG, PNG or WEBP · max 10 MB',
+  dak_btn:'Analyse roof ↗', dak_analyzing:'Analysing…',
+  dak_result_title:'Analysis result',
+  dak_apply:'Apply results to ROI Calculator',
+  dak_applied:'Data loaded into ROI Calculator.',
+  dak_no_img:'Please upload a roof photo first.',
+  dak_no_key:'Please set an API key first.',
+  notif_send:'Send notification', notif_title:'Send notification',
+  notif_email:'Draft email', notif_sms:'Copy SMS',
+  notif_whatsapp:'WhatsApp', notif_preview:'Message preview',
+  notif_gen:'Generate message ↗', notif_sent:'Notification sent.',
+  notif_mark_sent:'Mark as sent',
+  rem_no_date:'Please choose a date.', war_select_proj:'Please select a project.',
+  mat_no_name:'Please enter a product name.', svc_no_date:'Please choose a date for the visit.',
+  key_no_key:'No API key', key_set:'API:',
+}};
+function t(k){return T[lang]?.[k]??T.nl[k]??k;}
+function setLang(l){
+  lang=l;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');const v=t(k);if(v!==undefined)el.textContent=v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-ph');const v=t(k);if(v!==undefined)el.placeholder=v;
+  });
+  document.querySelectorAll('[data-i18n-val]').forEach(el=>{
+    const k=el.getAttribute('data-i18n-val');const v=t(k);if(v!==undefined)el.value=v;
+  });
+  // Update language toggle buttons
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  // Update topbar title + date for current page
+  const curPage=document.querySelector('.page.active');
+  if(curPage) document.getElementById('topbarTitle').textContent=getPageTitle(curPage.id.replace('page-',''));
+  document.getElementById('topbarDate').textContent=new Date().toLocaleDateString(t('date_short'),{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  // Re-render dynamic content
+  renderAll();
+  buildStatusFilters();
+  const pg=curPage;
+  if(pg){const pid=pg.id.replace('page-','');
+    if(pid==='mapa') setTimeout(()=>renderMap(),30);
+    if(pid==='faktury') renderInvoices();
+    if(pid==='dofinansowania') renderGrants();
+    if(pid==='dokumenty') {renderDocOrders();renderDocList();}
+    if(pid==='osd') renderOSD();
+    if(pid==='przypomnienia') renderReminders();
+    if(pid==='chatbot') renderChatClients();
+    if(pid==='zlecenia') renderOrdersFull();
+    if(pid==='kalkulator') calcROI();
+    if(pid==='oferty') fillOfferOrderSelect();
+    if(pid==='gwarancje') renderWarranties();
+    if(pid==='magazijn') renderMaterials();
+    if(pid==='portaal') renderPortaal();
+  }
+}
 
 function statusTag(s){
-  const m={"Zakończone":"t-green","W realizacji":"t-amber","Umowa podpisana":"t-teal","Zgłoszenie do OSD":"t-blue","Wycena":"t-gray","Odbiór końcowy":"t-coral"};
-  return`<span class="tag ${m[s]||'t-gray'}">${s}</span>`;
+  const m={"Afgerond":"t-green","In uitvoering":"t-amber","Contract getekend":"t-teal","Aanmelding netbeheerder":"t-blue","Offerte":"t-gray","Oplevering":"t-coral"};
+  const k={"Afgerond":"s_afgerond","In uitvoering":"s_uitvoering","Contract getekend":"s_contract","Aanmelding netbeheerder":"s_netbeheerder","Offerte":"s_offerte","Oplevering":"s_oplevering"};
+  return`<span class="tag ${m[s]||'t-gray'}">${escapeHTML(k[s]?t(k[s]):s)}</span>`;
 }
-function typeTag(t){
-  const m={"Fotowoltaika":"t-amber","Pompa ciepła":"t-blue","Kolektory słoneczne":"t-teal","Magazyn energii":"t-green","Hybryda PV+PC":"t-coral"};
-  return`<span class="tag ${m[t]||'t-gray'}">${t}</span>`;
+function typeTag(tp){
+  const m={"Zonnepanelen":"t-amber","Warmtepomp":"t-blue","Zonnecollectoren":"t-teal","Batterijopslag":"t-green","Hybride PV+WP":"t-coral"};
+  const k={"Zonnepanelen":"t_pv","Warmtepomp":"t_wp","Zonnecollectoren":"t_coll","Batterijopslag":"t_accu","Hybride PV+WP":"t_hybrid"};
+  return`<span class="tag ${m[tp]||'t-gray'}">${escapeHTML(k[tp]?t(k[tp]):tp)}</span>`;
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────
-const pageTitles={dashboard:"Dashboard",zlecenia:"Zlecenia",mapa:"Mapa instalacji",faktury:"Faktury",dofinansowania:"Dofinansowania",dokumenty:"Dokumenty & Zdjęcia",osd:"OSD Tracker",oferty:"Oferty & Umowy AI",chatbot:"Chatbot klienta",przypomnienia:"Przypomnienia"};
+const pageTitleKeys={dashboard:"dashboard",zlecenia:"projecten",mapa:"kaart",faktury:"facturen",dofinansowania:"subsidies",dokumenty:"documenten",osd:"netbeheerder",oferty:"offertes",chatbot:"chatbot",przypomnienia:"herinneringen",kalkulator:"roi",gwarancje:"garanties",magazijn:"magazijn",portaal:"portaal",dakanalyse:"dakanalyse"};
+function getPageTitle(name){return t(pageTitleKeys[name])||name;}
 function goPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
   if(window.innerWidth<=900)closeSidebar();
-  document.getElementById('topbarTitle').textContent=pageTitles[name]||name;
-  if(name==='mapa') renderMap();
+  document.getElementById('topbarTitle').textContent=getPageTitle(name);
+  setBnav(name);
+  if(name==='mapa') setTimeout(()=>renderMap(),30);
   if(name==='faktury') renderInvoices();
   if(name==='dofinansowania') renderGrants();
   if(name==='dokumenty'){renderDocOrders();renderDocList();}
@@ -729,21 +1481,40 @@ function goPage(name,el){
   if(name==='przypomnienia') renderReminders();
   if(name==='chatbot') renderChatClients();
   if(name==='zlecenia') renderOrdersFull();
+  if(name==='kalkulator') calcROI();
+  if(name==='oferty') fillOfferOrderSelect();
+  if(name==='dashboard') renderCharts();
+  if(name==='gwarancje') renderWarranties();
+  if(name==='magazijn') renderMaterials();
+  if(name==='portaal') renderPortaal();
+  if(name==='dakanalyse'){fillOfferOrderSelect();const s=document.getElementById('dakOrderSel');if(s)s.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');}
+}
+function goPageMobile(name){
+  goPage(name,null);
+  // also update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+name+"'")) n.classList.add('active');
+  });
+}
+function setBnav(name){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('bnav-'+name);
+  if(el) el.classList.add('active');
 }
 
 // ── STATS ──────────────────────────────────────────────────
 function renderStats(){
-  const active=orders.filter(o=>o.status!=="Zakończone").length;
-  const inWork=orders.filter(o=>o.status==="W realizacji").length;
-  const pipeline=orders.filter(o=>["Wycena","Umowa podpisana"].includes(o.status)).reduce((a,b)=>a+b.price,0);
-  const kw=orders.filter(o=>o.status==="Zakończone").reduce((a,b)=>a+(b.kw||0),0);
-  const osd=orders.filter(o=>o.status==="Zgłoszenie do OSD").length;
+  const active=orders.filter(o=>o.status!=="Afgerond").length;
+  const inWork=orders.filter(o=>o.status==="In uitvoering").length;
+  const pipeline=orders.filter(o=>["Offerte","Contract getekend"].includes(o.status)).reduce((a,b)=>a+b.price,0);
+  const kw=orders.filter(o=>o.status==="Afgerond").reduce((a,b)=>a+(b.kw||0),0);
+  const osd=orders.filter(o=>o.status==="Aanmelding netbeheerder").length;
   document.getElementById('statsGrid').innerHTML=`
-    <div class="stat-card c-green"><div class="stat-label">Aktywne zlecenia</div><div class="stat-val">${active}</div><div class="stat-sub">${orders.length} łącznie</div></div>
-    <div class="stat-card c-amber"><div class="stat-label">W realizacji</div><div class="stat-val amber">${inWork}</div><div class="stat-sub">na budowie</div></div>
-    <div class="stat-card c-blue"><div class="stat-label">Pipeline (zł)</div><div class="stat-val blue">${pipeline.toLocaleString('pl-PL')}</div><div class="stat-sub">wyceny + umowy</div></div>
-    <div class="stat-card c-teal"><div class="stat-label">Zainstalowane kWp</div><div class="stat-val green">${kw.toFixed(1)}</div><div class="stat-sub">zakończone projekty</div></div>
-    <div class="stat-card c-red"><div class="stat-label">Oczekuje OSD</div><div class="stat-val">${osd}</div><div class="stat-sub">zgłoszenia aktywne</div></div>`;
+    <div class="stat-card c-green"><div class="stat-label">${t('stat_active')}</div><div class="stat-val">${active}</div><div class="stat-sub">${orders.length} ${t('stat_total')}</div></div>
+    <div class="stat-card c-amber"><div class="stat-label">${t('stat_inwork')}</div><div class="stat-val amber">${inWork}</div><div class="stat-sub">${t('stat_onsite')}</div></div>
+    <div class="stat-card c-blue"><div class="stat-label">${t('stat_pipeline')}</div><div class="stat-val blue">${fmtEur(pipeline)}</div><div class="stat-sub">${t('stat_quotes_contracts')}</div></div>
+    <div class="stat-card c-teal"><div class="stat-label">${t('stat_kwp')}</div><div class="stat-val green">${kw.toFixed(1)}</div><div class="stat-sub">${t('stat_completed_proj')}</div></div>
+    <div class="stat-card c-red"><div class="stat-label">${t('stat_nbe')}</div><div class="stat-val">${osd}</div><div class="stat-sub">${t('stat_active_requests')}</div></div>`;
 }
 
 // ── CLIENTS ──────────────────────────────────────────────────
@@ -753,12 +1524,12 @@ function renderClients(){
     const cnt=orders.filter(o=>o.clientId===c.id).length;
     const kw=orders.filter(o=>o.clientId===c.id).reduce((a,b)=>a+(b.kw||0),0);
     return`<div class="client-row${activeClient===c.id?' active':''}" onclick="selectClient(${c.id})">
-      <div class="av ${c.col}">${c.av}</div>
-      <div style="flex:1;min-width:0"><div class="c-name">${c.name}</div><div class="c-sub">${c.type} · ${cnt} zlec.</div></div>
+      <div class="av ${c.col}">${escapeHTML(c.av)}</div>
+      <div style="flex:1;min-width:0"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-sub">${escapeHTML(c.type)} · ${cnt} proj.</div></div>
       <div class="c-kw">${kw.toFixed(1)} kWp</div>
     </div>`;
   }).join('');
-  document.getElementById('clientCount').textContent=clients.length+' firm';
+  document.getElementById('clientCount').textContent=clients.length+' '+t('clients_lbl');
 }
 function selectClient(id){activeClient=activeClient===id?null:id;renderClients();renderOrders();}
 
@@ -768,97 +1539,167 @@ function renderOrders(){
   const fv=document.getElementById('filterStatus').value;
   let filtered=activeClient?orders.filter(o=>o.clientId===activeClient):orders;
   if(fv) filtered=filtered.filter(o=>o.status===fv);
-  document.getElementById('ordersLabel').textContent=activeClient?clients.find(c=>c.id===activeClient)?.name:"Wszystkie zlecenia";
-  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">Brak zleceń.</div>`;
+  document.getElementById('ordersLabel').textContent=activeClient?clients.find(c=>c.id===activeClient)?.name:t('all_projects');
+  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">${t('no_projects')}</div>`;
 }
 function orderCardHTML(o){
   const c=clients.find(cl=>cl.id===o.clientId);
   const dl=daysLeft(o.date);
-  const risk=dl<5&&o.status!=="Zakończone";
+  const risk=dl<5&&o.status!=="Afgerond";
   return`<div class="order-card${risk?' risk':''}">
-    <div class="order-top"><div class="order-title">${o.title}</div><div class="order-price">${o.price.toLocaleString('pl-PL')} zł</div></div>
-    <div class="order-meta">${c?.name||''} · ${o.addr} · Termin: ${o.date}${risk?` · <span style="color:var(--red)">⚠ ${dl}d</span>`:''}</div>
+    <div class="order-top"><div class="order-title">${escapeHTML(o.title)}</div><div class="order-price">${fmtEur(o.price)}</div></div>
+    <div class="order-meta">${escapeHTML(c?.name||'')} · ${escapeHTML(o.addr)} · ${t('deadline')}: ${o.date}${risk?` · <span style="color:var(--red)">⚠ ${dl}d</span>`:''}</div>
     <div class="order-footer">${typeTag(o.type)}${statusTag(o.status)}<span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--green);margin-left:auto">${o.kw} kWp</span></div>
-    <div class="order-note">${o.note}</div>
+    <div class="order-note">${escapeHTML(o.note)}</div>
   </div>`;
+}
+function buildStatusFilters(){
+  const statuses=[
+    {nl:"Alles",key:"filter_all"},
+    {nl:"Offerte",key:"s_offerte"},
+    {nl:"Contract getekend",key:"s_contract"},
+    {nl:"In uitvoering",key:"s_uitvoering"},
+    {nl:"Oplevering",key:"s_oplevering"},
+    {nl:"Aanmelding netbeheerder",key:"s_netbeheerder"},
+    {nl:"Afgerond",key:"s_afgerond"}
+  ];
+  const sf=document.getElementById('statusFilters');
+  const active=sf.querySelector('.filter-chip.active')?.dataset.val||'Alles';
+  sf.innerHTML=statuses.map((s,i)=>`<button class="filter-chip${(active===s.nl||(!active&&i===0))?' active':''}" data-val="${s.nl}" onclick="filterOrdersFull('${s.nl}',this)">${t(s.key)||s.nl}</button>`).join('');
+  // also rebuild filterStatus select in dashboard
+  const sel=document.getElementById('filterStatus');
+  const selVal=sel.value;
+  sel.innerHTML=`<option value="">${t('filter_all_status')}</option>`+
+    statuses.slice(1).map(s=>`<option value="${s.nl}"${selVal===s.nl?' selected':''}>${t(s.key)||s.nl}</option>`).join('');
 }
 function renderOrdersFull(){
   const list=document.getElementById('orderListFull');
-  // status filter chips
-  const statuses=["Wszystkie","Wycena","Umowa podpisana","W realizacji","Odbiór końcowy","Zgłoszenie do OSD","Zakończone"];
-  const sf=document.getElementById('statusFilters');
-  if(!sf.hasChildNodes()){
-    sf.innerHTML=statuses.map((s,i)=>`<button class="filter-chip${i===0?' active':''}" onclick="filterOrdersFull('${s}',this)">${s}</button>`).join('');
-  }
-  list.innerHTML=orders.map(o=>orderCardHTML(o)).join('');
+  buildStatusFilters();
+  const activeVal=document.getElementById('statusFilters').querySelector('.filter-chip.active')?.dataset.val||'Alles';
+  const filtered=activeVal==='Alles'?orders:orders.filter(o=>o.status===activeVal);
+  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">${t('no_projects')}</div>`;
 }
 function filterOrdersFull(status,el){
   document.querySelectorAll('#statusFilters .filter-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   const list=document.getElementById('orderListFull');
-  const filtered=status==='Wszystkie'?orders:orders.filter(o=>o.status===status);
-  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">Brak zleceń w tym statusie.</div>`;
+  const filtered=status==='Alles'?orders:orders.filter(o=>o.status===status);
+  list.innerHTML=filtered.length?filtered.map(o=>orderCardHTML(o)).join(''):`<div class="empty">${t('no_projects')}</div>`;
 }
 
 // ── FORM ──────────────────────────────────────────────────
 function openForm(){document.getElementById('formOverlay').classList.add('open');}
 function closeForm(){document.getElementById('formOverlay').classList.remove('open');}
 function saveOrder(){
-  const name=document.getElementById('f-client').value.trim();if(!name){notify('Podaj nazwę klienta.');return;}
+  const name=document.getElementById('f-client').value.trim();if(!name){notify(t('form_no_client'));return;}
   const addr=document.getElementById('f-addr').value.trim();
   const type=document.getElementById('f-type').value;
   const kw=parseFloat(document.getElementById('f-kw').value)||0;
   const price=parseFloat(document.getElementById('f-price').value)||0;
   const status=document.getElementById('f-status').value;
   const date=document.getElementById('f-date').value||"2025-04-01";
-  const note=document.getElementById('f-note').value.trim()||"Nowe zlecenie.";
+  const note=document.getElementById('f-note').value.trim()||"Nieuw project.";
   let c=clients.find(x=>x.name.toLowerCase()===name.toLowerCase());
-  if(!c){const cols=["av-g","av-a","av-b","av-t","av-r"];c={id:clients.length+1,name,type:"Nowy klient",av:name.slice(0,2).toUpperCase(),col:cols[clients.length%cols.length],tel:"",email:""};clients.push(c);}
-  orders.push({id:orders.length+1,clientId:c.id,title:`${type} ${kw} kWp – ${addr||'brak adresu'}`,type,kw,status,price,note,date,addr,lat:140+Math.random()*120,lng:150+Math.random()*300});
-  closeForm();renderAll();notify('Zlecenie zostało zapisane.');
+  if(!c){const cols=["av-g","av-a","av-b","av-t","av-r"];c={id:clients.length+1,name,type:"Nieuwe klant",av:name.slice(0,2).toUpperCase(),col:cols[clients.length%cols.length],tel:"",email:""};clients.push(c);}
+  orders.push({id:orders.length+1,clientId:c.id,title:`${type} ${kw} kWp – ${addr||'onbekend adres'}`,type,kw,status,price,note,date,addr});
+  closeForm();renderAll();saveToStorage();notify(t('form_saved'));
   ['f-client','f-addr','f-kw','f-price','f-note'].forEach(id=>document.getElementById(id).value='');
 }
 
-// ── MAP ──────────────────────────────────────────────────
-let mapFilter='all';
+// ── MAP (Leaflet.js) ─────────────────────────────────────────
+let mapFilter='all',leafletMap=null,leafletMarkers=[];
+const GPS_CITY={
+  'amsterdam':[52.3676,4.9041],'rotterdam':[51.9225,4.4792],'den haag':[52.0705,4.3007],
+  'the hague':[52.0705,4.3007],'s-gravenhage':[52.0705,4.3007],'utrecht':[52.0907,5.1214],
+  'eindhoven':[51.4416,5.4697],'groningen':[53.2194,6.5665],'tilburg':[51.5555,5.0913],
+  'almere':[52.3508,5.2647],'breda':[51.5719,4.7683],'nijmegen':[51.8426,5.8527],
+  'arnhem':[51.9851,5.8987],'haarlem':[52.3874,4.6462],'enschede':[52.2215,6.8937],
+  'apeldoorn':[52.2130,5.9696],'zwolle':[52.5168,6.0830],'maastricht':[50.8514,5.6913],
+  'leiden':[52.1601,4.4970],'dordrecht':[51.8133,4.6901],'zoetermeer':[52.0567,4.4939],
+  'delft':[52.0116,4.3571],'amersfoort':[52.1561,5.3878],'den bosch':[51.6978,5.3037],
+  "'s-hertogenbosch":[51.6978,5.3037],'alkmaar':[52.6324,4.7534],'deventer':[52.2512,6.1583],
+  'helmond':[51.4826,5.6639],'zaandam':[52.4386,4.8295],'venlo':[51.3704,6.1724],
+  'leeuwarden':[53.2012,5.7999],'emmen':[52.7796,6.8993],'westland':[52.0104,4.2101],
+  'drachten':[53.1108,6.0994],'barendrecht':[51.8553,4.5350],'gouda':[52.0116,4.7079],
+  'purmerend':[52.5028,4.9560],'spijkenisse':[51.8486,4.3295],'hoorn':[52.6432,5.0601],
+  'alphen aan den rijn':[52.1280,4.6549],'nieuwegein':[52.0303,5.0869],'roosendaal':[51.5308,4.4625],
+  'schiedam':[51.9165,4.3883],'vlissingen':[51.4425,3.5714],'middelburg':[51.4988,3.6136],
+  'goes':[51.5041,3.8882],'terneuzen':[51.3353,3.8298],'bergen op zoom':[51.4939,4.2932],
+  'oss':[51.7641,5.5206],'waalwijk':[51.6827,5.0652],'veenendaal':[52.0274,5.5516],
+  'zeist':[52.0920,5.2281],'houten':[52.0289,5.1646],'capelle aan den ijssel':[51.9295,4.5673],
+  'spakenburg':[52.2567,5.3742],'harderwijk':[52.3417,5.6151],'ede':[52.0452,5.6636],
+  'wageningen':[51.9693,5.6651],'doetinchem':[51.9648,6.2975],'winterswijk':[51.9753,6.7249],
+  'hengelo':[52.2659,6.7935],'almelo':[52.3567,6.6650],'oldenzaal':[52.3125,6.9265],
+  'coevorden':[52.6602,6.7427],'hoogeveen':[52.7254,6.4771],'meppel':[52.6960,6.1954],
+  'assen':[52.9929,6.5642],'stadskanaal':[52.9878,6.9535],'veendam':[53.1085,6.8760],
+  'delfzijl':[53.3340,9.9294],'winschoten':[53.1433,7.0369],'lelystad':[52.5185,5.4714],
+  'leeuwarden':[53.2012,5.7999],'sneek':[53.0325,5.6580],'heerenveen':[52.9596,5.9225],
+  'bolsward':[53.0662,5.5303],'meppel':[52.6960,6.1954],'kampen':[52.5576,5.9126],
+  'hardenberg':[52.5757,6.6187],'steenwijk':[52.7873,6.1127],'midden-delfland':[51.9903,4.3010],
+};
+function getOrderGPS(o){
+  const addr=(o.addr||'').toLowerCase();
+  for(const[city,coords] of Object.entries(GPS_CITY)){
+    if(addr.includes(city)) return coords;
+  }
+  // deterministic jitter from order id so pins don't stack on default
+  const seed=o.id||1;
+  return[52.3+(seed*0.037%1.5)-0.75, 5.3+(seed*0.061%3.0)-1.5];
+}
 function renderMap(filter){
   if(filter) mapFilter=filter;
-  const svg=document.getElementById('mapSvg');
   const filtered=mapFilter==='all'?orders:orders.filter(o=>o.status===mapFilter);
-  const colMap={"Zakończone":"#3fb950","W realizacji":"#d29922","Zgłoszenie do OSD":"#58a6ff"};
-  const cities=[{x:190,y:70,n:"Kraków"},{x:445,y:100,n:"Tarnów"},{x:260,y:68,n:"Wieliczka"},{x:300,y:130,n:"Myślenice"},{x:325,y:170,n:"Zakopane"},{x:140,y:90,n:"Chrzanów"},{x:380,y:60,n:"Bochnia"},{x:520,y:80,n:"Dębica"}];
-  svg.innerHTML=`
-    <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/></pattern></defs>
-    <rect width="760" height="340" fill="var(--bg3)"/>
-    <rect width="760" height="340" fill="url(#grid)"/>
-    ${cities.map(t=>`<text x="${t.x}" y="${t.y}" font-size="10" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.2)">${t.n}</text>`).join('')}
-    ${filtered.map(o=>{
-      const col=colMap[o.status]||"#6e7681";
-      return`<g class="map-pin" style="cursor:pointer" onclick="showMapDetail(${o.id})" onmouseover="showMapTip(event,${o.id})" onmouseout="hideMapTip()">
-        <circle cx="${o.lng}" cy="${o.lat}" r="14" fill="${col}" fill-opacity=".12"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}"/>
-        <circle cx="${o.lng}" cy="${o.lat}" r="7" fill="${col}" fill-opacity=".3"><animate attributeName="r" from="7" to="18" dur="2s" repeatCount="indefinite"/><animate attributeName="fill-opacity" from=".3" to="0" dur="2s" repeatCount="indefinite"/></circle>
-        <text x="${o.lng}" y="${o.lat+18}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="rgba(255,255,255,0.4)">${o.kw}k</text>
-      </g>`;
-    }).join('')}`;
+  const colMap={"Afgerond":"#3fb950","In uitvoering":"#d29922","Aanmelding netbeheerder":"#58a6ff","Contract getekend":"#39d353","Oplevering":"#ff7b72","Offerte":"#6e7681"};
+  if(!leafletMap){
+    leafletMap=L.map('leafletMap',{center:[52.3,5.3],zoom:8,zoomControl:true,scrollWheelZoom:true});
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+      attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/">CARTO</a>',
+      subdomains:'abcd',maxZoom:19
+    }).addTo(leafletMap);
+  }
+  leafletMap.invalidateSize();
+  leafletMarkers.forEach(m=>leafletMap.removeLayer(m));
+  leafletMarkers=[];
+  filtered.forEach(o=>{
+    const[lat,lng]=getOrderGPS(o);
+    const c=clients.find(cl=>cl.id===o.clientId);
+    const col=colMap[o.status]||'#6e7681';
+    const icon=L.divIcon({
+      className:'',
+      html:`<div style="position:relative;width:24px;height:24px">
+        <div style="position:absolute;inset:0;border-radius:50%;background:${col};opacity:.15;animation:leaflet-pulse 2s ease-out infinite"></div>
+        <div style="position:absolute;top:5px;left:5px;width:14px;height:14px;border-radius:50%;background:${col};border:2px solid rgba(255,255,255,.5);box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>
+      </div>`,
+      iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12]
+    });
+    const marker=L.marker([lat,lng],{icon}).addTo(leafletMap);
+    marker.bindPopup(`<div style="font-family:'DM Mono',monospace;line-height:1.7">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;color:#e6edf3">${c?.name||''}</div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:4px">${o.title}</div>
+      <div style="font-size:11px"><span style="color:${col}">⬤</span> ${o.status} · <strong style="color:${col}">${o.kw} kWp</strong></div>
+      <div style="font-size:11px;color:#6e7681;margin-top:2px">${o.addr}</div>
+      <div style="font-size:13px;font-weight:700;color:#3fb950;margin-top:6px">${fmtEur(o.price)}</div>
+    </div>`,{maxWidth:240});
+    marker.on('click',()=>showMapDetail(o.id));
+    leafletMarkers.push(marker);
+  });
+  if(leafletMarkers.length>0){
+    try{
+      const grp=L.featureGroup(leafletMarkers);
+      leafletMap.fitBounds(grp.getBounds().pad(0.15));
+    }catch(e){}
+  }
 }
-function showMapTip(e,id){
-  const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  const tip=document.getElementById('mapTooltip');
-  tip.innerHTML=`<strong>${c?.name}</strong><br>${o.title}<br><span style="color:var(--green)">${o.kw} kWp · ${o.status}</span>`;
-  tip.style.display="block";tip.style.left=(e.offsetX+14)+"px";tip.style.top=(e.offsetY-10)+"px";
-}
-function hideMapTip(){document.getElementById('mapTooltip').style.display='none';}
 function showMapDetail(id){
   const o=orders.find(x=>x.id===id);const c=clients.find(x=>x.id===o.clientId);
-  document.getElementById('mapDetail').innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
-    <div><div class="stat-label">Klient</div><div style="font-size:13px;font-weight:600;margin-top:5px">${c?.name}</div></div>
+  document.getElementById('mapDetail').innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+    <div><div class="stat-label">${t('f_klant')}</div><div style="font-size:13px;font-weight:600;margin-top:5px">${escapeHTML(c?.name||'')}</div></div>
     <div><div class="stat-label">Status</div><div style="margin-top:5px">${statusTag(o.status)}</div></div>
-    <div><div class="stat-label">Moc</div><div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.kw} kWp</div></div>
-    <div><div class="stat-label">Adres</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${o.addr}</div></div>
-    <div><div class="stat-label">Wartość</div><div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.price.toLocaleString('pl-PL')} zł</div></div>
-    <div><div class="stat-label">Termin</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${o.date}</div></div>
-    <div style="grid-column:1/-1"><div class="stat-label">Notatka</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px;line-height:1.6">${o.note}</div></div>
+    <div><div class="stat-label">${t('f_kwp')}</div><div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${o.kw} kWp</div></div>
+    <div><div class="stat-label">${t('f_adres')}</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${escapeHTML(o.addr)}</div></div>
+    <div><div class="stat-label">${t('f_waarde')}</div><div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green);margin-top:5px">${fmtEur(o.price)}</div></div>
+    <div><div class="stat-label">${t('deadline')}</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px">${o.date}</div></div>
+    <div style="grid-column:1/-1"><div class="stat-label">${t('f_notitie')}</div><div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text2);margin-top:5px;line-height:1.6">${escapeHTML(o.note)}</div></div>
   </div>`;
 }
 function filterMap(f,el){
@@ -874,7 +1715,7 @@ function renderDocOrders(){
     const cnt=(docs[o.id]||[]).length;
     return`<div class="client-row${selectedDocOrder===o.id?' active':''}" onclick="selectDocOrder(${o.id},this)">
       <div class="av av-g" style="font-size:9px">${o.kw}k</div>
-      <div style="flex:1;min-width:0"><div class="c-name" style="font-size:12px">${o.title.substring(0,32)}…</div><div class="c-sub">${c?.name} · ${cnt} plików</div></div>
+      <div style="flex:1;min-width:0"><div class="c-name" style="font-size:12px">${escapeHTML(o.title.substring(0,32))}…</div><div class="c-sub">${escapeHTML(c?.name||'')} · ${cnt} ${t('docs_files')}</div></div>
     </div>`;
   }).join('');
 }
@@ -887,10 +1728,10 @@ function selectDocOrder(id,el){
   renderDocList();
 }
 function handleUpload(e){
-  if(!selectedDocOrder){notify('Wybierz zlecenie z listy.');return;}
+  if(!selectedDocOrder){notify(t('docs_choose'));return;}
   if(!docs[selectedDocOrder]) docs[selectedDocOrder]=[];
   Array.from(e.target.files).forEach(f=>{docs[selectedDocOrder].push({name:f.name,size:(f.size/1024).toFixed(0)+"KB",type:f.type,date:"2025-03-14"});});
-  renderDocList();renderDocOrders();notify('Pliki dodane.');
+  renderDocList();renderDocOrders();saveToStorage();notify(t('docs_added'));
 }
 function renderDocList(){
   const list=document.getElementById('docList');
@@ -902,61 +1743,62 @@ function renderDocList(){
       <div class="doc-icon" style="background:${isImg?'var(--green-bg)':'var(--blue-dim)'}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${isImg?'#3fb950':'#58a6ff'}" stroke-width="2">${isImg?'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'}</svg>
       </div>
-      <div style="flex:1;min-width:0"><div class="doc-name">${f.name}</div><div class="doc-meta">${f.size} · ${f.date}</div></div>
-      <button class="btn-danger" onclick="docs[${selectedDocOrder}].splice(${i},1);renderDocList();renderDocOrders()">Usuń</button>
+      <div style="flex:1;min-width:0"><div class="doc-name">${escapeHTML(f.name)}</div><div class="doc-meta">${f.size} · ${f.date}</div></div>
+      <button class="btn-danger" onclick="docs[${selectedDocOrder}].splice(${i},1);renderDocList();renderDocOrders()">Verwijderen</button>
     </div>`;
-  }).join(''):`<div class="empty">Brak plików. Dodaj zdjęcia z montażu lub dokumenty.</div>`;
+  }).join(''):`<div class="empty">${t('docs_no_files')}</div>`;
 }
 
 // ── INVOICES ──────────────────────────────────────────────────
 function renderInvoices(){
   const list=document.getElementById('fvList');
   const sc={"paid":"t-green","pending":"t-amber","overdue":"t-red"};
-  const sl={"paid":"Zapłacona","pending":"Do zapłaty","overdue":"Przeterminowana"};
+  const sl={"paid":t('inv_status_paid'),"pending":t('inv_status_pending'),"overdue":t('inv_status_overdue')};
   list.innerHTML=invoices.map(fv=>{
     const c=clients.find(cl=>cl.id===fv.clientId);
     return`<div class="fv-row">
-      <div class="fv-num">${fv.num}</div>
-      <div class="fv-client">${c?.name}</div>
-      <div class="fv-amount">${fv.amount.toLocaleString('pl-PL')} zł</div>
+      <div class="fv-num">${escapeHTML(fv.num)}</div>
+      <div class="fv-client">${escapeHTML(c?.name||'')}</div>
+      <div class="fv-amount">${fmtEur(fv.amount)}</div>
       <span class="tag ${sc[fv.status]}">${sl[fv.status]}</span>
       <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-left:auto">${fv.date}</div>
-      ${fv.status!=='paid'?`<button class="btn-primary" style="padding:4px 10px;font-size:10px" onclick="markPaid(${fv.id})">Opłać</button>`:''}
+      ${fv.status!=='paid'?`<button class="btn-primary" style="padding:4px 10px;font-size:10px" onclick="markPaid(${fv.id})">${t('inv_pay')}</button>`:''}
     </div>`;
   }).join('');
-  document.getElementById('fv-paid').textContent=invoices.filter(f=>f.status==="paid").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
-  document.getElementById('fv-pending').textContent=invoices.filter(f=>f.status==="pending").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
-  document.getElementById('fv-overdue').textContent=invoices.filter(f=>f.status==="overdue").reduce((a,b)=>a+b.amount,0).toLocaleString('pl-PL')+" zł";
+  document.getElementById('fv-paid').textContent=fmtEur(invoices.filter(f=>f.status==="paid").reduce((a,b)=>a+b.amount,0));
+  document.getElementById('fv-pending').textContent=fmtEur(invoices.filter(f=>f.status==="pending").reduce((a,b)=>a+b.amount,0));
+  document.getElementById('fv-overdue').textContent=fmtEur(invoices.filter(f=>f.status==="overdue").reduce((a,b)=>a+b.amount,0));
 }
-function markPaid(id){const f=invoices.find(x=>x.id===id);if(f){f.status='paid';renderInvoices();notify('Faktura oznaczona jako opłacona.');}}
+function markPaid(id){const f=invoices.find(x=>x.id===id);if(f){f.status='paid';renderInvoices();saveToStorage();notify(t('inv_marked_paid'));}}
 function addInvoice(){
   const c=clients[invoices.length%clients.length];
   const o=orders.find(x=>x.clientId===c.id);if(!o) return;
-  invoices.push({id:invoices.length+1,num:`FV/2025/03/${String(invoices.length+1).padStart(3,'0')}`,clientId:c.id,amount:o.price,status:"pending",date:"2025-03-14"});
-  renderInvoices();notify('Faktura wystawiona.');
+  invoices.push({id:invoices.length+1,num:`F/2025/03/${String(invoices.length+1).padStart(3,'0')}`,clientId:c.id,amount:o.price,status:"pending",date:"2025-03-14"});
+  renderInvoices();saveToStorage();notify(t('inv_created'));
 }
 
 // ── GRANTS ──────────────────────────────────────────────────
 function renderGrants(){
   const list=document.getElementById('grantList');
-  const sc={"Zatwierdzone":"t-green","W trakcie":"t-amber","Złożony":"t-blue","Odrzucony":"t-red"};
+  const sc={"Goedgekeurd":"t-green","In behandeling":"t-amber","Ingediend":"t-blue","Afgewezen":"t-red"};
+  const sk={"Goedgekeurd":"grant_status_approved","In behandeling":"grant_status_pending","Ingediend":"grant_status_submitted","Afgewezen":"grant_status_rejected"};
   list.innerHTML=grants.map(g=>{
     const c=clients.find(cl=>cl.id===g.clientId);
     return`<div class="grant-row">
-      <div class="av av-g" style="font-size:9px;font-weight:700">${g.program.slice(0,2).toUpperCase()}</div>
+      <div class="av av-g" style="font-size:9px;font-weight:700">${escapeHTML(g.program.slice(0,3).toUpperCase())}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:13px;font-weight:500">${c?.name}</div>
-        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${g.program} · złożono: ${g.submitted} · oczekiwany: ${g.expected}</div>
+        <div style="font-size:13px;font-weight:500">${escapeHTML(c?.name||'')}</div>
+        <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${escapeHTML(g.program)} · ${t('grant_submitted')}: ${g.submitted} · ${t('grant_expected')}: ${g.expected}</div>
       </div>
-      <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${g.amount.toLocaleString('pl-PL')} zł</div>
-      <span class="tag ${sc[g.status]||'t-gray'}">${g.status}</span>
+      <div style="font-size:14px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${fmtEur(g.amount)}</div>
+      <span class="tag ${sc[g.status]||'t-gray'}">${t(sk[g.status])||escapeHTML(g.status)}</span>
     </div>`;
   }).join('');
 }
 function addGrant(){
   const c=clients[grants.length%clients.length];
-  grants.push({id:grants.length+1,clientId:c.id,program:"Czyste Powietrze",amount:15000,status:"Złożony",submitted:"2025-03-14",expected:"2025-07-01"});
-  renderGrants();notify('Wniosek dodany.');
+  grants.push({id:grants.length+1,clientId:c.id,program:"SDE++",amount:15000,status:"Ingediend",submitted:"2025-03-14",expected:"2025-07-01"});
+  renderGrants();saveToStorage();notify(t('grant_add'));
 }
 
 // ── OSD ──────────────────────────────────────────────────
@@ -968,24 +1810,24 @@ function renderOSD(){
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
           <div style="font-size:14px;font-weight:600;margin-bottom:4px">${c?.name}</div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px">${o?.title} · Operator: <span style="color:var(--blue)">${osd.operator}</span> · Złożono: ${osd.submitted}</div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:8px">Etap ${osd.step+1}/${osd.steps.length}: <strong style="color:var(--amber)">${osd.steps[osd.step]}</strong></div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px">${escapeHTML(o?.title||'')} · ${t('osd_operator')}: <span style="color:var(--blue)">${escapeHTML(osd.operator)}</span> · ${t('grant_submitted')}: ${osd.submitted}</div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:8px">${t('osd_step')} ${osd.step+1}/${osd.steps.length}: <strong style="color:var(--amber)">${escapeHTML(osd.steps[osd.step])}</strong></div>
         </div>
-        <button class="btn-secondary" style="font-size:11px" onclick="advanceOSD(${osd.id})">Następny etap →</button>
+        <button class="btn-secondary" style="font-size:11px" onclick="advanceOSD(${osd.id})">${t('osd_next')}</button>
       </div>
       <div class="osd-steps">${osd.steps.map((_,i)=>`<div class="osd-step ${i<osd.step?'done':i===osd.step?'curr':'todo'}"></div>`).join('')}</div>
       <div class="osd-step-labels">${osd.steps.map((s,i)=>`<div class="osd-step-label ${i<osd.step?'done':i===osd.step?'curr':''}">${s}</div>`).join('')}</div>
     </div>`;
   }).join('');
 }
-function advanceOSD(id){const osd=osdItems.find(x=>x.id===id);if(osd&&osd.step<osd.steps.length-1){osd.step++;renderOSD();notify('Etap zaktualizowany.');}}
+function advanceOSD(id){const osd=osdItems.find(x=>x.id===id);if(osd&&osd.step<osd.steps.length-1){osd.step++;renderOSD();saveToStorage();notify(t('osd_updated'));}}
 
 // ── REMINDERS ──────────────────────────────────────────────────
 function renderReminders(){
   const sel=document.getElementById('r-client');
   sel.innerHTML=clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   const list=document.getElementById('remindList');
-  const months=["Sty","Lut","Mar","Kwi","Maj","Cze","Lip","Sie","Wrz","Paź","Lis","Gru"];
+  const months=lang==='nl'?["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"]:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   list.innerHTML=reminders.sort((a,b)=>new Date(a.date)-new Date(b.date)).map(r=>{
     const c=clients.find(cl=>cl.id===r.clientId);
     const d=new Date(r.date);const dl=Math.ceil((d-TODAY)/864e5);
@@ -994,7 +1836,8 @@ function renderReminders(){
       <div style="text-align:center;min-width:34px"><div class="remind-day">${d.getDate()}</div><div class="remind-month">${months[d.getMonth()]}</div></div>
       <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c?.name}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${r.type}</div></div>
       <span class="tag ${dl<=1?'t-red':dl<=7?'t-amber':'t-blue'}">${r.channel}</span>
-      ${dl<=3?`<span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--red)">${dl===0?'Dziś':dl===1?'Jutro':dl+'d'}</span>`:''}
+      ${dl<=3?`<span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--red)">${dl===0?t('rem_today'):dl===1?t('rem_tomorrow'):dl+'d'}</span>`:''}
+      ${r.sent?`<span class="tag t-green" style="font-size:9px">✓ ${lang==='nl'?'verstuurd':'sent'}</span>`:`<button class="btn-secondary" style="font-size:10px;padding:3px 9px" onclick="openNotifModal(${reminders.indexOf(r)})">${t('notif_send')}</button>`}
     </div>`;
   }).join('');
 }
@@ -1003,9 +1846,9 @@ function addReminder(){
   const type=document.getElementById('r-type').value;
   const date=document.getElementById('r-date').value;
   const channel=document.getElementById('r-channel').value;
-  if(!date){notify('Wybierz datę.');return;}
+  if(!date){notify(t('rem_no_date'));return;}
   reminders.push({clientId,type,date,channel});
-  renderReminders();notify('Przypomnienie dodane.');
+  renderReminders();saveToStorage();notify(t('rem_added'));
 }
 
 // ── CHATBOT ──────────────────────────────────────────────────
@@ -1024,7 +1867,7 @@ function selectChatClient(id){
   renderChatClients();
   const ords=orders.filter(o=>o.clientId===id);
   const summary=ords.map(o=>`${o.title} — ${o.status}`).join('; ');
-  addChatMsg(`Cześć! Załadowałem dane klienta **${c?.name}**.\n\nAktywne zlecenia: ${ords.length}\n${summary}\n\nZadaj mi pytanie o status, terminy lub kolejne kroki.`,'bot');
+  addChatMsg(`Hallo! Ik heb de gegevens van **${c?.name}** geladen.\n\nActieve projecten: ${ords.length}\n${summary}\n\nStel me een vraag over de status, deadlines of volgende stappen.`,'bot');
 }
 function addChatMsg(text,role){
   const msgs=document.getElementById('chatMsgs');
@@ -1041,10 +1884,10 @@ async function sendChat(){
   const ords=chatClient?orders.filter(o=>o.clientId===chatClient):orders;
   const ctx=ords.map(o=>`- ${o.title} | status: ${o.status} | termin: ${o.date} | nota: ${o.note}`).join('\n');
   try{
-    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:`Jesteś asystentem CRM firmy OZE. Rozmawiasz z ${c?`klientem ${c.name}`:"pracownikiem"}. Dane:\n${ctx}\nOdpowiadaj krótko, po polsku, max 3 zdania.`,messages:[{role:"user",content:text}]})});
+    const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:`Je bent een CRM-assistent van een zonne-energiebedrijf in Nederland. Je spreekt met ${c?`klant ${c.name}`:"een medewerker"}. Projectgegevens:\n${ctx}\nAntwoord kort en bondig in het Nederlands, maximaal 3 zinnen.`,messages:[{role:"user",content:text}]})});
     const data=await res.json();
-    addChatMsg(data.content?.find(b=>b.type==="text")?.text||"Przepraszam, spróbuj ponownie.",'bot');
-  }catch(e){addChatMsg("Błąd połączenia z AI.",'bot');}
+    addChatMsg(data.content?.find(b=>b.type==="text")?.text||"Sorry, probeer het opnieuw.",'bot');
+  }catch(e){addChatMsg("Verbindingsfout met AI.",'bot');}
 }
 
 // ── OFFER AI ──────────────────────────────────────────────────
@@ -1055,40 +1898,40 @@ async function genOffer(){
   const type=document.getElementById('of-type').value;const kw=document.getElementById('of-kw').value;
   const price=document.getElementById('of-price').value;const doctype=document.getElementById('of-doctype').value;
   const notes=document.getElementById('of-notes').value;
-  spin.classList.add('show');label.textContent='Generuję…';btn.disabled=true;
+  spin.classList.add('show');label.textContent=t('btn_gen_ai');btn.disabled=true;
   const prompts={
-    oferta:`Napisz profesjonalną ofertę handlową dla firmy OZE w Polsce. Klient: ${client||'[Klient]'}. Adres: ${addr}. Instalacja: ${type} ${kw} kWp. Cena netto: ${price} zł. Uwagi: ${notes}. Zawrzyj: wstęp, zakres prac, spec techniczną, cenę z VAT, gwarancję, terminy. Max 280 słów, po polsku.`,
-    umowa:`Napisz szkic umowy instalacyjnej OZE. Zleceniodawca: ${client||'[Klient]'}. Adres: ${addr}. Przedmiot: ${type} ${kw} kWp. Wartość: ${price} zł netto. Uwagi: ${notes}. Sekcje: §1 Przedmiot, §2 Terminy, §3 Wynagrodzenie, §4 Gwarancja, §5 Postanowienia końcowe. Po polsku.`,
-    protokol:`Napisz protokół odbioru instalacji OZE. Inwestor: ${client||'[Klient]'}. Adres: ${addr}. Instalacja: ${type} ${kw} kWp. Uwagi: ${notes}. Zawrzyj: datę odbioru, komisję, opis instalacji, wyniki pomiarów, uwagi, podpisy. Po polsku.`
+    oferta:`Schrijf een professionele commerciële offerte voor een zonne-energiebedrijf in Nederland. Klant: ${client||'[Klant]'}. Adres: ${addr}. Installatie: ${type} ${kw} kWp. Nettobedrag: €${price}. Opmerkingen: ${notes}. Neem op: inleiding, scopeomschrijving, technische specificaties, prijs inclusief BTW, garantie, planning. Maximaal 280 woorden, in het Nederlands.`,
+    umowa:`Schrijf een concept installatieovereenkomst voor zonne-energie. Opdrachtgever: ${client||'[Klant]'}. Adres: ${addr}. Onderwerp: ${type} ${kw} kWp. Bedrag: €${price} excl. BTW. Opmerkingen: ${notes}. Secties: §1 Onderwerp, §2 Planning, §3 Vergoeding, §4 Garantie, §5 Slotbepalingen. In het Nederlands.`,
+    protokol:`Schrijf een opleverings­protocol voor een zonne-energieinstallatie. Opdrachtgever: ${client||'[Klant]'}. Adres: ${addr}. Installatie: ${type} ${kw} kWp. Opmerkingen: ${notes}. Neem op: opleverdatum, commissie, installatiebeschrijving, meetresultaten, opmerkingen, handtekeningen. In het Nederlands.`
   };
   try{
     const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompts[doctype]}]})});
     const data=await res.json();
-    document.getElementById('offerPreview').textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd generowania.";
-  }catch(e){document.getElementById('offerPreview').textContent="Błąd połączenia z AI.";}
-  spin.classList.remove('show');label.textContent='Generuj AI ↗';btn.disabled=false;
+    document.getElementById('offerPreview').textContent=data.content?.find(b=>b.type==="text")?.text||"Fout bij genereren.";
+  }catch(e){document.getElementById('offerPreview').textContent="Verbindingsfout met AI.";}
+  spin.classList.remove('show');label.textContent=t('btn_gen_ai');btn.disabled=false;
 }
-function copyOffer(){const t=document.getElementById('offerPreview').textContent;navigator.clipboard?.writeText(t).then(()=>notify('Skopiowano do schowka.'));}
+function copyOffer(){const txt=document.getElementById('offerPreview').textContent;navigator.clipboard?.writeText(txt).then(()=>notify(t('off_copied')));}
 
 // ── AI REPORT ──────────────────────────────────────────────────
 async function generateReport(){
   if(!requireKey('raportu AI')) return;
   const btn=document.getElementById('aiBtn');const spin=document.getElementById('spin');const label=document.getElementById('aiLabel');const result=document.getElementById('aiResult');
-  spin.classList.add('show');label.textContent='Analizuję…';btn.disabled=true;result.classList.remove('show');
+  spin.classList.add('show');label.textContent=t('btn_analyse');btn.disabled=true;result.classList.remove('show');
   const scope=document.getElementById('aiScope').value;
-  const sum=orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);const dl=daysLeft(o.date);return`- ${c?.name}: "${o.title}" | ${o.type} | ${o.kw}kWp | ${o.status} | ${o.price}zł | termin: ${o.date}(${dl}d) | ${o.note}`;}).join('\n');
+  const sum=orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);const dl=daysLeft(o.date);return`- ${c?.name}: "${o.title}" | ${o.type} | ${o.kw}kWp | ${o.status} | €${o.price} | deadline: ${o.date}(${dl}d) | ${o.note}`;}).join('\n');
   const prompts={
-    ryzyko:`Analityk ryzyka firmy OZE. Wskaż zlecenia zagrożone opóźnieniem (termin <5 dni, problemy w notatkach). Dla każdego: powód ryzyka + rekomendacja. Max 200 słów, po polsku.\n\n${sum}`,
-    tydzien:`Asystent managera firmy OZE. Podsumowanie tygodnia: co zrealizowano, w toku, pipeline, kluczowe sprawy. Max 7 zdań, po polsku.\n\n${sum}`,
-    priorytet:`Asystent managera OZE. 5 najważniejszych zadań na jutro (OSD, odbiory, pilne terminy, płatności). Format: lista numerowana. Po polsku.\n\n${sum}`,
-    osd_ai:`Specjalista OSD/URE. Status zgłoszeń do operatorów. Co czeka, zagrożenia opóźnieniem, potrzebne dokumenty. Po polsku.\n\n${sum}`
+    ryzyko:`Je bent een risicoanalyst van een zonne-energiebedrijf in Nederland. Identificeer projecten met vertraagd risico (deadline <5 dagen, problemen in notities). Voor elk: risicoreden + aanbeveling. Maximaal 200 woorden, in het Nederlands.\n\n${sum}`,
+    tydzien:`Je bent een managersassistent van een zonne-energiebedrijf in Nederland. Weekoverzicht: wat is afgerond, wat loopt, pipeline, belangrijkste aandachtspunten. Maximaal 7 zinnen, in het Nederlands.\n\n${sum}`,
+    priorytet:`Je bent een managersassistent van een zonne-energiebedrijf in Nederland. Geef de 5 belangrijkste taken voor morgen (netbeheerder, opleveringen, urgente deadlines, betalingen). Formaat: genummerde lijst. In het Nederlands.\n\n${sum}`,
+    osd_ai:`Je bent een specialist netbeheerder-aansluitingen in Nederland. Status van ingediende aanvragen bij Liander/Enexis/Stedin. Wat wacht, risico's op vertraging, benodigde documenten. In het Nederlands.\n\n${sum}`
   };
   try{
     const res=await fetch("/api/chat",{method:"POST",headers:getApiHeaders(),body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompts[scope]}]})});
     const data=await res.json();
-    result.textContent=data.content?.find(b=>b.type==="text")?.text||"Błąd.";result.classList.add('show');
-  }catch(e){result.textContent="Błąd połączenia z AI.";result.classList.add('show');}
-  spin.classList.remove('show');label.textContent='Analizuj ↗';btn.disabled=false;
+    result.textContent=data.content?.find(b=>b.type==="text")?.text||"Fout.";result.classList.add('show');
+  }catch(e){result.textContent="Verbindingsfout met AI.";result.classList.add('show');}
+  spin.classList.remove('show');label.textContent=t('btn_analyse');btn.disabled=false;
 }
 
 // ── API KEY MANAGEMENT ────────────────────────────────────
@@ -1105,8 +1948,8 @@ function clearKeyStatus(){document.getElementById('apikeyStatus').textContent=''
 function toggleKeyVisibility(){
   const inp=document.getElementById('apikeyInput');
   const btn=inp.nextElementSibling;
-  if(inp.type==='password'){inp.type='text';btn.textContent='ukryj';}
-  else{inp.type='password';btn.textContent='pokaż';}
+  if(inp.type==='password'){inp.type='text';btn.textContent='verberg';}
+  else{inp.type='password';btn.textContent='toon';}
 }
 function updateKeyIndicator(){
   const dot=document.getElementById('keyDot');
@@ -1116,15 +1959,15 @@ function updateKeyIndicator(){
     lbl.textContent='API: sk-...'+ANTHROPIC_API_KEY.slice(-4);
   } else {
     dot.classList.remove('active');
-    lbl.textContent='Brak klucza API';
+    lbl.textContent=t('key_no_key');
   }
 }
 async function saveApiKey(){
   const key=document.getElementById('apikeyInput').value.trim();
   const status=document.getElementById('apikeyStatus');
-  if(!key){status.className='apikey-status err';status.textContent='⚠ Wklej klucz API.';return;}
-  if(!key.startsWith('sk-ant')){status.className='apikey-status err';status.textContent='⚠ Klucz powinien zaczynać się od sk-ant...';return;}
-  status.className='apikey-status';status.textContent='⏳ Testuję połączenie...';
+  if(!key){status.className='apikey-status err';status.textContent='⚠ Plak uw API-sleutel.';return;}
+  if(!key.startsWith('sk-ant')){status.className='apikey-status err';status.textContent='⚠ Sleutel moet beginnen met sk-ant...';return;}
+  status.className='apikey-status';status.textContent='⏳ Verbinding testen...';
   try{
     const res=await fetch("/api/chat",{
       method:"POST",
@@ -1133,17 +1976,17 @@ async function saveApiKey(){
     });
     if(res.ok||res.status===200){
       ANTHROPIC_API_KEY=key;
-      status.className='apikey-status ok';status.textContent='✓ Klucz poprawny! Połączono z API.';
+      status.className='apikey-status ok';status.textContent='✓ Sleutel correct! Verbonden met API.';
       updateKeyIndicator();
       setTimeout(closeApiKeyModal,1200);
     } else {
       const err=await res.json().catch(()=>({}));
       status.className='apikey-status err';
-      status.textContent='✗ Błąd: '+(err?.error?.message||'Nieprawidłowy klucz ('+res.status+')');
+      status.textContent='✗ Fout: '+(err?.error?.message||'Ongeldige sleutel ('+res.status+')');
     }
   }catch(e){
     status.className='apikey-status err';
-    status.textContent='✗ Błąd sieci. Sprawdź połączenie.';
+    status.textContent='✗ Netwerkfout. Controleer uw verbinding.';
   }
 }
 
@@ -1151,6 +1994,601 @@ function getApiHeaders(){
   return{"Content-Type":"application/json"};
 }
 function requireKey(featureName){return true;}
+
+// ── LOCAL STORAGE ─────────────────────────────────────────
+function saveToStorage(){
+  try{
+    localStorage.setItem('solarcrm_orders',JSON.stringify(orders));
+    localStorage.setItem('solarcrm_clients',JSON.stringify(clients));
+    localStorage.setItem('solarcrm_invoices',JSON.stringify(invoices));
+    localStorage.setItem('solarcrm_grants',JSON.stringify(grants));
+    localStorage.setItem('solarcrm_osd',JSON.stringify(osdItems));
+    localStorage.setItem('solarcrm_reminders',JSON.stringify(reminders));
+    localStorage.setItem('solarcrm_docs',JSON.stringify(docs));
+    localStorage.setItem('solarcrm_warranties',JSON.stringify(warranties));
+    localStorage.setItem('solarcrm_materials',JSON.stringify(materials));
+  }catch(e){}
+}
+function loadFromStorage(){
+  try{
+    const o=localStorage.getItem('solarcrm_orders');if(o)orders=JSON.parse(o);
+    const c=localStorage.getItem('solarcrm_clients');if(c)clients=JSON.parse(c);
+    const i=localStorage.getItem('solarcrm_invoices');if(i)invoices=JSON.parse(i);
+    const g=localStorage.getItem('solarcrm_grants');if(g)grants=JSON.parse(g);
+    const osd=localStorage.getItem('solarcrm_osd');if(osd)osdItems=JSON.parse(osd);
+    const r=localStorage.getItem('solarcrm_reminders');if(r)reminders=JSON.parse(r);
+    const d=localStorage.getItem('solarcrm_docs');if(d)docs=JSON.parse(d);
+    const w=localStorage.getItem('solarcrm_warranties');if(w)warranties=JSON.parse(w);
+    const m=localStorage.getItem('solarcrm_materials');if(m)materials=JSON.parse(m);
+  }catch(e){}
+}
+
+// ── GLOBAL SEARCH ──────────────────────────────────────────
+function doSearch(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const box=document.getElementById('searchResults');
+  if(!q){box.classList.remove('open');return;}
+  const results=[];
+  clients.forEach(c=>{if(c.name.toLowerCase().includes(q)||c.email.toLowerCase().includes(q)||c.tel.includes(q)){results.push({type:t('search_type_client'),name:c.name,sub:c.type,action:()=>{goPage('dashboard');setTimeout(()=>{selectClient(c.id);},100);}});}});
+  orders.forEach(o=>{const c=clients.find(cl=>cl.id===o.clientId);if(o.title.toLowerCase().includes(q)||o.addr.toLowerCase().includes(q)||(c&&c.name.toLowerCase().includes(q))){results.push({type:t('search_type_project'),name:o.title,sub:`${c?.name||''} · ${o.status}`,action:()=>goPage('zlecenia')});}});
+  invoices.forEach(fv=>{const c=clients.find(cl=>cl.id===fv.clientId);if(fv.num.toLowerCase().includes(q)||(c&&c.name.toLowerCase().includes(q))){results.push({type:t('search_type_inv'),name:fv.num,sub:`${c?.name||''} · ${fmtEur(fv.amount)}`,action:()=>goPage('faktury')});}});
+  if(!results.length){box.innerHTML=`<div class="sr-item"><div class="sr-sub" style="padding:4px 0">${t('search_no')} „${escapeHTML(q)}"</div></div>`;box.classList.add('open');return;}
+  box.innerHTML=results.slice(0,8).map((r,i)=>`<div class="sr-item" onclick="searchResults[${i}].action();closeSearch()"><span class="sr-type">${r.type}</span><div><div class="sr-name">${r.name}</div><div class="sr-sub">${r.sub}</div></div></div>`).join('');
+  window.searchResults=results;
+  box.classList.add('open');
+}
+function closeSearch(){
+  document.getElementById('searchResults').classList.remove('open');
+  document.getElementById('searchInput').value='';
+}
+
+// ── REVENUE CHARTS ─────────────────────────────────────────
+function renderCharts(){
+  const months=lang==='nl'?['okt','nov','dec','jan','feb','mrt']:['Oct','Nov','Dec','Jan','Feb','Mar'];
+  const baseRev=[118000,95000,142000,67000,185000,233500];
+  const baseKw=[28,19,42,12,65,73.4];
+  // overlay real invoice data on most recent months
+  const paid=invoices.filter(f=>f.status==='paid').reduce((a,b)=>a+b.amount,0);
+  baseRev[5]=paid||baseRev[5];
+  baseKw[5]=orders.filter(o=>o.status==='Afgerond').reduce((a,b)=>a+(b.kw||0),0)||baseKw[5];
+  renderBarChart('revChart',months,baseRev,'#3fb950','€');
+  renderBarChart('kwChart',months,baseKw,'#58a6ff','kWp');
+}
+function renderBarChart(id,labels,data,color,unit){
+  const svg=document.getElementById(id);if(!svg)return;
+  const W=400,H=130,pad={t:10,b:30,l:8,r:8};
+  const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  const max=Math.max(...data)*1.1||1;
+  const bw=cw/data.length*.65,gap=cw/data.length;
+  let html='';
+  data.forEach((v,i)=>{
+    const x=pad.l+i*gap+gap*.175;
+    const bh=Math.max(2,(v/max)*ch);
+    const y=pad.t+ch-bh;
+    html+=`<rect class="chart-bar" x="${x}" y="${y}" width="${bw}" height="${bh}" rx="3" fill="${color}" fill-opacity=".8">
+      <title>${labels[i]}: ${typeof v==='number'&&v>999?v.toLocaleString('nl-NL'):v} ${unit}</title>
+    </rect>`;
+    html+=`<text x="${x+bw/2}" y="${H-10}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="rgba(255,255,255,.35)">${labels[i]}</text>`;
+    if(i===data.length-1){
+      const lbl=v>999?Math.round(v/1000)+'k':v;
+      html+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="9" font-family="DM Mono,monospace" fill="${color}" font-weight="600">${lbl}</text>`;
+    }
+  });
+  svg.innerHTML=html;
+}
+
+// ── ROI CALCULATOR ─────────────────────────────────────────
+function calcROI(){
+  const kwh=parseFloat(document.getElementById('roi-kwh').value)||4500;
+  const kwp=parseFloat(document.getElementById('roi-kwp').value)||9.9;
+  const cost=parseFloat(document.getElementById('roi-cost').value)||28000;
+  const price=parseFloat(document.getElementById('roi-price').value)||0.83;
+  const grant=parseFloat(document.getElementById('roi-grant').value)||0;
+  const dir=parseFloat(document.getElementById('roi-dir').value)||1.0;
+  const prod=Math.round(kwp*950*dir);
+  const selfUse=Math.min(prod,kwh);
+  const export_=Math.max(0,prod-kwh);
+  const saveSelf=selfUse*price;
+  const saveExport=export_*0.3;
+  const totalSave=Math.round(saveSelf+saveExport);
+  const net=Math.max(0,cost-grant);
+  const payback=totalSave>0?(net/totalSave).toFixed(1):'∞';
+  const save25=Math.round(totalSave*25*(1+0.05*12));
+  const co2=(prod*0.7/1000).toFixed(1);
+  const pct=Math.min(100,Math.round((new Date().getFullYear()-2024)/parseFloat(payback)*100))||0;
+  document.getElementById('roi-prod').textContent=prod.toLocaleString('nl-NL');
+  document.getElementById('roi-save').textContent=fmtEur(totalSave);
+  document.getElementById('roi-payback').textContent=payback;
+  document.getElementById('roi-25y').textContent=fmtEur(save25);
+  document.getElementById('roi-co2').textContent=co2+' t';
+  document.getElementById('roi-net').textContent=fmtEur(net);
+  document.getElementById('roi-bar').style.width=pct+'%';
+  document.getElementById('roi-pct').textContent=pct+'%';
+}
+
+// ── AUTO-FILL OFFER FROM ORDER ─────────────────────────────
+function fillOfferOrderSelect(){
+  const sel=document.getElementById('of-order');
+  if(!sel)return;
+  sel.innerHTML=`<option value="">— ${t('off_fill')} —</option>`+
+    orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
+}
+function fillOfferFromOrder(){
+  const id=parseInt(document.getElementById('of-order').value);
+  if(!id)return;
+  const o=orders.find(x=>x.id===id);
+  const c=clients.find(x=>x.id===o?.clientId);
+  if(!o)return;
+  document.getElementById('of-client').value=c?.name||'';
+  document.getElementById('of-addr').value=o.addr||'';
+  document.getElementById('of-kw').value=o.kw||'';
+  document.getElementById('of-price').value=o.price||'';
+  // map type
+  const typeMap={'Zonnepanelen':'Zonnepanelen','Warmtepomp':'Warmtepomp','Hybride PV+WP':'Hybride PV+WP','Zonnecollectoren':'Zonnepanelen','Batterijopslag':'Batterijopslag'};
+  const ofType=document.getElementById('of-type');
+  const mapped=typeMap[o.type]||'Zonnepanelen';
+  Array.from(ofType.options).forEach(opt=>{if(opt.value===mapped||opt.text===mapped)opt.selected=true;});
+  document.getElementById('of-notes').value=o.note||'';
+  notify(t('off_loaded'));
+}
+
+// ── CSV EXPORT ───────────────────────────────────────────────
+function downloadCSV(rows,filename){
+  const bom='\uFEFF';
+  const csv=rows.map(r=>r.map(c=>{
+    const s=String(c==null?'':c);
+    return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;
+  }).join(',')).join('\r\n');
+  const blob=new Blob([bom+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;a.click();
+  URL.revokeObjectURL(url);
+}
+function exportOrders(){
+  const hdr=['ID','Klant','Titel','Type installatie','Vermogen (kWp)','Status','Waarde (€)','Deadline','Adres','Notitie'];
+  const rows=[hdr,...orders.map(o=>{
+    const c=clients.find(cl=>cl.id===o.clientId);
+    return[o.id,c?.name||'',o.title,o.type,o.kw,o.status,o.price,o.date,o.addr,o.note];
+  })];
+  downloadCSV(rows,`solarcrm_projecten_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Projecten geëxporteerd naar CSV.');
+}
+function exportClients(){
+  const hdr=['ID','Naam','Type','Telefoon','E-mail','Aantal projecten','Totaal kWp'];
+  const rows=[hdr,...clients.map(c=>{
+    const cnt=orders.filter(o=>o.clientId===c.id).length;
+    const kw=orders.filter(o=>o.clientId===c.id).reduce((a,b)=>a+(b.kw||0),0);
+    return[c.id,c.name,c.type,c.tel,c.email,cnt,kw.toFixed(1)];
+  })];
+  downloadCSV(rows,`solarcrm_klanten_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Klanten geëxporteerd naar CSV.');
+}
+function exportInvoices(){
+  const sl={'paid':t('inv_status_paid'),'pending':t('inv_status_pending'),'overdue':t('inv_status_overdue')};
+  const hdr=['Factuurnummer','Klant','Bedrag (€)','Status','Datum'];
+  const rows=[hdr,...invoices.map(fv=>{
+    const c=clients.find(cl=>cl.id===fv.clientId);
+    return[fv.num,c?.name||'',fv.amount,sl[fv.status]||fv.status,fv.date];
+  })];
+  downloadCSV(rows,`solarcrm_facturen_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Facturen geëxporteerd naar CSV.');
+}
+function exportMaterials(){
+  const hdr=['ID','Naam','Categorie','Aantal','Eenheid','Min. voorraad','Leverancier','Stukprijs (€)','Waarde (€)','Laatste bestelling'];
+  const rows=[hdr,...materials.map(m=>[m.id,m.name,m.cat,m.qty,m.unit,m.minQty,m.supplier,m.price,(m.qty*m.price).toFixed(2),m.lastOrder])];
+  downloadCSV(rows,`solarcrm_magazijn_${new Date().toISOString().slice(0,10)}.csv`);
+  notify('Magazijn geëxporteerd naar CSV.');
+}
+
+// ── WARRANTIES ───────────────────────────────────────────────
+const WAR_TODAY=new Date();
+function warDaysLeft(d){return d?Math.ceil((new Date(d)-WAR_TODAY)/864e5):9999;}
+function warStatus(w){
+  const dl=warDaysLeft(w.warrantyEnd);
+  if(dl<0) return'expired';
+  if(dl<90) return'expiring';
+  return'active';
+}
+function renderWarranties(){
+  const actv=warranties.filter(w=>warStatus(w)==='active').length;
+  const soon=warranties.filter(w=>warStatus(w)==='expiring').length;
+  const svcs=warranties.reduce((a,w)=>a+(w.serviceLog||[]).length,0);
+  document.getElementById('war-active').textContent=actv;
+  document.getElementById('war-soon').textContent=soon;
+  document.getElementById('war-services').textContent=svcs;
+  const list=document.getElementById('warrantyList');
+  if(!warranties.length){list.innerHTML=`<div class="empty">${t('war_add')} — geen garanties gevonden.</div>`;return;}
+  list.innerHTML=warranties.map(w=>{
+    const o=orders.find(x=>x.id===w.orderId);
+    const c=o?clients.find(x=>x.id===o.clientId):null;
+    const ws=warStatus(w);
+    const wDL=warDaysLeft(w.warrantyEnd);
+    const nsDL=warDaysLeft(w.nextService);
+    const wCls=ws==='expired'?'bad':ws==='expiring'?'warn':'ok';
+    const svcHTML=(w.serviceLog||[]).length?
+      (w.serviceLog||[]).map(s=>`<div class="service-entry">
+        <div class="service-dot"></div>
+        <div>
+          <div style="font-size:12px;font-weight:500">${s.type} <span style="font-family:'DM Mono',monospace;color:var(--text3);font-size:10px">· ${s.date} · ${s.tech}</span></div>
+          <div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px;line-height:1.6">${s.notes}</div>
+        </div>
+      </div>`).join(''):
+      `<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);padding:6px 0">${t('svc_no_entries')}</div>`;
+    return`<div class="war-card ${ws==='expired'?'expired':ws==='expiring'?'expiring':''}">
+      <div class="war-header">
+        <div>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">${c?.name||'—'} <span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text3);font-weight:400">· ${o?.title?.substring(0,45)||'—'}</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            ${ws==='expired'?`<span class="tag t-red">${t('war_expired_tag')}</span>`:ws==='expiring'?`<span class="tag t-amber">${t('war_expiring_tag')}</span>`:`<span class="tag t-green">${t('war_active_tag')}</span>`}
+            ${typeTag(o?.type||'Zonnepanelen')}
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--green)">${o?.kw||0} kWp</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn-secondary" style="font-size:11px" onclick="toggleServiceForm(${w.id})">${t('btn_service')}</button>
+          <button class="btn-danger" onclick="removeWarranty(${w.id})">Verwijderen</button>
+        </div>
+      </div>
+      <div class="war-dates">
+        <div class="war-date-item">
+          <div class="war-date-label">${t('war_instdate')}</div>
+          <div class="war-date-val">${w.instDate||'—'}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">${t('war_end')}</div>
+          <div class="war-date-val ${wCls}">${w.warrantyEnd||'—'}${wDL>0&&wDL<365?` <span style="font-size:10px">(${wDL}d)</span>`:''}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">${t('war_inv')}</div>
+          <div class="war-date-val ok">${w.inverterEnd||'—'}</div>
+        </div>
+        <div class="war-date-item">
+          <div class="war-date-label">${t('war_mod')}</div>
+          <div class="war-date-val ok">${w.moduleEnd||'—'}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);line-height:1.6;margin-bottom:12px">${w.notes||''}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${nsDL<30?'#f85149':nsDL<90?'#d29922':'#3fb950'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${t('war_next')}:</span>
+        <span style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:${nsDL<30?'var(--red)':nsDL<90?'var(--amber)':'var(--green)'}">${w.nextService||'—'}${nsDL>0&&nsDL<365?` · over ${nsDL} dagen`:''}</span>
+      </div>
+      <div class="service-log">
+        <div class="service-log-title">${t('war_log')}</div>
+        ${svcHTML}
+      </div>
+      <div class="add-service-form" id="svc-form-${w.id}">
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Servicebezoek toevoegen</div>
+        <div class="form-grid form-grid-2" style="gap:8px;margin-bottom:8px">
+          <div class="form-field"><div class="form-label">Datum</div><input class="form-input" type="date" id="svc-date-${w.id}"/></div>
+          <div class="form-field"><div class="form-label">${t('svc_type')}</div>
+            <select class="form-select" id="svc-type-${w.id}">
+              ${(t('svc_types')||[]).map(s=>`<option>${s}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="form-grid form-grid-2" style="gap:8px;margin-bottom:8px">
+          <div class="form-field"><div class="form-label">${t('svc_tech')}</div><input class="form-input" id="svc-tech-${w.id}" placeholder="Voor- en achternaam"/></div>
+          <div class="form-field"><div class="form-label">${t('svc_next')}</div><input class="form-input" type="date" id="svc-next-${w.id}"/></div>
+        </div>
+        <div class="form-field" style="margin-bottom:8px"><div class="form-label">${t('svc_notes')}</div><textarea class="form-textarea" id="svc-notes-${w.id}" placeholder="${t('svc_ph')}"></textarea></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-primary" style="font-size:11px" onclick="saveServiceEntry(${w.id})">${t('btn_add_svc')}</button>
+          <button class="btn-secondary" style="font-size:11px" onclick="toggleServiceForm(${w.id})">${t('btn_cancel')}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function toggleServiceForm(id){
+  const el=document.getElementById(`svc-form-${id}`);
+  el.classList.toggle('open');
+  if(el.classList.contains('open')){
+    const today=new Date().toISOString().slice(0,10);
+    document.getElementById(`svc-date-${id}`).value=today;
+  }
+}
+function saveServiceEntry(id){
+  const w=warranties.find(x=>x.id===id);if(!w)return;
+  const date=document.getElementById(`svc-date-${id}`).value;
+  const type=document.getElementById(`svc-type-${id}`).value;
+  const tech=document.getElementById(`svc-tech-${id}`).value.trim()||'—';
+  const notes=document.getElementById(`svc-notes-${id}`).value.trim();
+  const next=document.getElementById(`svc-next-${id}`).value;
+  if(!date){notify(t('svc_no_date'));return;}
+  if(!w.serviceLog) w.serviceLog=[];
+  w.serviceLog.unshift({date,type,tech,notes});
+  if(next) w.nextService=next;
+  saveToStorage();renderWarranties();notify(t('war_svc_saved'));
+}
+function removeWarranty(id){
+  warranties=warranties.filter(w=>w.id!==id);
+  saveToStorage();renderWarranties();notify(t('war_removed'));
+}
+function openWarrantyForm(){
+  const sel=document.getElementById('war-order');
+  sel.innerHTML=orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('war-inst-date').value=today;
+  document.getElementById('war-end-date').value=today.replace(/^(\d{4})/,y=>+y+5);
+  document.getElementById('war-inv-date').value=today.replace(/^(\d{4})/,y=>+y+10);
+  document.getElementById('war-mod-date').value=today.replace(/^(\d{4})/,y=>+y+25);
+  document.getElementById('war-next-service').value=today.replace(/^(\d{4})/,y=>+y+1);
+  document.getElementById('war-notes').value='';
+  document.getElementById('warrantyOverlay').classList.add('open');
+}
+function closeWarrantyForm(){document.getElementById('warrantyOverlay').classList.remove('open');}
+function saveWarranty(){
+  const orderId=parseInt(document.getElementById('war-order').value);
+  if(!orderId){notify(t('war_select_proj'));return;}
+  if(warranties.find(w=>w.orderId===orderId)){notify(t('war_exists'));return;}
+  warranties.push({
+    id:warranties.length?Math.max(...warranties.map(w=>w.id))+1:1,
+    orderId,
+    instDate:document.getElementById('war-inst-date').value,
+    warrantyEnd:document.getElementById('war-end-date').value,
+    inverterEnd:document.getElementById('war-inv-date').value,
+    moduleEnd:document.getElementById('war-mod-date').value,
+    notes:document.getElementById('war-notes').value.trim(),
+    nextService:document.getElementById('war-next-service').value,
+    serviceLog:[]
+  });
+  closeWarrantyForm();saveToStorage();renderWarranties();notify(t('war_saved'));
+}
+
+// ── MATERIALS ─────────────────────────────────────────────────
+const MAT_ICONS={'Zonnepanelen':'☀️','Omvormers':'⚡','Bekabeling':'🔌','Montage':'🔧','Warmtepompen':'❄️','Batterijopslag':'🔋','Overig':'📦'};
+const MAT_CATS=['Alles','Zonnepanelen','Omvormers','Bekabeling','Montage','Warmtepompen','Batterijopslag','Overig'];
+const MAT_COLORS={'Zonnepanelen':'var(--amber-dim)','Omvormers':'var(--blue-dim)','Bekabeling':'var(--green-bg)','Montage':'var(--bg4)','Warmtepompen':'#0d2a3a','Batterijopslag':'#1a1a3a','Overig':'var(--bg4)'};
+function renderMaterials(){
+  const filtered=activeMatFilter==='Alles'?materials:materials.filter(m=>m.cat===activeMatFilter);
+  const lowCnt=materials.filter(m=>m.qty<=m.minQty).length;
+  const totalVal=materials.reduce((a,m)=>a+m.qty*m.price,0);
+  const suppliers=[...new Set(materials.map(m=>m.supplier))].length;
+  document.getElementById('mat-total').textContent=materials.length;
+  document.getElementById('mat-low').textContent=lowCnt;
+  document.getElementById('mat-value').textContent=fmtEur(Math.round(totalVal));
+  document.getElementById('mat-suppliers').textContent=suppliers;
+  // category chips — re-render with translated labels
+  const fEl=document.getElementById('matFilters');
+  const tCats=t('mat_cats')||MAT_CATS;
+  fEl.innerHTML=MAT_CATS.map((cat,i)=>`<button class="filter-chip${cat===activeMatFilter?' active':''}" data-val="${cat}" onclick="filterMaterials('${cat}',this)">${tCats[i]||cat}</button>`).join('');
+  const list=document.getElementById('materialList');
+  if(!filtered.length){list.innerHTML=`<div class="empty">${t('mat_no_items')}</div>`;return;}
+  list.innerHTML=filtered.map(m=>{
+    const isLow=m.qty<=m.minQty;
+    const pct=m.minQty>0?Math.min(100,Math.round(m.qty/Math.max(m.qty*1.5,m.minQty*2)*100)):100;
+    const barCol=isLow?'var(--red)':m.qty<=m.minQty*1.5?'var(--amber)':'var(--green)';
+    const qCls=isLow?'low':m.qty<=m.minQty*1.5?'warn':'ok';
+    return`<div class="mat-row${isLow?' low-stock':''}">
+      <div class="mat-icon" style="background:${MAT_COLORS[m.cat]||'var(--bg4)'}">
+        <span style="font-size:18px">${MAT_ICONS[m.cat]||'📦'}</span>
+      </div>
+      <div class="mat-info">
+        <div class="mat-name">${escapeHTML(m.name)}${isLow?` <span class="tag t-red" style="font-size:9px;margin-left:4px">${t('mat_low_tag')}</span>`:''}</div>
+        <div class="mat-supplier">${escapeHTML(m.cat)} · ${escapeHTML(m.supplier)} · lts. best.: ${m.lastOrder}</div>
+      </div>
+      <div class="stock-bar-wrap">
+        <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text3)">${t('mat_min')}: ${m.minQty} ${escapeHTML(m.unit)}</div>
+        <div class="stock-bar-bg"><div class="stock-bar-fill" style="width:${pct}%;background:${barCol}"></div></div>
+      </div>
+      <div class="mat-price">${fmtEur(m.price)}/${escapeHTML(m.unit)}<br><span style="color:var(--text3);font-size:10px">${t('mat_value')}: ${fmtEur(m.qty*m.price)}</span></div>
+      <div class="mat-qty-wrap">
+        <div class="mat-qty ${qCls}">${m.qty}</div>
+        <div class="mat-unit">${escapeHTML(m.unit)}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="btn-primary" style="padding:4px 10px;font-size:10px" onclick="adjustStock(${m.id},1)">+</button>
+        <button class="btn-secondary" style="padding:4px 10px;font-size:10px" onclick="adjustStock(${m.id},-1)">−</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function filterMaterials(cat,el){
+  document.querySelectorAll('#matFilters .filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeMatFilter=cat;
+  renderMaterials();
+}
+function adjustStock(id,delta){
+  const m=materials.find(x=>x.id===id);
+  if(m){m.qty=Math.max(0,m.qty+delta);saveToStorage();renderMaterials();}
+}
+function openMaterialForm(){
+  ['mat-name-inp','mat-supplier-inp','mat-unit-inp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mat-qty-inp').value='1';
+  document.getElementById('mat-min-inp').value='1';
+  document.getElementById('mat-price-inp').value='0';
+  document.getElementById('mat-order-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('mat-unit-inp').value='st';
+  document.getElementById('materialOverlay').classList.add('open');
+}
+function closeMaterialForm(){document.getElementById('materialOverlay').classList.remove('open');}
+function saveMaterial(){
+  const name=document.getElementById('mat-name-inp').value.trim();
+  if(!name){notify(t('mat_no_name'));return;}
+  materials.push({
+    id:materials.length?Math.max(...materials.map(m=>m.id))+1:1,
+    name,
+    cat:document.getElementById('mat-cat-inp').value,
+    qty:parseInt(document.getElementById('mat-qty-inp').value)||0,
+    unit:document.getElementById('mat-unit-inp').value||'st',
+    minQty:parseInt(document.getElementById('mat-min-inp').value)||1,
+    supplier:document.getElementById('mat-supplier-inp').value.trim()||'—',
+    price:parseFloat(document.getElementById('mat-price-inp').value)||0,
+    lastOrder:document.getElementById('mat-order-date').value||new Date().toISOString().slice(0,10)
+  });
+  closeMaterialForm();saveToStorage();renderMaterials();notify(t('mat_saved'));
+}
+
+// ── CLIENT PORTAL ─────────────────────────────────────────
+let portalClient=null;
+function renderPortaal(){
+  const list=document.getElementById('portalClientList');
+  list.innerHTML=clients.map(c=>`
+    <div class="client-row${portalClient===c.id?' active':''}" onclick="selectPortalClient(${c.id})">
+      <div class="av ${c.col}">${escapeHTML(c.av)}</div>
+      <div style="flex:1;min-width:0"><div class="c-name">${escapeHTML(c.name)}</div><div class="c-sub">${escapeHTML(c.type)}</div></div>
+    </div>`).join('');
+  if(portalClient) showPortalContent(portalClient);
+}
+function selectPortalClient(id){
+  portalClient=id;
+  renderPortaal();
+  showPortalContent(id);
+}
+function showPortalContent(id){
+  const c=clients.find(x=>x.id===id);
+  const ords=orders.filter(o=>o.clientId===id);
+  const invs=invoices.filter(f=>f.clientId===id);
+  const war=warranties.find(w=>ords.some(o=>o.id===w.orderId));
+  const link=window.location.origin+window.location.pathname+'?portal='+id;
+  const el=document.getElementById('portalContent');
+  el.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-size:15px;font-weight:700">${escapeHTML(c.name)}</div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${escapeHTML(c.type)} · ${escapeHTML(c.email)} · ${escapeHTML(c.tel)}</div>
+      </div>
+      <button class="btn-secondary" style="font-size:11px" onclick="copyPortalLink(${id})">🔗 ${t('portal_share')}</button>
+    </div>
+    <div style="padding:14px;background:var(--green-bg);border:1px solid var(--green-dim);border-radius:8px;margin-bottom:16px;font-size:12px;font-family:'DM Mono',monospace;color:#b3f0b8;line-height:1.7">
+      ${t('portal_welcome')} <strong>${escapeHTML(c.name)}</strong>.<br>${ords.length} ${t('portal_projects').toLowerCase()} · ${invs.length} ${t('portal_invoices').toLowerCase()}${war?` · ${t('portal_next_svc')}: ${war.nextService}`:''}
+    </div>
+    <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">${t('portal_projects')}</div>
+    ${ords.map(o=>`<div style="padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px">
+        <div style="font-size:13px;font-weight:500">${escapeHTML(o.title)}</div>
+        <div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)">${fmtEur(o.price)}</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        ${statusTag(o.status)}${typeTag(o.type)}
+        <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-left:auto">${t('deadline')}: ${o.date}</span>
+      </div>
+      ${o.note?`<div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:8px;line-height:1.6">${escapeHTML(o.note)}</div>`:''}
+    </div>`).join('')}
+    ${invs.length?`<div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 10px">${t('portal_invoices')}</div>
+    ${invs.map(f=>{const sc={"paid":"t-green","pending":"t-amber","overdue":"t-red"};const sl={"paid":t('inv_status_paid'),"pending":t('inv_status_pending'),"overdue":t('inv_status_overdue')};return`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border);margin-bottom:6px"><span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2)">${escapeHTML(f.num)}</span><span style="flex:1;font-family:'DM Mono',monospace;font-size:13px;font-weight:700">${fmtEur(f.amount)}</span><span class="tag ${sc[f.status]}">${sl[f.status]}</span><span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3)">${f.date}</span></div>`;}).join('')}`:''}`;
+}
+function copyPortalLink(id){
+  const link=window.location.origin+window.location.pathname+'?portal='+id;
+  navigator.clipboard?.writeText(link).then(()=>notify(t('portal_copied')));
+}
+
+// ── DAKANALYSE AI ─────────────────────────────────────────
+let dakImageB64=null,dakMimeType='image/jpeg',dakAnalysisResult=null;
+function handleDakUpload(e){
+  const file=e.target.files[0];if(!file)return;loadDakFile(file);
+}
+function handleDakDrop(e){
+  e.preventDefault();
+  const file=e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;loadDakFile(file);
+}
+function loadDakFile(file){
+  dakMimeType=file.type||'image/jpeg';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    dakImageB64=ev.target.result.split(',')[1];
+    const prev=document.getElementById('dakPreview');
+    prev.src=ev.target.result;
+    document.getElementById('dakPreviewWrap').style.display='block';
+    document.getElementById('dakDropzone').style.display='none';
+    document.getElementById('dakApplyBtn').style.display='none';
+    document.getElementById('dakResult').textContent=t('off_placeholder');
+    dakAnalysisResult=null;
+  };
+  reader.readAsDataURL(file);
+  // populate project select
+  const sel=document.getElementById('dakOrderSel');
+  sel.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+
+    orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
+}
+async function analyseDak(){
+  if(!dakImageB64){notify(t('dak_no_img'));return;}
+  const btn=document.getElementById('dakBtn');
+  const spin=document.getElementById('dakSpin');
+  const label=document.getElementById('dakLabel');
+  const result=document.getElementById('dakResult');
+  spin.classList.add('show');label.textContent=t('dak_analyzing');btn.disabled=true;
+  const prompt=lang==='nl'
+    ?`Je bent een zonne-energiespecialist. Analyseer deze dakfoto en geef een gedetailleerde beoordeling:\n\n1. **Dakoriëntatie** — schat de richting (Zuid, ZO, ZW, Oost/West)\n2. **Dakoppervlak** — schat het bruikbare dakoppervlak in m²\n3. **Schaduw & obstakels** — dakramen, schoorstenen, bomen, beschaduwing\n4. **Daktype & helling** — zadeldak, plat dak, mansarde; geschatte hellingshoek\n5. **Aanbevolen capaciteit** — aanbevolen kWp, aantal panelen (415W standaard)\n6. **Verwachte jaarproductie** — in kWh bij Nederlandse instraling\n7. **Opmerkingen** — aandachtspunten voor de installateur\n\nWees specifiek en praktisch. Geef getallen waar mogelijk.`
+    :`You are a solar energy specialist. Analyse this roof photo and provide a detailed assessment:\n\n1. **Roof orientation** — estimate the direction (South, SE, SW, East/West)\n2. **Roof area** — estimate the usable roof area in m²\n3. **Shading & obstacles** — skylights, chimneys, trees, shading\n4. **Roof type & pitch** — gable, flat, mansard; estimated pitch angle\n5. **Recommended capacity** — recommended kWp, number of panels (415W standard)\n6. **Expected annual production** — in kWh for Netherlands irradiation\n7. **Notes** — points of attention for the installer\n\nBe specific and practical. Give numbers where possible.`;
+  try{
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+      model:"claude-sonnet-4-20250514",max_tokens:900,
+      messages:[{role:"user",content:[
+        {type:"image",source:{type:"base64",media_type:dakMimeType,data:dakImageB64}},
+        {type:"text",text:prompt}
+      ]}]
+    })});
+    const data=await res.json();
+    dakAnalysisResult=data.content?.find(b=>b.type==="text")?.text||"Fout bij analyseren.";
+    result.textContent=dakAnalysisResult;
+    document.getElementById('dakApplyBtn').style.display='';
+    // try to extract kWp for ROI prefill
+    const kwpMatch=dakAnalysisResult.match(/(\d+[.,]\d+|\d+)\s*kWp/i);
+    if(kwpMatch) document.getElementById('dakApplyBtn').dataset.kwp=kwpMatch[1].replace(',','.');
+  }catch(e){result.textContent=lang==='nl'?"Verbindingsfout met AI.":"Connection error with AI.";}
+  spin.classList.remove('show');label.textContent=t('dak_btn');btn.disabled=false;
+}
+function applyDakToROI(){
+  if(!dakAnalysisResult)return;
+  const kwp=parseFloat(document.getElementById('dakApplyBtn').dataset.kwp)||0;
+  if(kwp>0){document.getElementById('roi-kwp').value=kwp;calcROI();}
+  goPage('kalkulator',document.querySelector('.nav-item[onclick*="kalkulator"]'));
+  notify(t('dak_applied'));
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────
+let notifReminder=null;
+function openNotifModal(idx){
+  notifReminder=idx;
+  const r=reminders[idx];
+  const c=clients.find(x=>x.id===r.clientId);
+  const modal=document.getElementById('notifOverlay');
+  document.getElementById('notifClientName').textContent=c?.name||'';
+  document.getElementById('notifType').textContent=r.type;
+  document.getElementById('notifDate').textContent=r.date;
+  document.getElementById('notifMsg').textContent='';
+  modal.classList.add('open');
+}
+function closeNotifModal(){document.getElementById('notifOverlay').classList.remove('open');}
+async function genNotifMsg(){
+  const r=reminders[notifReminder];
+  const c=clients.find(x=>x.id===r.clientId);
+  const ords=orders.filter(o=>o.clientId===r.clientId);
+  const msgEl=document.getElementById('notifMsg');
+  msgEl.textContent=lang==='nl'?'Genereren…':'Generating…';
+  const prompt=lang==='nl'
+    ?`Schrijf een korte, vriendelijke notificatie voor klant ${c?.name} over: ${r.type} op ${r.date}. Projecten: ${ords.map(o=>o.title).join(', ')}. Maximaal 3 zinnen. Professioneel maar warm. Nederlands.`
+    :`Write a short, friendly notification for client ${c?.name} about: ${r.type} on ${r.date}. Projects: ${ords.map(o=>o.title).join(', ')}. Maximum 3 sentences. Professional but warm. English.`;
+  try{
+    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:120,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    msgEl.textContent=data.content?.find(b=>b.type==="text")?.text||'';
+  }catch(e){msgEl.textContent=lang==='nl'?'Verbindingsfout.':'Connection error.';}
+}
+function sendNotifEmail(){
+  const r=reminders[notifReminder];
+  const c=clients.find(x=>x.id===r.clientId);
+  const msg=document.getElementById('notifMsg').textContent;
+  const subject=encodeURIComponent(`SolarCRM — ${r.type}`);
+  const body=encodeURIComponent(msg||`${r.type} — ${r.date}`);
+  window.open(`mailto:${c?.email||''}?subject=${subject}&body=${body}`);
+}
+function sendNotifSMS(){
+  const msg=document.getElementById('notifMsg').textContent;
+  if(msg){navigator.clipboard?.writeText(msg).then(()=>notify(t('portal_copied')));}
+}
+function sendNotifWhatsApp(){
+  const r=reminders[notifReminder];
+  const msg=document.getElementById('notifMsg').textContent||`${r.type} — ${r.date}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+}
+function markNotifSent(){
+  if(notifReminder!==null){reminders[notifReminder].sent=true;saveToStorage();renderReminders();}
+  closeNotifModal();notify(t('notif_sent'));
+}
 
 // ── MOBILE SIDEBAR ────────────────────────────────────────
 function toggleSidebar(){
@@ -1167,27 +2605,30 @@ document.querySelectorAll('.nav-item').forEach(btn=>{
 });
 
 // ── INIT ──────────────────────────────────────────────────
-function renderAll(){renderStats();renderClients();renderOrders();}
-document.getElementById('topbarDate').textContent=new Date().toLocaleDateString('pl-PL',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+function renderAll(){renderStats();renderClients();renderOrders();renderCharts();}
+loadFromStorage();
+document.getElementById('topbarDate').textContent=new Date().toLocaleDateString(t('date_short'),{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 renderAll();
+buildStatusFilters();
+calcROI();
 
 // Add API key modal HTML
 (function(){
   const overlay=document.createElement('div');
   overlay.className='apikey-overlay';overlay.id='apikeyOverlay';
   overlay.innerHTML=`<div class="apikey-modal">
-    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Klucz API Anthropic</h2>
-    <p>Wymagany do funkcji AI: chatbot, oferty, raporty.<br>Klucz przechowywany tylko w pamięci — znika po zamknięciu karty.</p>
+    <h2><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Anthropic API-sleutel</h2>
+    <p>Vereist voor AI-functies: chatbot, offertes, rapporten.<br>De sleutel wordt alleen in het geheugen opgeslagen — verdwijnt na sluiten van de tab.</p>
     <div class="apikey-input-wrap">
       <input type="password" id="apikeyInput" placeholder="sk-ant-api03-..." oninput="clearKeyStatus()"/>
-      <button class="apikey-toggle" onclick="toggleKeyVisibility()">pokaż</button>
+      <button class="apikey-toggle" onclick="toggleKeyVisibility()">toon</button>
     </div>
     <div class="apikey-status" id="apikeyStatus"></div>
     <div style="display:flex;gap:8px">
-      <button class="btn-primary" onclick="saveApiKey()" style="flex:1">Zapisz i przetestuj</button>
-      <button class="btn-secondary" onclick="closeApiKeyModal()">Anuluj</button>
+      <button class="btn-primary" onclick="saveApiKey()" style="flex:1">Opslaan en testen</button>
+      <button class="btn-secondary" onclick="closeApiKeyModal()">Annuleren</button>
     </div>
-    <div class="apikey-hint">Klucz API: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue)">console.anthropic.com</a><br>⚠️ Nie udostępniaj klucza nikomu.</div>
+    <div class="apikey-hint">API-sleutel aanmaken: <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color:var(--blue)">console.anthropic.com</a><br>⚠️ Deel uw sleutel nooit met derden.</div>
   </div>`;
   document.body.appendChild(overlay);
 })();
