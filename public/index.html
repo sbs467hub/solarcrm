@@ -710,7 +710,7 @@ html{background:var(--bg)}
             </div>
             <div class="form-grid form-grid-2" style="gap:8px">
               <div class="form-field"><div class="form-label" data-i18n="off_price">Nettobedrag (€)</div><input class="form-input" id="of-price" type="number" value="15000"/></div>
-              <div class="form-field"><div class="form-label" data-i18n="off_doctype">Documenttype</div><select class="form-select" id="of-doctype"><option value="oferta">Offerte</option><option value="umowa">Installatiecontract</option><option value="protokol">Opleveringsprotocol</option></select></div>
+              <div class="form-field"><div class="form-label" data-i18n="off_doctype">Documenttype</div><select class="form-select" id="of-doctype"></select></div>
             </div>
             <div class="form-field"><div class="form-label" data-i18n="off_notes">Aanvullende opmerkingen</div><textarea class="form-textarea" id="of-notes" placeholder="SDE++ subsidie, schuin dak 35°, terugleveringsmeter, ISDE aanvraag..."></textarea></div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -804,7 +804,7 @@ html{background:var(--bg)}
           <div class="card-title" style="margin-bottom:14px" data-i18n="rem_add">Herinnering toevoegen</div>
           <div class="form-grid" style="gap:11px">
             <div class="form-field"><div class="form-label" data-i18n="f_klant">Klant</div><select class="form-select" id="r-client"></select></div>
-            <div class="form-field"><div class="form-label" data-i18n="rem_type">Type afspraak</div><select class="form-select" id="r-type"><option>Installatiedatum</option><option>Jaarlijks onderhoud</option><option>Factuur betaling</option><option>Aanvraag netbeheerder</option><option>Oplevering installatie</option></select></div>
+            <div class="form-field"><div class="form-label" data-i18n="rem_type">Type afspraak</div><select class="form-select" id="r-type"></select></div>
             <div class="form-grid form-grid-2" style="gap:8px">
               <div class="form-field"><div class="form-label" data-i18n="rem_date">Datum</div><input class="form-input" type="date" id="r-date"/></div>
               <div class="form-field"><div class="form-label" data-i18n="rem_channel">Kanaal</div><select class="form-select" id="r-channel"><option>SMS</option><option>Email</option><option>SMS + Email</option></select></div>
@@ -946,12 +946,12 @@ html{background:var(--bg)}
         <div class="form-field"><div class="form-label" data-i18n="f_adres">Installatieadres</div><input class="form-input" id="f-addr" data-i18n-ph="form_addr_ph" placeholder="Meentheweg 22, Drachten"/></div>
       </div>
       <div class="form-grid form-grid-3" style="gap:10px">
-        <div class="form-field"><div class="form-label" data-i18n="f_type">Type installatie</div><select class="form-select" id="f-type"><option>Zonnepanelen</option><option>Warmtepomp</option><option>Zonnecollectoren</option><option>Batterijopslag</option><option>Hybride PV+WP</option></select></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_type">Type installatie</div><select class="form-select" id="f-type"></select></div>
         <div class="form-field"><div class="form-label" data-i18n="f_kwp">Vermogen (kWp)</div><input class="form-input" id="f-kw" type="number" step="0.1" placeholder="9.9"/></div>
         <div class="form-field"><div class="form-label" data-i18n="f_waarde">Waarde (€)</div><input class="form-input" id="f-price" type="number" placeholder="28000"/></div>
       </div>
       <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label" data-i18n="f_status">Status</div><select class="form-select" id="f-status"><option>Offerte</option><option>Contract getekend</option><option>In uitvoering</option><option>Oplevering</option><option>Aanmelding netbeheerder</option><option>Afgerond</option></select></div>
+        <div class="form-field"><div class="form-label" data-i18n="f_status">Status</div><select class="form-select" id="f-status"></select></div>
         <div class="form-field"><div class="form-label" data-i18n="f_datum">Verwachte oplevering</div><input class="form-input" id="f-date" type="date"/></div>
       </div>
       <div class="form-field"><div class="form-label" data-i18n="f_notitie">Notitie</div><textarea class="form-textarea" id="f-note" data-i18n-ph="form_note_ph" placeholder="Daktype, omvormermodel, montage-opmerkingen..."></textarea></div>
@@ -996,24 +996,21 @@ html{background:var(--bg)}
   <div class="form-modal">
     <div class="form-title"><span data-i18n="btn_add_mat">+ Materiaal toevoegen</span><button class="form-close" onclick="closeMaterialForm()">✕</button></div>
     <div class="form-grid">
-      <div class="form-field"><div class="form-label">Productnaam</div><input class="form-input" id="mat-name-inp" data-i18n-ph="mat_name_ph" placeholder="bijv. Zonnepaneel Longi 415W"/></div>
+      <div class="form-field"><div class="form-label" data-i18n="mat_prod_lbl">Productnaam</div><input class="form-input" id="mat-name-inp" data-i18n-ph="mat_name_ph" placeholder="bijv. Zonnepaneel Longi 415W"/></div>
       <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Categorie</div>
-          <select class="form-select" id="mat-cat-inp">
-            <option>Zonnepanelen</option><option>Omvormers</option><option>Bekabeling</option>
-            <option>Montage</option><option>Warmtepompen</option><option>Batterijopslag</option><option>Overig</option>
-          </select>
+        <div class="form-field"><div class="form-label" data-i18n="mat_cat_lbl">Categorie</div>
+          <select class="form-select" id="mat-cat-inp"></select>
         </div>
-        <div class="form-field"><div class="form-label">Leverancier</div><input class="form-input" id="mat-supplier-inp" placeholder="Naam leverancier"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_sup_lbl">Leverancier</div><input class="form-input" id="mat-supplier-inp" placeholder="Naam leverancier"/></div>
       </div>
       <div class="form-grid form-grid-3" style="gap:10px">
-        <div class="form-field"><div class="form-label">Aantal</div><input class="form-input" type="number" id="mat-qty-inp" value="1" min="0"/></div>
-        <div class="form-field"><div class="form-label">Eenheid</div><input class="form-input" id="mat-unit-inp" placeholder="st / rol / set"/></div>
-        <div class="form-field"><div class="form-label">Min. voorraad</div><input class="form-input" type="number" id="mat-min-inp" value="1" min="0"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_qty_lbl">Aantal</div><input class="form-input" type="number" id="mat-qty-inp" value="1" min="0"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_unit_lbl">Eenheid</div><input class="form-input" id="mat-unit-inp" placeholder="st / rol / set"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_min_lbl">Min. voorraad</div><input class="form-input" type="number" id="mat-min-inp" value="1" min="0"/></div>
       </div>
       <div class="form-grid form-grid-2" style="gap:10px">
-        <div class="form-field"><div class="form-label">Stukprijs (€)</div><input class="form-input" type="number" id="mat-price-inp" value="0" min="0"/></div>
-        <div class="form-field"><div class="form-label">Laatste bestelling</div><input class="form-input" type="date" id="mat-order-date"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_price_lbl">Stukprijs (€)</div><input class="form-input" type="number" id="mat-price-inp" value="0" min="0"/></div>
+        <div class="form-field"><div class="form-label" data-i18n="mat_last_order_lbl">Laatste bestelling</div><input class="form-input" type="date" id="mat-order-date"/></div>
       </div>
     </div>
     <div class="divider"></div>
@@ -1092,7 +1089,7 @@ let reminders=[
   {clientId:2,type:"Installatiedatum",date:"2025-03-18",channel:"SMS"},
   {clientId:1,type:"Oplevering installatie",date:"2025-03-15",channel:"Email"},
   {clientId:3,type:"Factuur betaling",date:"2025-03-20",channel:"SMS + Email"},
-  {clientId:4,type:"Jaarlijkse onderhoudsbeurt",date:"2025-04-10",channel:"SMS"},
+  {clientId:4,type:"Jaarlijks onderhoud",date:"2025-04-10",channel:"SMS"},
 ];
 let docs={};
 let warranties=[
@@ -1283,6 +1280,17 @@ nl:{
   rem_no_date:'Kies een datum.', war_select_proj:'Selecteer een project.',
   mat_no_name:'Vul een productnaam in.', svc_no_date:'Kies een datum voor het bezoek.',
   key_no_key:'Geen API-sleutel', key_set:'API:',
+  // OSD steps
+  osd_steps:["Aanvraag ingediend","Aansluitingsvoorwaarden ontvangen","Aansluitingsovereenkomst","Teruglevermeter geplaatst","Activatie — eerste meting"],
+  // Extra UI strings
+  war_none:'Geen garanties gevonden.', btn_delete:'Verwijderen',
+  svc_add_title:'Servicebezoek toevoegen', svc_date:'Datum',
+  war_days_left_pre:'· over', war_days_left_suf:'dagen',
+  mat_last_ord_abbr:'lts. best.',
+  // Material form labels
+  mat_prod_lbl:'Productnaam', mat_cat_lbl:'Categorie', mat_sup_lbl:'Leverancier',
+  mat_qty_lbl:'Aantal', mat_unit_lbl:'Eenheid', mat_min_lbl:'Min. voorraad',
+  mat_price_lbl:'Stukprijs (€)', mat_last_order_lbl:'Laatste bestelling',
 },
 
 en:{
@@ -1411,6 +1419,17 @@ en:{
   rem_no_date:'Please choose a date.', war_select_proj:'Please select a project.',
   mat_no_name:'Please enter a product name.', svc_no_date:'Please choose a date for the visit.',
   key_no_key:'No API key', key_set:'API:',
+  // OSD steps
+  osd_steps:["Application submitted","Connection conditions received","Connection agreement","Backfeed meter installed","Activation — first reading"],
+  // Extra UI strings
+  war_none:'No warranties found.', btn_delete:'Delete',
+  svc_add_title:'Add service visit', svc_date:'Date',
+  war_days_left_pre:'· in', war_days_left_suf:'days',
+  mat_last_ord_abbr:'last order',
+  // Material form labels
+  mat_prod_lbl:'Product name', mat_cat_lbl:'Category', mat_sup_lbl:'Supplier',
+  mat_qty_lbl:'Quantity', mat_unit_lbl:'Unit', mat_min_lbl:'Min. stock',
+  mat_price_lbl:'Unit price (€)', mat_last_order_lbl:'Last order',
 }};
 function t(k){return T[lang]?.[k]??T.nl[k]??k;}
 function setLang(l){
@@ -1433,6 +1452,7 @@ function setLang(l){
   // Re-render dynamic content
   renderAll();
   buildStatusFilters();
+  populateFormSelects();
   const pg=curPage;
   if(pg){const pid=pg.id.replace('page-','');
     if(pid==='mapa') setTimeout(()=>renderMap(),30);
@@ -1462,6 +1482,45 @@ function typeTag(tp){
   return`<span class="tag ${m[tp]||'t-gray'}">${escapeHTML(k[tp]?t(k[tp]):tp)}</span>`;
 }
 
+// ── FORM SELECTS (language-aware) ───────────────────────────
+const NL_TYPES=['Zonnepanelen','Warmtepomp','Zonnecollectoren','Batterijopslag','Hybride PV+WP'];
+const NL_STATUSES=['Offerte','Contract getekend','In uitvoering','Oplevering','Aanmelding netbeheerder','Afgerond'];
+const NL_OFF_VALS=['oferta','umowa','protokol'];
+function populateFormSelects(){
+  function fill(id,nlVals,labelKey){
+    const el=document.getElementById(id);if(!el)return;
+    const cur=el.value;const labels=t(labelKey)||nlVals;
+    el.innerHTML=nlVals.map((v,i)=>`<option value="${v}"${v===cur?' selected':''}>${labels[i]||v}</option>`).join('');
+  }
+  fill('f-type',NL_TYPES,'form_types');
+  fill('f-status',NL_STATUSES,'form_statuses');
+  // Reminders type
+  const nlRem=T.nl.rem_types||[];const remLabels=t('rem_types')||nlRem;
+  const rtype=document.getElementById('r-type');
+  if(rtype){const cur=rtype.value;rtype.innerHTML=nlRem.map((v,i)=>`<option value="${v}"${v===cur?' selected':''}>${remLabels[i]||v}</option>`).join('');}
+  // Quotes doctype
+  const offLabels=t('off_types')||T.nl.off_types||[];
+  const ofdt=document.getElementById('of-doctype');
+  if(ofdt){const cur=ofdt.value||'oferta';ofdt.innerHTML=NL_OFF_VALS.map((v,i)=>`<option value="${v}"${v===cur?' selected':''}>${offLabels[i]||v}</option>`).join('');}
+  // Material category
+  const nlCats=MAT_CATS.slice(1);const catLabels=(t('mat_cats')||MAT_CATS).slice(1);
+  const mc=document.getElementById('mat-cat-inp');
+  if(mc){const cur=mc.value||nlCats[0];mc.innerHTML=nlCats.map((v,i)=>`<option value="${v}"${v===cur?' selected':''}>${catLabels[i]||v}</option>`).join('');}
+}
+// ── TRANSLATION HELPERS ──────────────────────────────────────
+function tArrLookup(val,nlKey,enKey){
+  const nl=T.nl[nlKey]||[];const en=T.en[nlKey]||[];
+  let idx=nl.indexOf(val);if(idx<0)idx=en.indexOf(val);
+  if(idx<0)return val;
+  return(T[lang][nlKey]||nl)[idx]||val;
+}
+function tRemType(v){return tArrLookup(v,'rem_types');}
+function tSvcType(v){return tArrLookup(v,'svc_types');}
+function tOsdStep(v){return tArrLookup(v,'osd_steps');}
+function tMatCat(v){
+  const idx=MAT_CATS.indexOf(v);if(idx<0)return v;
+  return(t('mat_cats')||MAT_CATS)[idx]||v;
+}
 // ── NAVIGATION ──────────────────────────────────────────────
 const pageTitleKeys={dashboard:"dashboard",zlecenia:"projecten",mapa:"kaart",faktury:"facturen",dofinansowania:"subsidies",dokumenty:"documenten",osd:"netbeheerder",oferty:"offertes",chatbot:"chatbot",przypomnienia:"herinneringen",kalkulator:"roi",gwarancje:"garanties",magazijn:"magazijn",portaal:"portaal",dakanalyse:"dakanalyse"};
 function getPageTitle(name){return t(pageTitleKeys[name])||name;}
@@ -1811,12 +1870,12 @@ function renderOSD(){
         <div>
           <div style="font-size:14px;font-weight:600;margin-bottom:4px">${c?.name}</div>
           <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:8px">${escapeHTML(o?.title||'')} · ${t('osd_operator')}: <span style="color:var(--blue)">${escapeHTML(osd.operator)}</span> · ${t('grant_submitted')}: ${osd.submitted}</div>
-          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:8px">${t('osd_step')} ${osd.step+1}/${osd.steps.length}: <strong style="color:var(--amber)">${escapeHTML(osd.steps[osd.step])}</strong></div>
+          <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text2);margin-bottom:8px">${t('osd_step')} ${osd.step+1}/${osd.steps.length}: <strong style="color:var(--amber)">${tOsdStep(osd.steps[osd.step])}</strong></div>
         </div>
         <button class="btn-secondary" style="font-size:11px" onclick="advanceOSD(${osd.id})">${t('osd_next')}</button>
       </div>
       <div class="osd-steps">${osd.steps.map((_,i)=>`<div class="osd-step ${i<osd.step?'done':i===osd.step?'curr':'todo'}"></div>`).join('')}</div>
-      <div class="osd-step-labels">${osd.steps.map((s,i)=>`<div class="osd-step-label ${i<osd.step?'done':i===osd.step?'curr':''}">${s}</div>`).join('')}</div>
+      <div class="osd-step-labels">${osd.steps.map((s,i)=>`<div class="osd-step-label ${i<osd.step?'done':i===osd.step?'curr':''}">${tOsdStep(s)}</div>`).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -1834,7 +1893,7 @@ function renderReminders(){
     const cls=dl<=1?'urgent':dl<=7?'soon':'';
     return`<div class="remind-row ${cls}">
       <div style="text-align:center;min-width:34px"><div class="remind-day">${d.getDate()}</div><div class="remind-month">${months[d.getMonth()]}</div></div>
-      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c?.name}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${r.type}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${c?.name}</div><div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${tRemType(r.type)}</div></div>
       <span class="tag ${dl<=1?'t-red':dl<=7?'t-amber':'t-blue'}">${r.channel}</span>
       ${dl<=3?`<span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--red)">${dl===0?t('rem_today'):dl===1?t('rem_tomorrow'):dl+'d'}</span>`:''}
       ${r.sent?`<span class="tag t-green" style="font-size:9px">✓ ${lang==='nl'?'verstuurd':'sent'}</span>`:`<button class="btn-secondary" style="font-size:10px;padding:3px 9px" onclick="openNotifModal(${reminders.indexOf(r)})">${t('notif_send')}</button>`}
@@ -2197,7 +2256,7 @@ function renderWarranties(){
   document.getElementById('war-soon').textContent=soon;
   document.getElementById('war-services').textContent=svcs;
   const list=document.getElementById('warrantyList');
-  if(!warranties.length){list.innerHTML=`<div class="empty">${t('war_add')} — geen garanties gevonden.</div>`;return;}
+  if(!warranties.length){list.innerHTML=`<div class="empty">${t('war_none')}</div>`;return;}
   list.innerHTML=warranties.map(w=>{
     const o=orders.find(x=>x.id===w.orderId);
     const c=o?clients.find(x=>x.id===o.clientId):null;
@@ -2209,7 +2268,7 @@ function renderWarranties(){
       (w.serviceLog||[]).map(s=>`<div class="service-entry">
         <div class="service-dot"></div>
         <div>
-          <div style="font-size:12px;font-weight:500">${s.type} <span style="font-family:'DM Mono',monospace;color:var(--text3);font-size:10px">· ${s.date} · ${s.tech}</span></div>
+          <div style="font-size:12px;font-weight:500">${tSvcType(s.type)} <span style="font-family:'DM Mono',monospace;color:var(--text3);font-size:10px">· ${s.date} · ${s.tech}</span></div>
           <div style="font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;margin-top:2px;line-height:1.6">${s.notes}</div>
         </div>
       </div>`).join(''):
@@ -2226,7 +2285,7 @@ function renderWarranties(){
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <button class="btn-secondary" style="font-size:11px" onclick="toggleServiceForm(${w.id})">${t('btn_service')}</button>
-          <button class="btn-danger" onclick="removeWarranty(${w.id})">Verwijderen</button>
+          <button class="btn-danger" onclick="removeWarranty(${w.id})">${t('btn_delete')}</button>
         </div>
       </div>
       <div class="war-dates">
@@ -2251,16 +2310,16 @@ function renderWarranties(){
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:10px 12px;background:var(--bg3);border-radius:7px;border:1px solid var(--border)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${nsDL<30?'#f85149':nsDL<90?'#d29922':'#3fb950'}" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">${t('war_next')}:</span>
-        <span style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:${nsDL<30?'var(--red)':nsDL<90?'var(--amber)':'var(--green)'}">${w.nextService||'—'}${nsDL>0&&nsDL<365?` · over ${nsDL} dagen`:''}</span>
+        <span style="font-size:12px;font-weight:600;font-family:'DM Mono',monospace;color:${nsDL<30?'var(--red)':nsDL<90?'var(--amber)':'var(--green)'}">${w.nextService||'—'}${nsDL>0&&nsDL<365?` ${t('war_days_left_pre')} ${nsDL} ${t('war_days_left_suf')}`:''}</span>
       </div>
       <div class="service-log">
         <div class="service-log-title">${t('war_log')}</div>
         ${svcHTML}
       </div>
       <div class="add-service-form" id="svc-form-${w.id}">
-        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Servicebezoek toevoegen</div>
+        <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">${t('svc_add_title')}</div>
         <div class="form-grid form-grid-2" style="gap:8px;margin-bottom:8px">
-          <div class="form-field"><div class="form-label">Datum</div><input class="form-input" type="date" id="svc-date-${w.id}"/></div>
+          <div class="form-field"><div class="form-label">${t('svc_date')}</div><input class="form-input" type="date" id="svc-date-${w.id}"/></div>
           <div class="form-field"><div class="form-label">${t('svc_type')}</div>
             <select class="form-select" id="svc-type-${w.id}">
               ${(t('svc_types')||[]).map(s=>`<option>${s}</option>`).join('')}
@@ -2366,7 +2425,7 @@ function renderMaterials(){
       </div>
       <div class="mat-info">
         <div class="mat-name">${escapeHTML(m.name)}${isLow?` <span class="tag t-red" style="font-size:9px;margin-left:4px">${t('mat_low_tag')}</span>`:''}</div>
-        <div class="mat-supplier">${escapeHTML(m.cat)} · ${escapeHTML(m.supplier)} · lts. best.: ${m.lastOrder}</div>
+        <div class="mat-supplier">${tMatCat(m.cat)} · ${escapeHTML(m.supplier)} · ${t('mat_last_ord_abbr')}: ${m.lastOrder}</div>
       </div>
       <div class="stock-bar-wrap">
         <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text3)">${t('mat_min')}: ${m.minQty} ${escapeHTML(m.unit)}</div>
@@ -2610,6 +2669,7 @@ loadFromStorage();
 document.getElementById('topbarDate').textContent=new Date().toLocaleDateString(t('date_short'),{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 renderAll();
 buildStatusFilters();
+populateFormSelects();
 calcROI();
 
 // Add API key modal HTML
