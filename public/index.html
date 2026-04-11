@@ -487,10 +487,6 @@ html{background:var(--bg)}
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       <span data-i18n="portaal">Klantportaal</span>
     </button>
-    <button class="nav-item" onclick="goPage('dakanalyse',this)">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span data-i18n="dakanalyse">Dakanalyse AI</span>
-    </button>
     <button class="nav-item" onclick="goPage('przypomnienia',this)">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <span data-i18n="herinneringen">Herinneringen</span>
@@ -864,43 +860,6 @@ html{background:var(--bg)}
       </div>
     </div>
 
-    <!-- DAKANALYSE AI -->
-    <div class="page" id="page-dakanalyse">
-      <div class="page-header">
-        <div><div class="page-title" data-i18n="dak_title">Dakanalyse AI</div><div class="page-sub" data-i18n="dak_sub">Upload een foto van het dak voor AI-analyse</div></div>
-      </div>
-      <div class="panel-2c">
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_title">Dakanalyse AI</div>
-          <div class="dropzone" id="dakDropzone" onclick="document.getElementById('dakFileInput').click()" ondragover="event.preventDefault()" ondrop="handleDakDrop(event)">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            <div style="font-size:12px;font-family:'DM Mono',monospace;color:var(--text3)" data-i18n="dak_drop">Sleep een dakfoto hierheen of klik om te uploaden</div>
-            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-top:4px" data-i18n="dak_hint">JPG, PNG of WEBP · max 10 MB</div>
-          </div>
-          <input type="file" id="dakFileInput" style="display:none" accept="image/*" onchange="handleDakUpload(event)"/>
-          <div id="dakPreviewWrap" style="display:none;margin-bottom:14px">
-            <img id="dakPreview" style="width:100%;border-radius:8px;border:1px solid var(--border);max-height:260px;object-fit:cover"/>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn-ai" id="dakBtn" onclick="analyseDak()">
-              <div class="spinner" id="dakSpin"></div>
-              <span id="dakLabel" data-i18n="dak_btn">Analyseer dak ↗</span>
-            </button>
-            <button class="btn-secondary" id="dakApplyBtn" style="display:none" onclick="applyDakToROI()" data-i18n="dak_apply">Toepassen in ROI Calculator</button>
-          </div>
-          <div style="margin-top:12px">
-            <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px" data-i18n="off_fill">Project koppelen</div>
-            <select class="form-select" id="dakOrderSel" style="margin-bottom:0">
-              <option value="">— optioneel —</option>
-            </select>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title" style="margin-bottom:14px" data-i18n="dak_result_title">Analyseresultaat</div>
-          <div id="dakResult" style="font-size:12px;color:var(--text2);font-family:'DM Mono',monospace;line-height:1.9;white-space:pre-wrap;min-height:280px" data-i18n="off_placeholder">Vul het formulier links in en klik op "Analyseer dak" om een AI-analyse te starten.</div>
-        </div>
-      </div>
-    </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
@@ -1252,7 +1211,7 @@ nl:{
   filter_all:'Alles', filter_all_status:'Alle statussen',
   mat_cats_0:'Alles',
   // Pages (new)
-  portaal:'Klantportaal', dakanalyse:'Dakanalyse AI',
+  portaal:'Klantportaal',
   // Client portal
   portal_title:'Klantportaal', portal_sub:'Gedeeld overzicht voor de klant',
   portal_share:'Portaallink kopiëren', portal_copied:'Link gekopieerd!',
@@ -1260,16 +1219,6 @@ nl:{
   portal_projects:'Projecten', portal_invoices:'Facturen',
   portal_next_svc:'Volgend onderhoud', portal_status:'Status',
   portal_welcome:'Welkom bij uw projectoverzicht van',
-  // Dakanalyse AI
-  dak_title:'Dakanalyse AI', dak_sub:'Upload een foto van het dak voor AI-analyse',
-  dak_drop:'Sleep een dakfoto hierheen of klik om te uploaden',
-  dak_hint:'JPG, PNG of WEBP · max 10 MB',
-  dak_btn:'Analyseer dak ↗', dak_analyzing:'Analyseren…',
-  dak_result_title:'Analyseresultaat',
-  dak_apply:'Resultaat toepassen in ROI Calculator',
-  dak_applied:'Gegevens ingeladen in ROI Calculator.',
-  dak_no_img:'Upload eerst een dakfoto.',
-  dak_no_key:'Stel eerst de API-sleutel in.',
   // Notifications
   notif_send:'Verstuur notificatie', notif_title:'Notificatie versturen',
   notif_email:'E-mail opstellen', notif_sms:'SMS kopiëren',
@@ -1396,22 +1345,13 @@ en:{
   week_prefix:'Week',
   filter_all:'All', filter_all_status:'All statuses',
   mat_cats_0:'All',
-  portaal:'Client Portal', dakanalyse:'Roof Analysis AI',
+  portaal:'Client Portal',
   portal_title:'Client Portal', portal_sub:'Shared overview for the client',
   portal_share:'Copy portal link', portal_copied:'Link copied!',
   portal_no_client:'Choose a client from the list.',
   portal_projects:'Projects', portal_invoices:'Invoices',
   portal_next_svc:'Next maintenance', portal_status:'Status',
   portal_welcome:'Welcome to your project overview from',
-  dak_title:'Roof Analysis AI', dak_sub:'Upload a roof photo for AI analysis',
-  dak_drop:'Drag a roof photo here or click to upload',
-  dak_hint:'JPG, PNG or WEBP · max 10 MB',
-  dak_btn:'Analyse roof ↗', dak_analyzing:'Analysing…',
-  dak_result_title:'Analysis result',
-  dak_apply:'Apply results to ROI Calculator',
-  dak_applied:'Data loaded into ROI Calculator.',
-  dak_no_img:'Please upload a roof photo first.',
-  dak_no_key:'Please set an API key first.',
   notif_send:'Send notification', notif_title:'Send notification',
   notif_email:'Draft email', notif_sms:'Copy SMS',
   notif_whatsapp:'WhatsApp', notif_preview:'Message preview',
@@ -1524,7 +1464,7 @@ function tMatCat(v){
   return(t('mat_cats')||MAT_CATS)[idx]||v;
 }
 // ── NAVIGATION ──────────────────────────────────────────────
-const pageTitleKeys={dashboard:"dashboard",zlecenia:"projecten",mapa:"kaart",faktury:"facturen",dofinansowania:"subsidies",dokumenty:"documenten",osd:"netbeheerder",oferty:"offertes",chatbot:"chatbot",przypomnienia:"herinneringen",kalkulator:"roi",gwarancje:"garanties",magazijn:"magazijn",portaal:"portaal",dakanalyse:"dakanalyse"};
+const pageTitleKeys={dashboard:"dashboard",zlecenia:"projecten",mapa:"kaart",faktury:"facturen",dofinansowania:"subsidies",dokumenty:"documenten",osd:"netbeheerder",oferty:"offertes",chatbot:"chatbot",przypomnienia:"herinneringen",kalkulator:"roi",gwarancje:"garanties",magazijn:"magazijn",portaal:"portaal"};
 function getPageTitle(name){return t(pageTitleKeys[name])||name;}
 function goPage(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -1548,7 +1488,6 @@ function goPage(name,el){
   if(name==='gwarancje') renderWarranties();
   if(name==='magazijn') renderMaterials();
   if(name==='portaal') renderPortaal();
-  if(name==='dakanalyse'){fillOfferOrderSelect();const s=document.getElementById('dakOrderSel');if(s)s.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');}
 }
 function goPageMobile(name){
   goPage(name,null);
@@ -2536,69 +2475,6 @@ function copyPortalLink(id){
   navigator.clipboard?.writeText(link).then(()=>notify(t('portal_copied')));
 }
 
-// ── DAKANALYSE AI ─────────────────────────────────────────
-let dakImageB64=null,dakMimeType='image/jpeg',dakAnalysisResult=null;
-function handleDakUpload(e){
-  const file=e.target.files[0];if(!file)return;loadDakFile(file);
-}
-function handleDakDrop(e){
-  e.preventDefault();
-  const file=e.dataTransfer.files[0];if(!file||!file.type.startsWith('image/'))return;loadDakFile(file);
-}
-function loadDakFile(file){
-  dakMimeType=file.type||'image/jpeg';
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    dakImageB64=ev.target.result.split(',')[1];
-    const prev=document.getElementById('dakPreview');
-    prev.src=ev.target.result;
-    document.getElementById('dakPreviewWrap').style.display='block';
-    document.getElementById('dakDropzone').style.display='none';
-    document.getElementById('dakApplyBtn').style.display='none';
-    document.getElementById('dakResult').textContent=t('off_placeholder');
-    dakAnalysisResult=null;
-  };
-  reader.readAsDataURL(file);
-  // populate project select
-  const sel=document.getElementById('dakOrderSel');
-  sel.innerHTML=`<option value="">— ${lang==='nl'?'optioneel':'optional'} —</option>`+
-    orders.map(o=>{const c=clients.find(cl=>cl.id===o.clientId);return`<option value="${o.id}">${c?.name||''} — ${o.title.substring(0,40)}</option>`;}).join('');
-}
-async function analyseDak(){
-  if(!dakImageB64){notify(t('dak_no_img'));return;}
-  const btn=document.getElementById('dakBtn');
-  const spin=document.getElementById('dakSpin');
-  const label=document.getElementById('dakLabel');
-  const result=document.getElementById('dakResult');
-  spin.classList.add('show');label.textContent=t('dak_analyzing');btn.disabled=true;
-  const prompt=lang==='nl'
-    ?`Je bent een zonne-energiespecialist. Analyseer deze dakfoto en geef een gedetailleerde beoordeling:\n\n1. **Dakoriëntatie** — schat de richting (Zuid, ZO, ZW, Oost/West)\n2. **Dakoppervlak** — schat het bruikbare dakoppervlak in m²\n3. **Schaduw & obstakels** — dakramen, schoorstenen, bomen, beschaduwing\n4. **Daktype & helling** — zadeldak, plat dak, mansarde; geschatte hellingshoek\n5. **Aanbevolen capaciteit** — aanbevolen kWp, aantal panelen (415W standaard)\n6. **Verwachte jaarproductie** — in kWh bij Nederlandse instraling\n7. **Opmerkingen** — aandachtspunten voor de installateur\n\nWees specifiek en praktisch. Geef getallen waar mogelijk.`
-    :`You are a solar energy specialist. Analyse this roof photo and provide a detailed assessment:\n\n1. **Roof orientation** — estimate the direction (South, SE, SW, East/West)\n2. **Roof area** — estimate the usable roof area in m²\n3. **Shading & obstacles** — skylights, chimneys, trees, shading\n4. **Roof type & pitch** — gable, flat, mansard; estimated pitch angle\n5. **Recommended capacity** — recommended kWp, number of panels (415W standard)\n6. **Expected annual production** — in kWh for Netherlands irradiation\n7. **Notes** — points of attention for the installer\n\nBe specific and practical. Give numbers where possible.`;
-  try{
-    const res=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",max_tokens:900,
-      messages:[{role:"user",content:[
-        {type:"image",source:{type:"base64",media_type:dakMimeType,data:dakImageB64}},
-        {type:"text",text:prompt}
-      ]}]
-    })});
-    const data=await res.json();
-    dakAnalysisResult=data.content?.find(b=>b.type==="text")?.text||"Fout bij analyseren.";
-    result.textContent=dakAnalysisResult;
-    document.getElementById('dakApplyBtn').style.display='';
-    // try to extract kWp for ROI prefill
-    const kwpMatch=dakAnalysisResult.match(/(\d+[.,]\d+|\d+)\s*kWp/i);
-    if(kwpMatch) document.getElementById('dakApplyBtn').dataset.kwp=kwpMatch[1].replace(',','.');
-  }catch(e){result.textContent=lang==='nl'?"Verbindingsfout met AI.":"Connection error with AI.";}
-  spin.classList.remove('show');label.textContent=t('dak_btn');btn.disabled=false;
-}
-function applyDakToROI(){
-  if(!dakAnalysisResult)return;
-  const kwp=parseFloat(document.getElementById('dakApplyBtn').dataset.kwp)||0;
-  if(kwp>0){document.getElementById('roi-kwp').value=kwp;calcROI();}
-  goPage('kalkulator',document.querySelector('.nav-item[onclick*="kalkulator"]'));
-  notify(t('dak_applied'));
-}
 
 // ── NOTIFICATIONS ─────────────────────────────────────────
 let notifReminder=null;
